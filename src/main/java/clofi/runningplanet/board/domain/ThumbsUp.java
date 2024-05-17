@@ -1,8 +1,5 @@
 package clofi.runningplanet.board.domain;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-
 import clofi.runningplanet.common.domain.BaseEntity;
 import clofi.runningplanet.member.domain.Member;
 import jakarta.persistence.Column;
@@ -18,8 +15,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@SQLDelete(sql = "update thumbs_up set is_delete = true where thumbs_up = ?")
-@SQLRestriction("is_delete = false")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class ThumbsUp extends BaseEntity {
