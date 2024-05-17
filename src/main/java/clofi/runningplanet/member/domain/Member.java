@@ -3,36 +3,29 @@ package clofi.runningplanet.member.domain;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-import clofi.runningplanet.common.domain.BaseEntity;
-import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.common.domain.BaseSoftDeleteEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@SQLDelete(sql = "update member set is_delete = true where member_id = ?")
-@SQLRestriction("is_delete = false")
+@SQLDelete(sql = "update member set deleted_at = now() where member_id = ?")
+@SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Member extends BaseEntity {
+public class Member extends BaseSoftDeleteEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "member_id", nullable = false)
 	private Long id;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "crew_id", nullable = false)
-	private Crew crew;
 
 	@Column(name = "nickname", length = 20)
 	private String nickname;
@@ -58,4 +51,19 @@ public class Member extends BaseEntity {
 
 	@Column(name = "total_distance", nullable = false)
 	private int totalDistance;
+
+	@Builder
+	public Member(Long id, String nickname, Gender gender, int age, String profileImg, Integer runScore,
+			Integer avgPace,
+			Integer avgDistance, int totalDistance) {
+		this.id = id;
+		this.nickname = nickname;
+		this.gender = gender;
+		this.age = age;
+		this.profileImg = profileImg;
+		this.runScore = runScore;
+		this.avgPace = avgPace;
+		this.avgDistance = avgDistance;
+		this.totalDistance = totalDistance;
+	}
 }
