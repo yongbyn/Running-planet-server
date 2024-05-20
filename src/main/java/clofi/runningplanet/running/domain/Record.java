@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,9 +31,9 @@ public class Record extends BaseSoftDeleteEntity {
 	@Column(name = "record_id", nullable = false)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member_id", nullable = false)
-	private Member member;
+	// @ManyToOne(fetch = FetchType.LAZY)
+	// @JoinColumn(name = "member_id", nullable = false)
+	// private Member member;
 
 	@Column(name = "run_time", nullable = false)
 	private int runTime;
@@ -48,4 +49,12 @@ public class Record extends BaseSoftDeleteEntity {
 
 	@Column(name = "end_time")
 	private LocalDateTime endTime;
+
+	@Builder
+	private Record(int runTime, double runDistance, int calories, int avgPace) {
+		this.runTime = runTime;
+		this.runDistance = runDistance;
+		this.calories = calories;
+		this.avgPace = avgPace;
+	}
 }

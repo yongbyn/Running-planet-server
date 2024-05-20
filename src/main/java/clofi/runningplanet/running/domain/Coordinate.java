@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,4 +37,11 @@ public class Coordinate extends BaseSoftDeleteEntity {
 
 	@Column(name = "longitude", nullable = false)
 	private double longitude;
+
+	@Builder
+	private Coordinate(Record record, double latitude, double longitude) {
+		this.record = record;
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
 }
