@@ -38,7 +38,7 @@ class CrewControllerTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	@DisplayName("주문 생성 성공")
+	@DisplayName("크루 생성 성공")
 	@Test
 	void createCrew() throws Exception {
 		//given
