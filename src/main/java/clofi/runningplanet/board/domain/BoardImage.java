@@ -33,4 +33,9 @@ public class BoardImage extends BaseSoftDeleteEntity {
 
 	@Column(name = "image_url", nullable = false, length = 255)
 	private String imageUrl;
+
+	public BoardImage(Board board, String imageUrl) {
+		this.board = board;
+		this.imageUrl = imageUrl;
+	}
 }
