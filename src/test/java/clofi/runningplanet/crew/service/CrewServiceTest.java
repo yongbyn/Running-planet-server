@@ -1,5 +1,7 @@
 package clofi.runningplanet.crew.service;
 
+import static clofi.runningplanet.crew.domain.ApprovalType.*;
+import static clofi.runningplanet.crew.domain.Category.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
@@ -12,11 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import clofi.runningplanet.crew.domain.ApprovalType;
-import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.domain.Tag;
+import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
-import clofi.runningplanet.crew.dto.request.RuleReqDto;
+import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
 
@@ -36,7 +39,7 @@ class CrewServiceTest {
 	@Test
 	void successCreateCrew() {
 		//given
-		final RuleReqDto rule = new RuleReqDto(
+		final RuleDto rule = new RuleDto(
 			5,
 			100
 		);
@@ -47,9 +50,9 @@ class CrewServiceTest {
 			"구름 크루",
 			5,
 			50,
-			Category.RUNNING,
+			RUNNING,
 			List.of("성실"),
-			ApprovalType.AUTO,
+			AUTO,
 			"구름 크루는 성실한 크루",
 			rule
 		);
@@ -68,5 +71,58 @@ class CrewServiceTest {
 		//then
 		assertThat(result).isEqualTo(1L);
 
+	}
+
+	@DisplayName("크루 목록 조회 성공")
+	@Test
+	void successFindAllCrew() {
+		//given
+		given(crewRepository.findAll())
+			.willReturn(List.of(
+				new Crew(1L, 1L, "구름 크루", 10, 50,
+					RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
+					0, 0),
+				new Crew(2L, 2L, "클로피 크루", 8, 90,
+					RUNNING, MANUAL, "클로피 크루는 최고의 크루", 7, 500,
+					1000, 3000)));
+
+		given(tagRepository.findAllByCrewId(anyLong()))
+			.willReturn(List.of(
+				new Tag(1L, null, "성실")
+			))
+			.willReturn(List.of(
+				new Tag(2L, null, "최고")
+			));
+
+
+		//when
+		List<FindAllCrewResDto> result = crewService.findAllCrew();
+
+		//then
+		final FindAllCrewResDto firstFindAllCrewResDto = FindAllCrewResDto.of(new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
+			0, 0), List.of("성실"), new CrewLeaderDto(1L, "임시 닉네임"));
+
+		final FindAllCrewResDto secondFindAllCrewResDto = FindAllCrewResDto.of(new Crew(2L, 2L, "클로피 크루", 8, 90,
+			RUNNING, MANUAL, "클로피 크루는 최고의 크루", 7, 500,
+			1000, 3000), List.of("최고"), new CrewLeaderDto(2L, "임시 닉네임"));
+
+		final List<FindAllCrewResDto> expect = List.of(firstFindAllCrewResDto, secondFindAllCrewResDto);
+
+		assertThat(result).isEqualTo(expect);
+	}
+
+	@DisplayName("아무 크루도 없을 시 빈 리스트 반환")
+	@Test
+	void successEmptyCrew() {
+		//given
+		given(crewRepository.findAll())
+			.willReturn(List.of());
+
+		//when
+		List<FindAllCrewResDto> result = crewService.findAllCrew();
+
+		//then
+		assertThat(result).isEmpty();
 	}
 }

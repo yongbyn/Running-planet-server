@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Range;
 import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.dto.RuleDto;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -34,7 +35,7 @@ public record CreateCrewReqDto(
 	String introduction,
 
 	@NotNull
-	RuleReqDto rule
+	RuleDto rule
 ) {
 	public Crew toEntity(Long crewId) {
 		return new Crew(crewId, crewName, limitMemberCnt, limitRunScore, category, approvalType, introduction,

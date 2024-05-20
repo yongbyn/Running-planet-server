@@ -38,4 +38,10 @@ public class Tag extends BaseSoftDeleteEntity {
 		this.crew = crew;
 		this.content = content;
 	}
+
+	public Tag(Long id, Crew crew, String content) {
+		this.id = id;
+		this.crew = crew;
+		this.content = content;
+	}
 }
