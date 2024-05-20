@@ -33,9 +33,9 @@ public class Board extends BaseSoftDeleteEntity {
 	@JoinColumn(name = "crew_id", nullable = false)
 	private Crew crew;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	/*@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id", nullable = false)
-	private Member member;
+	private Member member;*/
 
 	@Column(name = "title", nullable = false)
 	private String title;

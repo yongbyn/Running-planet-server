@@ -40,6 +40,6 @@ public class BoardController {
 	private ResponseEntity<List<BoardResponse>> getBoardList(
 		@PathVariable(value = "crewId") Long crewId
 	) {
-		return ResponseEntity.ok(boardReadService.read(crewId));
+		return ResponseEntity.ok(boardReadService.getBoardList(crewId));
 	}
 }

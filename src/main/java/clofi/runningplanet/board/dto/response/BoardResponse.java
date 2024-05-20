@@ -21,7 +21,7 @@ public class BoardResponse {
 	public BoardResponse(Board board, List<ImageList> boardImageList, int commentCnt, int likeCnt) {
 		this.id = board.getId();
 		this.title = board.getTitle();
-		this.author = board.getMember().getNickname();
+		this.author = "작성자";
 		this.writtenDate = board.getCreatedAt().toLocalDate();
 		this.commentCnt = commentCnt;
 		this.likeCnt = likeCnt;

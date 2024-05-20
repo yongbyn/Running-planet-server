@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import clofi.runningplanet.board.domain.Board;
-import clofi.runningplanet.board.domain.BoardImage;
 import clofi.runningplanet.board.domain.Comment;
 import clofi.runningplanet.board.dto.response.BoardResponse;
 import clofi.runningplanet.board.dto.response.ImageList;
@@ -30,7 +29,7 @@ public class BoardReadService {
 	private final CommentRepository commentRepository;
 	private final ThumbsUpRepository thumbsUpRepository;
 
-	public List<BoardResponse> read(Long crewId) {
+	public List<BoardResponse> getBoardList(Long crewId) {
 		List<BoardResponse> boardResponses = new ArrayList<>();
 		Crew crew = crewRepository.findById(crewId)
 			.orElseThrow(() -> new IllegalArgumentException("크루가 존재하지 않습니다"));
