@@ -2,12 +2,17 @@ package clofi.runningplanet.crew.controller;
 
 import java.util.List;
 
+import static clofi.runningplanet.crew.domain.ApprovalType.*;
+import static clofi.runningplanet.crew.domain.Category.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,14 +20,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import clofi.runningplanet.crew.domain.ApprovalType;
-import clofi.runningplanet.crew.domain.Category;
+import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.service.CrewService;
 
 @WebMvcTest(CrewController.class)
@@ -37,6 +47,17 @@ class CrewControllerTest {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private WebApplicationContext context;
+
+	@BeforeEach
+	void setUp() {
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
+			.addFilters(new CharacterEncodingFilter("UTF-8", true))
+			.alwaysDo(print())
+			.build();
+	}
 
 	@DisplayName("크루 생성 성공")
 	@Test
@@ -53,9 +74,9 @@ class CrewControllerTest {
 			"구름 크루",
 			5,
 			50,
-			Category.RUNNING,
+			RUNNING,
 			List.of("성실"),
-			ApprovalType.AUTO,
+			AUTO,
 			"구름 크루는 성실한 크루",
 			rule
 		);
@@ -64,7 +85,7 @@ class CrewControllerTest {
 			.willReturn(1L);
 
 		//when
-		ResultActions resultAction = createOrder(reqDto);
+		ResultActions resultAction = createCrew(reqDto);
 
 		//then
 		resultAction
@@ -73,9 +94,50 @@ class CrewControllerTest {
 
 	}
 
-	private ResultActions createOrder(CreateCrewReqDto reqDto) throws Exception {
+	@DisplayName("크루 목록 조회 성공")
+	@Test
+	void FindAllCrew() throws Exception {
+		//given
+		List<FindAllCrewResDto> expected = List.of(
+			new FindAllCrewResDto(1L, "구름 크루", 1, 1,
+				10, AUTO, 50, List.of("성실"), RUNNING,
+				new RuleDto(3, 100),
+				"구름 크루는 성실한 크루",
+				new CrewLeaderDto(1L, "임시 닉네임")),
+			new FindAllCrewResDto(2L, "클로피 크루", 1, 1,
+				8, MANUAL, 80, List.of("최고"), RUNNING,
+				new RuleDto(3, 100),
+				"클로피 크루는 최고의 크루",
+				new CrewLeaderDto(2L, "임시 닉네임"))
+		);
+		given(crewService.findAllCrew())
+			.willReturn(expected);
+
+		//when
+		ResultActions resultAction = findAllCrew();
+
+		//then
+		MvcResult mvcResult = resultAction
+			.andExpect(status().isOk())
+			.andReturn();
+
+		List<FindAllCrewResDto> resDtoList = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<>() {
+			}
+		);
+
+		assertThat(resDtoList).isEqualTo(expected);
+	}
+
+	private ResultActions createCrew(CreateCrewReqDto reqDto) throws Exception {
 		return mockMvc.perform(post("/api/crew")
 			.contentType(APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(reqDto)));
+	}
+
+	private ResultActions findAllCrew() throws Exception {
+		return mockMvc.perform(get("/api/crew")
+			.contentType(APPLICATION_JSON));
 	}
 }
