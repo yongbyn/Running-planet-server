@@ -61,9 +61,9 @@ class RecordServiceTest {
 			.extracting("runTime", "runDistance", "calories", "avgPace", "endTime")
 			.contains(630, 1.23, 300, 500, null);
 
-		Optional<Coordinate> byRecord = coordinateRepository.findByRecord(savedRecord);
-		assertThat(byRecord).isPresent();
-		assertThat(byRecord.get())
+		Optional<Coordinate> savedCoordinate = coordinateRepository.findByRecord(savedRecord);
+		assertThat(savedCoordinate).isPresent();
+		assertThat(savedCoordinate.get())
 			.extracting("latitude", "longitude")
 			.contains(100.23, 200.23);
 	}
