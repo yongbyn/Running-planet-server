@@ -16,7 +16,7 @@ import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
-import clofi.runningplanet.crew.dto.request.RuleReqDto;
+import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
 
@@ -36,7 +36,7 @@ class CrewServiceTest {
 	@Test
 	void successCreateCrew() {
 		//given
-		final RuleReqDto rule = new RuleReqDto(
+		final RuleDto rule = new RuleDto(
 			5,
 			100
 		);

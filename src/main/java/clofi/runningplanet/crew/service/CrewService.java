@@ -7,7 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.Tag;
+import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
+import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,15 @@ public class CrewService {
 		return savedCrew.getId();
 	}
 
+	@Transactional(readOnly = true)
+	public List<FindAllCrewResDto> findAllCrew() {
+		List<Crew> crewList = crewRepository.findAll();
+
+		return crewList.stream()
+			.map(this::convertToFindAllCrewResDto)
+			.toList();
+	}
+
 	private Crew createAndSaveCrew(CreateCrewReqDto reqDto) {
 		Crew crew = reqDto.toEntity(1L);
 		return crewRepository.save(crew);
@@ -43,5 +54,22 @@ public class CrewService {
 			.map(t -> new Tag(savedCrew, t))
 			.toList();
 		tagRepository.saveAll(tagList);
+	}
+
+	private FindAllCrewResDto convertToFindAllCrewResDto(Crew crew) {
+		List<String> tags = findTagsToStrings(crew.getId());
+		CrewLeaderDto crewLeaderDto = findCrewLeader(crew.getLeaderId());
+		return FindAllCrewResDto.of(crew, tags, crewLeaderDto);
+	}
+
+	private CrewLeaderDto findCrewLeader(Long leaderId) {
+		// todo member 기능 구현 후 로직 개선
+		return new CrewLeaderDto(leaderId, "임시 닉네임");
+	}
+
+	private List<String> findTagsToStrings(Long crewId) {
+		return tagRepository.findAllByCrewId(crewId).stream()
+			.map(Tag::getContent)
+			.toList();
 	}
 }

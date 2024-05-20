@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
-import clofi.runningplanet.crew.dto.request.RuleReqDto;
+import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.service.CrewService;
 
 @WebMvcTest(CrewController.class)
@@ -42,7 +42,7 @@ class CrewControllerTest {
 	@Test
 	void createCrew() throws Exception {
 		//given
-		final RuleReqDto rule = new RuleReqDto(
+		final RuleDto rule = new RuleDto(
 			5,
 			100
 		);
