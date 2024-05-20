@@ -33,4 +33,9 @@ public class Tag extends BaseSoftDeleteEntity {
 
 	@Column(name = "content", nullable = false, length = 20)
 	private String content;
+
+	public Tag(Crew crew, String content) {
+		this.crew = crew;
+		this.content = content;
+	}
 }
