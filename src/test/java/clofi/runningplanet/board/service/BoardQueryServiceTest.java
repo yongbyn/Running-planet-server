@@ -12,16 +12,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.BoardImage;
 import clofi.runningplanet.board.dto.request.CreateBoardRequest;
+import clofi.runningplanet.board.dto.request.UpdateBoardRequest;
 import clofi.runningplanet.board.dto.response.CreateBoardResponse;
 import clofi.runningplanet.board.factory.BoardFactory;
 import clofi.runningplanet.board.factory.fake.FakeS3StorageManager;
 import clofi.runningplanet.board.repository.BoardImageRepository;
 import clofi.runningplanet.board.repository.BoardRepository;
+import clofi.runningplanet.crew.domain.ApprovalType;
+import clofi.runningplanet.crew.domain.Category;
+import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.repository.CrewRepository;
 
 @SpringBootTest
@@ -38,19 +43,21 @@ class BoardQueryServiceTest {
 	void tearDown() {
 		boardImageRepository.deleteAllInBatch();
 		boardRepository.deleteAllInBatch();
+		crewRepository.deleteAllInBatch();
 	}
 
 	@DisplayName("사용자는 게시글을 작성할 수 있다.")
 	@Test
 	void createBoardTest(){
     	//given
-		Long crewId = 1L;
+		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crew = crewRepository.save(crewInstance);
 		CreateBoardRequest createBoardRequest = new CreateBoardRequest("게시판 제목", "게시판 내용");
 		List<MultipartFile> imageFile = getImageFile();
 		BoardQueryService boardQueryService = getBoardService();
 
 		//when
-		CreateBoardResponse createBoardResponse = boardQueryService.create(crewId, createBoardRequest, imageFile);
+		CreateBoardResponse createBoardResponse = boardQueryService.create(crew.getId(), createBoardRequest, imageFile);
 		Board board = boardRepository.findById(createBoardResponse.boardId())
 			.orElseThrow(() ->new IllegalArgumentException("게시판이 없습니다"));
 		List<BoardImage> boardImage = boardImageRepository.findAllByBoard(board);
@@ -61,6 +68,36 @@ class BoardQueryServiceTest {
 		assertThat(boardImage.stream().map(BoardImage::getImageUrl).collect(Collectors.toList()))
 			.containsExactlyInAnyOrder("fakeImageUrl1", "fakeImageUrl2");
 	}
+
+	@DisplayName("게시글을 수정할 수 있다.")
+	@Test
+	@Transactional
+	void updateTest(){
+	    //given
+		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crew = crewRepository.save(crewInstance);
+
+		Board board = new Board("기존 게시글 제목", "기존 게시글 내용", crew);
+		boardRepository.save(board);
+
+		BoardImage boardImage = new BoardImage(board, "기존 이미지 주소");
+		boardImageRepository.save(boardImage);
+
+		List<MultipartFile> imageFile = getImageFile();
+
+		UpdateBoardRequest updateBoardRequest = new UpdateBoardRequest("업데이트 게시글 제목", "업데이트 게시글 내용");
+		BoardQueryService boardService = getBoardService();
+		//when
+		boardService.update(crew.getId(), board.getId(), updateBoardRequest, imageFile);
+		List<BoardImage> updateImage = boardImageRepository.findAllByBoard(board);
+		//then
+		assertThat(board.getContent()).isEqualTo("업데이트 게시글 내용");
+		assertThat(board.getTitle()).isEqualTo("업데이트 게시글 제목");
+		assertThat(
+			updateImage.stream().map(BoardImage::getImageUrl).collect(Collectors.toList())).containsExactlyInAnyOrder(
+			"fakeImageUrl1", "fakeImageUrl2");
+
+	  }
 
 	private List<MultipartFile> getImageFile() {
 
@@ -85,9 +122,11 @@ class BoardQueryServiceTest {
 		return new BoardQueryService(
 			new BoardFactory(
 				boardRepository,
-				boardImageRepository
+				boardImageRepository,
+				fakeS3StorageManager
 			),
 			crewRepository,
+			boardRepository,
 			fakeS3StorageManager
 		);
 	}

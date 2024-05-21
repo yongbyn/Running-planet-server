@@ -3,6 +3,7 @@ package clofi.runningplanet.board.domain;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import clofi.runningplanet.common.domain.BaseEntity;
 import clofi.runningplanet.common.domain.BaseSoftDeleteEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,11 +18,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@SQLDelete(sql = "update board_image set deleted_at = now() where board_image_id = ?")
-@SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class BoardImage extends BaseSoftDeleteEntity {
+public class BoardImage extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "board_image_id", nullable = false)

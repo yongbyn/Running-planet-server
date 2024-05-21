@@ -48,4 +48,9 @@ public class Board extends BaseSoftDeleteEntity {
 		this.content = content;
 		this.crew = crew;
 	}
+
+	public void updateBoard(String title, String content) {
+		this.title = title;
+		this.content = content;
+	}
 }
