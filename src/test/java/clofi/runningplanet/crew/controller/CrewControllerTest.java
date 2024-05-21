@@ -33,6 +33,7 @@ import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.service.CrewService;
 
 @WebMvcTest(CrewController.class)
@@ -130,6 +131,36 @@ class CrewControllerTest {
 		assertThat(resDtoList).isEqualTo(expected);
 	}
 
+	@DisplayName("크루 상세 조회 성공")
+	@Test
+	void findCrew() throws Exception {
+	    //given
+		Long crewId = 1L;
+		FindCrewResDto expected = new FindCrewResDto(1L, 1, "구름 크루",
+			new CrewLeaderDto(1L, "임시 닉네임"), 5, 10, AUTO,
+			50 , "구름 크루는 성실한 크루", List.of("성실"), RUNNING,
+			new RuleDto(5, 100), 0, false);
+
+		given(crewService.findCrew(crewId))
+			.willReturn(expected);
+
+	    //when
+		ResultActions resultActions = findCrew(crewId);
+
+		//then
+		MvcResult mvcResult = resultActions
+			.andExpect(status().isOk())
+			.andReturn();
+
+		FindCrewResDto resDto = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<>() {
+			}
+		);
+
+		assertThat(resDto).isEqualTo(expected);
+	}
+
 	private ResultActions createCrew(CreateCrewReqDto reqDto) throws Exception {
 		return mockMvc.perform(post("/api/crew")
 			.contentType(APPLICATION_JSON)
@@ -138,6 +169,11 @@ class CrewControllerTest {
 
 	private ResultActions findAllCrew() throws Exception {
 		return mockMvc.perform(get("/api/crew")
+			.contentType(APPLICATION_JSON));
+	}
+
+	private ResultActions findCrew(Long crewId) throws Exception {
+		return mockMvc.perform(get("/api/crew/{crewId}", crewId)
 			.contentType(APPLICATION_JSON));
 	}
 }
