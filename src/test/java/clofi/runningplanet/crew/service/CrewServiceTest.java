@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
 
@@ -124,5 +126,32 @@ class CrewServiceTest {
 
 		//then
 		assertThat(result).isEmpty();
+	}
+
+	@DisplayName("크루 상세 조회 성공")
+	@Test
+	void successFindCrew() {
+		//given
+		given(crewRepository.findById(anyLong()))
+			.willReturn(
+				Optional.of(new Crew(1L, 1L, "구름 크루", 10, 50,
+					RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
+					0, 0))
+				);
+
+		given(tagRepository.findAllByCrewId(anyLong()))
+			.willReturn(List.of(
+				new Tag(1L, null, "성실")
+			));
+
+		//when
+		FindCrewResDto result = crewService.findCrew(1L);
+
+		//then
+		final FindCrewResDto findCrewResDto = FindCrewResDto.of(new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
+			0, 0), new CrewLeaderDto(1L, "임시 닉네임"), List.of("성실"));
+
+		assertThat(result).isEqualTo(findCrewResDto);
 	}
 }
