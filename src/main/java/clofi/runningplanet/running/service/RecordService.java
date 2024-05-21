@@ -1,10 +1,13 @@
 package clofi.runningplanet.running.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import clofi.runningplanet.running.domain.Coordinate;
 import clofi.runningplanet.running.domain.Record;
+import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
 import clofi.runningplanet.running.repository.CoordinateRepository;
 import clofi.runningplanet.running.repository.RecordRepository;
@@ -38,5 +41,15 @@ public class RecordService {
 		coordinateRepository.save(coordinate);
 
 		return savedRecord;
+	}
+
+	public RecordFindResponse find(Long recordId) {
+		//TODO: 회원 정보도 조건에 추가하기
+		Record record = recordRepository.findByIdAndEndTimeIsNotNull(recordId)
+			.orElseThrow(() -> new IllegalArgumentException("운동 기록을 찾을 수 없습니다."));
+
+		List<Coordinate> coordinates = coordinateRepository.findAllByRecord(record);
+
+		return new RecordFindResponse(record, coordinates);
 	}
 }

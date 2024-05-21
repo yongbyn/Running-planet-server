@@ -51,10 +51,11 @@ public class Record extends BaseSoftDeleteEntity {
 	private LocalDateTime endTime;
 
 	@Builder
-	private Record(int runTime, double runDistance, int calories, int avgPace) {
+	private Record(int runTime, double runDistance, int calories, int avgPace, LocalDateTime endTime) {
 		this.runTime = runTime;
 		this.runDistance = runDistance;
 		this.calories = calories;
 		this.avgPace = avgPace;
+		this.endTime = endTime;
 	}
 }
