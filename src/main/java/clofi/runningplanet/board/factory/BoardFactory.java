@@ -7,10 +7,11 @@ import org.springframework.stereotype.Component;
 
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.BoardImage;
-import clofi.runningplanet.board.dto.response.BoardResponse;
+import clofi.runningplanet.board.dto.response.CreateBoardResponse;
 import clofi.runningplanet.board.dto.request.CreateBoardRequest;
 import clofi.runningplanet.board.repository.BoardImageRepository;
 import clofi.runningplanet.board.repository.BoardRepository;
+import clofi.runningplanet.crew.domain.Crew;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -19,10 +20,10 @@ public class BoardFactory {
 	private final BoardRepository boardRepository;
 	private final BoardImageRepository boardImageRepository;
 
-	public BoardResponse insert(Long crewId, CreateBoardRequest createBoardRequest, List<String> imageUrlList) {
-		Board board = boardRepository.save(createBoardRequest.toBoard());
+	public CreateBoardResponse insert(Crew crew, CreateBoardRequest createBoardRequest, List<String> imageUrlList) {
+		Board board = boardRepository.save(createBoardRequest.toBoard(crew));
 		insertImage(board, imageUrlList);
-		return BoardResponse.of(board);
+		return CreateBoardResponse.of(board);
 	}
 
 	private void insertImage(Board board, List<String> imageUrlList) {

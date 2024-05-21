@@ -38,4 +38,10 @@ public class Comment extends BaseSoftDeleteEntity {
 
 	@Column(name = "content", nullable = false, length = 255)
 	private String content;
+
+	public Comment(Board board, String content, Member member) {
+		this.board = board;
+		this.content = content;
+		this.member = member;
+	}
 }

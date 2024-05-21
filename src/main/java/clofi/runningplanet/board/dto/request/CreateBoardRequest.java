@@ -1,6 +1,7 @@
 package clofi.runningplanet.board.dto.request;
 
 import clofi.runningplanet.board.domain.Board;
+import clofi.runningplanet.crew.domain.Crew;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -19,10 +20,11 @@ public class CreateBoardRequest {
 		this.content = content;
 	}
 
-	public Board toBoard() {
+	public Board toBoard(Crew crew) {
 		return new Board(
 			title,
-			content
+			content,
+			crew
 		);
 	}
 }
