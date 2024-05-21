@@ -1,31 +1,25 @@
 package clofi.runningplanet.running.dto;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import clofi.runningplanet.running.domain.Coordinate;
 import clofi.runningplanet.running.domain.Record;
 
-public record RecordFindResponse(
+public record RecordFindCurrentResponse(
 	Long id,
 	AvgPaceResponse avgPace,
 	RunTimeResponse runTime,
 	double runDistance,
-	List<CoordinateResponse> coordinateResponses,
 	int calories,
-	LocalDateTime startTime,
-	LocalDateTime endTime
+	double latitude,
+	double longitude
 ) {
-	public RecordFindResponse(Record record, List<Coordinate> coordinates) {
+	public RecordFindCurrentResponse(Record record, Coordinate coordinate) {
 		this(record.getId(),
 			new AvgPaceResponse(record.getAvgPace()),
 			new RunTimeResponse(record.getRunTime()),
 			record.getRunDistance(),
-			coordinates.stream().map(CoordinateResponse::new).toList(),
 			record.getCalories(),
-			record.getCreatedAt(),
-			record.getEndTime()
+			coordinate.getLatitude(),
+			coordinate.getLongitude()
 		);
 	}
-
 }

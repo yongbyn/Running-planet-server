@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import clofi.runningplanet.running.domain.Coordinate;
 import clofi.runningplanet.running.domain.Record;
+import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
 import clofi.runningplanet.running.repository.CoordinateRepository;
@@ -118,6 +119,49 @@ class RecordServiceTest {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> recordService.find(recordId))
 			.withMessage("운동 기록을 찾을 수 없습니다.");
+	}
+
+	@DisplayName("현재 운동 정보를 조회할 수 있다.")
+	@Test
+	void findCurrentRecord() {
+		// given
+		Record record = createRecord(65, 1.00, 3665, 300, null);
+		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
+		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
+		recordRepository.save(record);
+		coordinateRepository.save(coordinate1);
+		coordinateRepository.save(coordinate2);
+
+		// when
+		RecordFindCurrentResponse response = recordService.findCurrentRecord();
+
+		// then
+		assertThat(response.id()).isNotNull();
+		assertThat(response.avgPace())
+			.extracting("min", "sec")
+			.contains(1, 5);
+		assertThat(response.runTime())
+			.extracting("hour", "min", "sec")
+			.contains(1, 1, 5);
+		assertThat(response)
+			.extracting("runDistance", "calories", "latitude", "longitude")
+			.contains(1.00, 300, 20.00, 30.00);
+	}
+
+	@DisplayName("현재 운동 조회 시 종료되지 않은 운동 기록이 없으면 null이 반환된다.")
+	@Test
+	void findCurrentWorkoutRecordWhenNoneUnfinished() {
+		// given
+		Record record = createRecord(65, 1.00, 3665, 300, LocalDateTime.now());
+		Coordinate coordinate = createCoordinate(record, 10.00, 20.00);
+		recordRepository.save(record);
+		coordinateRepository.save(coordinate);
+
+		// when
+		RecordFindCurrentResponse response = recordService.findCurrentRecord();
+
+		// then
+		assertThat(response).isNull();
 	}
 
 	private Record createRecord(int avgPace, double runDistance, int runTime, int calories, LocalDateTime endTime) {

@@ -10,8 +10,9 @@ import clofi.runningplanet.running.domain.Record;
 
 public interface CoordinateRepository extends JpaRepository<Coordinate, Long> {
 
-  Optional<Coordinate> findByRecord(Record record);
+	Optional<Coordinate> findByRecord(Record record);
 
-  List<Coordinate> findAllByRecord(Record record);
+	List<Coordinate> findAllByRecord(Record record);
 
+	Optional<Coordinate> findFirstByRecordOrderByCreatedAtDesc(Record record);
 }

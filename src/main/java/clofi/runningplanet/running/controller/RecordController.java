@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import clofi.runningplanet.running.domain.Record;
+import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
 import clofi.runningplanet.running.dto.RecordSaveResponse;
@@ -31,5 +32,10 @@ public class RecordController {
 	@GetMapping("/record/{recordId}")
 	public RecordFindResponse getRecord(@PathVariable("recordId") Long recordId) {
 		return recordService.find(recordId);
+	}
+
+	@GetMapping("/record/current")
+	public RecordFindCurrentResponse getCurrentRecord() {
+		return recordService.findCurrentRecord();
 	}
 }
