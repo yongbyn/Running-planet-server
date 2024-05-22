@@ -33,12 +33,22 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		String username = customUserDetails.getName();
 
-
 		JwtToken jwt = jwtUtil.createJwt(username, 60 * 60 * 60L * 1000);
-				// jwtUtil.createJwt(username, 60*60*60L*1000);
-		response.addHeader("Authorization", "Bearer " + jwt.getAccessToken());
-		System.out.println("redirect 확인");
+
+		response.addCookie(createCookie("Authorization", jwt.getAccessToken()));
 		response.sendRedirect("http://localhost:3000");
+
+	}
+
+	private Cookie createCookie(String key, String value) {
+
+		Cookie cookie = new Cookie(key, value);
+		cookie.setMaxAge(60*60*60);
+		//cookie.setSecure(true);
+		cookie.setPath("/");
+		cookie.setHttpOnly(true);
+
+		return cookie;
 
 	}
 
