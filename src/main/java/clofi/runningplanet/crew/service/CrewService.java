@@ -5,11 +5,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.Tag;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,20 @@ public class CrewService {
 		return crewList.stream()
 			.map(this::convertToFindAllCrewResDto)
 			.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public FindCrewResDto findCrew(Long crewId) {
+		Crew findCrew = crewRepository.findById(crewId).orElseThrow(
+			() -> new NotFoundException("크루를 찾을 수 없습니다.")
+		);
+
+		List<String> tags = findTagsToStrings(findCrew.getId());
+
+		//todo member 기능 구현 후 로직 개선
+		CrewLeaderDto crewLeader = findCrewLeader(1L);
+
+		return FindCrewResDto.of(findCrew, crewLeader, tags);
 	}
 
 	private Crew createAndSaveCrew(CreateCrewReqDto reqDto) {

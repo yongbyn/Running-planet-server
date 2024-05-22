@@ -15,6 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import clofi.runningplanet.common.dto.ExceptionResult;
+import clofi.runningplanet.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @RestControllerAdvice
@@ -34,5 +35,11 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ExceptionResult illegalInputException(IllegalArgumentException exception) {
 		return new ExceptionResult(exception.getMessage());
+	}
+
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<ExceptionResult> handleNotFoundException(NotFoundException exception) {
+		ExceptionResult exceptionResult = new ExceptionResult(exception.getMessage());
+		return ResponseEntity.status(NOT_FOUND).body(exceptionResult);
 	}
 }
