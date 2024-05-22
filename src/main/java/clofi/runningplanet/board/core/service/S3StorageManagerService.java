@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.service;
+package clofi.runningplanet.board.core.service;
 
 import java.io.IOException;
 import java.util.List;

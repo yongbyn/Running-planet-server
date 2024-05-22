@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.dto.request;
+package clofi.runningplanet.board.core.dto.request;
 
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.crew.domain.Crew;

@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.dto.response;
+package clofi.runningplanet.board.core.dto.response;
 
 import java.time.LocalDate;
 import java.util.List;

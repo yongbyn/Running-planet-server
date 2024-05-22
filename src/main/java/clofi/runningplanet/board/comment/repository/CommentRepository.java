@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.repository;
+package clofi.runningplanet.board.comment.repository;
 
 import java.util.List;
 
