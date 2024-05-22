@@ -52,7 +52,7 @@ public class MemberService extends DefaultOAuth2UserService {
 			SocialLogin socialLogin = SocialLogin.builder()
 				.member(member)
 				.oAuthId(oAuth2Response.getProviderId())
-				.oAuthType(OAuthType.valueOf(oAuth2Response.getProvider()))
+				.oAuthType(OAuthType.valueOf(oAuth2Response.getProvider().toUpperCase()))
 				.externalEmail(oAuth2Response.getEmail())
 				.build();
 			socialLoginRepository.save(socialLogin);

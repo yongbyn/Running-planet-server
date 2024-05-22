@@ -33,16 +33,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		String username = customUserDetails.getName();
 
-		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-		Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
-		GrantedAuthority auth = iterator.next();
-		String role = auth.getAuthority();
 
 		JwtToken jwt = jwtUtil.createJwt(username, 60 * 60 * 60L * 1000);
 				// jwtUtil.createJwt(username, 60*60*60L*1000);
 		response.addHeader("Authorization", "Bearer " + jwt.getAccessToken());
 		System.out.println("redirect 확인");
-		response.sendRedirect("http://localhost:3000/");
+		response.sendRedirect("http://localhost:3000");
 
 	}
 
