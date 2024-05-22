@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.service;
+package clofi.runningplanet.board.core.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,13 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.board.domain.Board;
-import clofi.runningplanet.board.dto.request.UpdateBoardRequest;
-import clofi.runningplanet.board.dto.response.CreateBoardResponse;
-import clofi.runningplanet.board.dto.request.CreateBoardRequest;
-import clofi.runningplanet.board.factory.BoardFactory;
-import clofi.runningplanet.board.repository.BoardImageRepository;
-import clofi.runningplanet.board.repository.BoardRepository;
+import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
+import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
+import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
+import clofi.runningplanet.board.core.factory.BoardFactory;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import lombok.RequiredArgsConstructor;

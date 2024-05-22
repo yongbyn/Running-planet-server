@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.dto.request;
+package clofi.runningplanet.board.core.dto.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;

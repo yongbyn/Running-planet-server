@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.controller;
+package clofi.runningplanet.board.core.controller;
 
 import java.util.List;
 
@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import clofi.runningplanet.board.dto.request.UpdateBoardRequest;
-import clofi.runningplanet.board.dto.response.BoardResponse;
-import clofi.runningplanet.board.dto.response.CreateBoardResponse;
-import clofi.runningplanet.board.dto.request.CreateBoardRequest;
-import clofi.runningplanet.board.service.BoardReadService;
-import clofi.runningplanet.board.service.BoardQueryService;
+import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
+import clofi.runningplanet.board.core.dto.response.BoardResponse;
+import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
+import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
+import clofi.runningplanet.board.core.service.BoardReadService;
+import clofi.runningplanet.board.core.service.BoardQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
