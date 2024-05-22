@@ -2,7 +2,11 @@ package clofi.runningplanet.running.service;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
@@ -10,9 +14,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.auditing.AuditingHandler;
 
 import clofi.runningplanet.running.domain.Coordinate;
 import clofi.runningplanet.running.domain.Record;
+import clofi.runningplanet.running.dto.RecordFindAllResponse;
 import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
@@ -29,6 +36,9 @@ class RecordServiceTest {
 
 	@Autowired
 	CoordinateRepository coordinateRepository;
+
+	@SpyBean
+	private AuditingHandler auditingHandler;
 
 	@AfterEach
 	void tearDown() {
@@ -69,6 +79,48 @@ class RecordServiceTest {
 		assertThat(savedCoordinate.get())
 			.extracting("latitude", "longitude")
 			.contains(100.23, 200.23);
+	}
+
+	@DisplayName("year, month 로 운동 기록을 조회할 수 있다.")
+	@Test
+	void findAllRecordsByYearAndMonth() {
+		// given
+		LocalDateTime createdDateTime1 = createLocalDateTime("2024-01-31 23:59:59");
+		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime1));
+		Record record1 = createRecord(65, 1.00, 1000, 100,
+			createdDateTime1.plus(Duration.of(1000, ChronoUnit.SECONDS)));
+		recordRepository.save(record1);
+
+		LocalDateTime createdDateTime2 = createLocalDateTime("2024-02-01 00:00:00");
+		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime2));
+		Record record2 = createRecord(65, 2.00, 2000, 200,
+			createdDateTime2.plus(Duration.of(2000, ChronoUnit.SECONDS)));
+		recordRepository.save(record2);
+
+		LocalDateTime createdDateTime3 = createLocalDateTime("2024-02-29 23:59:59");
+		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime3));
+		Record record3 = createRecord(65, 3.00, 3000, 300,
+			createdDateTime3.plus(Duration.of(3000, ChronoUnit.SECONDS)));
+		recordRepository.save(record3);
+
+		LocalDateTime createdDateTime4 = createLocalDateTime("2024-03-01 00:00:00");
+		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime4));
+		Record record4 = createRecord(65, 4.00, 4000, 400,
+			createdDateTime4.plus(Duration.of(4000, ChronoUnit.SECONDS)));
+		recordRepository.save(record4);
+
+		int year = 2024;
+		int month = 2;
+
+		// when
+		List<RecordFindAllResponse> response = recordService.findAll(year, month);
+
+		assertThat(response).hasSize(2)
+			.extracting("id", "runDistance", "day")
+			.containsExactlyInAnyOrder(
+				tuple(record2.getId(), 2.00, 1),
+				tuple(record3.getId(), 3.00, 29)
+			);
 	}
 
 	@DisplayName("운동 아이디로 운동 기록을 조회할 수 있다.")
@@ -180,5 +232,9 @@ class RecordServiceTest {
 			.latitude(latitude)
 			.longitude(longitude)
 			.build();
+	}
+
+	private LocalDateTime createLocalDateTime(String date) {
+		return LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 	}
 }

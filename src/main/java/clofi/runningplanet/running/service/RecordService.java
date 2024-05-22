@@ -1,5 +1,7 @@
 package clofi.runningplanet.running.service;
 
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import clofi.runningplanet.running.domain.Coordinate;
 import clofi.runningplanet.running.domain.Record;
+import clofi.runningplanet.running.dto.RecordFindAllResponse;
 import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
@@ -43,6 +46,18 @@ public class RecordService {
 		coordinateRepository.save(coordinate);
 
 		return savedRecord;
+	}
+
+	public List<RecordFindAllResponse> findAll(Integer year, Integer month) {
+		YearMonth yearMonth = YearMonth.of(year, month);
+		LocalDateTime startDateTime = yearMonth.atDay(1).atStartOfDay();
+		LocalDateTime endDateTime = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+		List<Record> records = recordRepository
+			.findAllByCreatedAtBetweenAndEndTimeIsNotNull(startDateTime, endDateTime);
+
+		return records.stream()
+			.map(RecordFindAllResponse::new)
+			.toList();
 	}
 
 	public RecordFindResponse find(Long recordId) {

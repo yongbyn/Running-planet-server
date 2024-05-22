@@ -1,5 +1,7 @@
 package clofi.runningplanet.running.repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +14,6 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 	Optional<Record> findByIdAndEndTimeIsNotNull(Long id);
 
 	Optional<Record> findOneByEndTimeIsNull();
+
+	List<Record> findAllByCreatedAtBetweenAndEndTimeIsNotNull(LocalDateTime start, LocalDateTime end);
 }

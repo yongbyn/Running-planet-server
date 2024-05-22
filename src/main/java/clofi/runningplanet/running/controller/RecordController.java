@@ -1,13 +1,17 @@
 package clofi.runningplanet.running.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import clofi.runningplanet.running.domain.Record;
+import clofi.runningplanet.running.dto.RecordFindAllResponse;
 import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
@@ -27,6 +31,12 @@ public class RecordController {
 	public RecordSaveResponse saveRecord(@RequestBody @Valid RecordSaveRequest request) {
 		Record record = recordService.save(request);
 		return new RecordSaveResponse(record.getId());
+	}
+
+	@GetMapping("/record")
+	public List<RecordFindAllResponse> findAllRecords(@RequestParam Integer year, @RequestParam Integer month
+	) {
+		return recordService.findAll(year, month);
 	}
 
 	@GetMapping("/record/{recordId}")
