@@ -3,6 +3,7 @@ package clofi.runningplanet.board.comment.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,14 @@ class CommentServiceTest {
 	private CommentRepository commentRepository;
 	@Autowired
 	private BoardRepository boardRepository;
+
+	@AfterEach
+	void tearDown() {
+		commentRepository.deleteAllInBatch();
+		boardRepository.deleteAllInBatch();
+		crewRepository.deleteAllInBatch();
+		memberRepository.deleteAllInBatch();
+	}
 
 
 	@DisplayName("사용자는 댓글을 작성할 수 있다.")
