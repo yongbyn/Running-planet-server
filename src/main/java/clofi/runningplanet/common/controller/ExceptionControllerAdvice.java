@@ -15,7 +15,11 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import clofi.runningplanet.common.dto.ExceptionResult;
+import clofi.runningplanet.common.exception.BadRequestException;
+import clofi.runningplanet.common.exception.ConflictException;
+import clofi.runningplanet.common.exception.ForbiddenException;
 import clofi.runningplanet.common.exception.NotFoundException;
+import clofi.runningplanet.common.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 
 @RestControllerAdvice
@@ -41,5 +45,29 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 	public ResponseEntity<ExceptionResult> handleNotFoundException(NotFoundException exception) {
 		ExceptionResult exceptionResult = new ExceptionResult(exception.getMessage());
 		return ResponseEntity.status(NOT_FOUND).body(exceptionResult);
+	}
+
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<ExceptionResult> handleBadRequestException(BadRequestException exception) {
+		ExceptionResult exceptionResult = new ExceptionResult(exception.getMessage());
+		return ResponseEntity.badRequest().body(exceptionResult);
+	}
+
+	@ExceptionHandler(ConflictException.class)
+	public ResponseEntity<ExceptionResult> handleConflictException(ConflictException exception) {
+		ExceptionResult exceptionResult = new ExceptionResult(exception.getMessage());
+		return ResponseEntity.status(CONFLICT).body(exceptionResult);
+	}
+
+	@ExceptionHandler(UnauthorizedException.class)
+	public ResponseEntity<ExceptionResult> handleUnauthorizedException(UnauthorizedException exception) {
+		ExceptionResult exceptionResult = new ExceptionResult(exception.getMessage());
+		return ResponseEntity.status(UNAUTHORIZED).body(exceptionResult);
+	}
+
+	@ExceptionHandler(ForbiddenException.class)
+	public ResponseEntity<ExceptionResult> handleForbiddenException(ForbiddenException exception) {
+		ExceptionResult exceptionResult = new ExceptionResult(exception.getMessage());
+		return ResponseEntity.status(FORBIDDEN).body(exceptionResult);
 	}
 }
