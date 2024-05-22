@@ -11,6 +11,7 @@ import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +24,26 @@ public class JWTFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
-		System.out.println("JWTFilter 확인");
 
-		//request에서 Authorization 헤더를 찾음
-		String authorization = request.getHeader("Authorization");
+		//cookie들을 불러온 뒤 Authorization Key에 담긴 쿠키를 찾음
+		String authorization = null;
+		Cookie[] cookies = request.getCookies();
 
-		//Authorization 헤더 검증
-		if (authorization == null || !authorization.startsWith("Bearer ")) {
+		if (cookies == null) {
+
+			filterChain.doFilter(request, response);
+
+			return;
+		}
+
+		for (Cookie cookie : cookies) {
+			if (cookie.getName().equals("Authorization")) {
+				authorization = cookie.getValue();
+			}
+		}
+
+			//Authorization 검증
+		if (authorization == null) {
 
 			filterChain.doFilter(request, response);
 
@@ -43,7 +57,6 @@ public class JWTFilter extends OncePerRequestFilter {
 		//토큰 소멸 시간 검증
 		if (jwtUtil.isExpired(token)) {
 
-			System.out.println("token expired");
 			filterChain.doFilter(request, response);
 
 			//조건이 해당되면 메소드 종료 (필수)
