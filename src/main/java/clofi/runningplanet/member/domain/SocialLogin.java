@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -42,4 +43,13 @@ public class SocialLogin extends BaseSoftDeleteEntity {
 
 	@Column(name = "external_email", nullable = false, length = 50)
 	private String externalEmail;
+
+	@Builder
+	public SocialLogin(Long id, Member member, String oAuthId, OAuthType oAuthType, String externalEmail) {
+		this.id = id;
+		this.member = member;
+		this.oAuthId = oAuthId;
+		this.oAuthType = oAuthType;
+		this.externalEmail = externalEmail;
+	}
 }
