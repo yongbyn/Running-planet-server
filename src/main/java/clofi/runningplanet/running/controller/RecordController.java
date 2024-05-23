@@ -1,12 +1,19 @@
 package clofi.runningplanet.running.controller;
 
-import org.springframework.http.ResponseEntity;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import clofi.runningplanet.running.domain.Record;
+import clofi.runningplanet.running.dto.RecordFindAllResponse;
+import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
+import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
 import clofi.runningplanet.running.dto.RecordSaveResponse;
 import clofi.runningplanet.running.service.RecordService;
@@ -21,9 +28,24 @@ public class RecordController {
 
 	//TODO: 로그인 기능 구현 후 Principal 사용하게 변경하기.
 	@PostMapping("/record")
-	public ResponseEntity<RecordSaveResponse> saveRecord(@RequestBody @Valid RecordSaveRequest request) {
+	public RecordSaveResponse saveRecord(@RequestBody @Valid RecordSaveRequest request) {
 		Record record = recordService.save(request);
-		return ResponseEntity.ok(new RecordSaveResponse(record.getId()));
+		return new RecordSaveResponse(record.getId());
 	}
 
+	@GetMapping("/record")
+	public List<RecordFindAllResponse> findAllRecords(@RequestParam Integer year, @RequestParam Integer month
+	) {
+		return recordService.findAll(year, month);
+	}
+
+	@GetMapping("/record/{recordId}")
+	public RecordFindResponse getRecord(@PathVariable("recordId") Long recordId) {
+		return recordService.find(recordId);
+	}
+
+	@GetMapping("/record/current")
+	public RecordFindCurrentResponse getCurrentRecord() {
+		return recordService.findCurrentRecord();
+	}
 }
