@@ -41,4 +41,16 @@ public class CrewApplication extends BaseSoftDeleteEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id")
 	private Member member;
+
+	public CrewApplication(Long id, String introduction, Approval approval, Crew crew, Member member) {
+		this.id = id;
+		this.introduction = introduction;
+		this.approval = approval;
+		this.crew = crew;
+		this.member = member;
+	}
+
+	public CrewApplication(String introduction, Crew crew, Member member) {
+		this(null, introduction, Approval.PENDING, crew, member);
+	}
 }
