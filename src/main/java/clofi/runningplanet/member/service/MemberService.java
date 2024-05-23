@@ -14,14 +14,17 @@ import clofi.runningplanet.member.domain.OAuthType;
 import clofi.runningplanet.member.domain.SocialLogin;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import clofi.runningplanet.member.dto.KakaoResponse;
+import clofi.runningplanet.member.dto.MemberResponse;
 import clofi.runningplanet.member.dto.OAuth2Response;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.member.repository.SocialLoginRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class MemberService extends DefaultOAuth2UserService {
 
 	private final MemberRepository memberRepository;
@@ -43,6 +46,11 @@ public class MemberService extends DefaultOAuth2UserService {
 					"invalid_kakao_response", "Invalid Kakao response data", null));
 			}
 
+			String oAuthType = oAuth2Response.getProvider();
+			String oAuthId = oAuth2Response.getProviderId();
+
+			if (!socialLoginRepository.existsByOauthTypeAndOauthId(OAuthType.valueOf(oAuthType.toUpperCase()), oAuthId)){
+
 			Member member = Member.builder()
 				.nickname(oAuth2Response.getName())
 				.profileImg(oAuth2Response.getProfileImage())
@@ -51,13 +59,24 @@ public class MemberService extends DefaultOAuth2UserService {
 
 			SocialLogin socialLogin = SocialLogin.builder()
 				.member(member)
-				.oAuthId(oAuth2Response.getProviderId())
-				.oAuthType(OAuthType.valueOf(oAuth2Response.getProvider().toUpperCase()))
+				.oauthId(oAuth2Response.getProviderId())
+				.oauthType(OAuthType.valueOf(oAuth2Response.getProvider().toUpperCase()))
 				.externalEmail(oAuth2Response.getEmail())
 				.build();
 			socialLoginRepository.save(socialLogin);
 
 			return new CustomOAuth2User(member);
+
+			} else {
+
+				SocialLogin socialLogin = socialLoginRepository.findByOauthTypeAndOauthId(OAuthType.valueOf(oAuthType.toUpperCase()),oAuthId);
+				Member member = socialLogin.getMember();
+
+				//TODO 패치조인으로 수정
+				log.info(member.getNickname());
+
+				return new CustomOAuth2User(member);
+			}
 
 		} else {
 			//로그인 id가 일치하지 않을 경우
@@ -66,4 +85,10 @@ public class MemberService extends DefaultOAuth2UserService {
 			throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.getDescription());
 		}
 	}
+
+	public MemberResponse getMember(Long memberId) {
+
+		return null;
+	}
+
 }

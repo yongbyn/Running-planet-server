@@ -1,11 +1,13 @@
 package clofi.runningplanet.security.config;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -56,8 +58,11 @@ public class SecurityConfig {
 		//경로별 인가 작업
 		http
 			.authorizeRequests((auth) -> auth
-				.requestMatchers("/error", "/ws/**", "/api/login", "/api/signup", "/h2-console/**","/oauth/**","/oauth2/**","/**").permitAll()
+				.requestMatchers("/error", "/ws/**", "/h2-console/**","/oauth/**","/oauth2/**").permitAll()
 				.anyRequest().authenticated());
+
+		http
+			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
 		//세션 설정 : STATELESS
 		http
@@ -73,7 +78,7 @@ public class SecurityConfig {
 
 					CorsConfiguration configuration = new CorsConfiguration();
 
-					configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
+					configuration.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:5173"));
 					configuration.setAllowedMethods(Collections.singletonList("*"));
 					configuration.setAllowCredentials(true);
 					configuration.setAllowedHeaders(Collections.singletonList("*"));
