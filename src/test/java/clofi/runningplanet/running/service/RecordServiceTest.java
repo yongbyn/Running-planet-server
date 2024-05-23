@@ -127,7 +127,7 @@ class RecordServiceTest {
 	@Test
 	void findRecord() {
 		// given
-		LocalDateTime endTime = LocalDateTime.now();
+		LocalDateTime endTime = LocalDateTime.now().withNano(0);
 		Record record = createRecord(65, 1.00, 3665, 300, endTime);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);

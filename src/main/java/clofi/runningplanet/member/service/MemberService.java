@@ -8,13 +8,11 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.domain.OAuthType;
 import clofi.runningplanet.member.domain.SocialLogin;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import clofi.runningplanet.member.dto.KakaoResponse;
-import clofi.runningplanet.member.dto.MemberResponse;
 import clofi.runningplanet.member.dto.OAuth2Response;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.member.repository.SocialLoginRepository;
@@ -85,10 +83,4 @@ public class MemberService extends DefaultOAuth2UserService {
 			throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.getDescription());
 		}
 	}
-
-	public MemberResponse getMember(Long memberId) {
-
-		return null;
-	}
-
 }

@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.service;
+package clofi.runningplanet.board.core.service;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -15,14 +15,13 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import clofi.runningplanet.board.core.service.BoardQueryService;
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.BoardImage;
 import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
 import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
 import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
 import clofi.runningplanet.board.core.factory.BoardFactory;
-import clofi.runningplanet.board.factory.fake.FakeS3StorageManager;
+import clofi.runningplanet.board.core.factory.fake.FakeS3StorageManager;
 import clofi.runningplanet.board.core.repository.BoardImageRepository;
 import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.crew.domain.ApprovalType;

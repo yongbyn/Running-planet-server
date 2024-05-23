@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.factory.fake;
+package clofi.runningplanet.board.core.factory.fake;
 
 import java.util.Arrays;
 import java.util.List;
