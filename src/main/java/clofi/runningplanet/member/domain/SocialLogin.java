@@ -13,7 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,26 +30,26 @@ public class SocialLogin extends BaseSoftDeleteEntity {
 	@Column(name = "social_login_id", nullable = false)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member member;
 
 	@Column(name = "o_auth_id", nullable = false, length = 50)
-	private String oAuthId;
+	private String oauthId;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "o_auth_type", nullable = false, length = 10)
-	private OAuthType oAuthType;
+	private OAuthType oauthType;
 
 	@Column(name = "external_email", nullable = false, length = 50)
 	private String externalEmail;
 
 	@Builder
-	public SocialLogin(Long id, Member member, String oAuthId, OAuthType oAuthType, String externalEmail) {
+	public SocialLogin(Long id, Member member, String oauthId, OAuthType oauthType, String externalEmail) {
 		this.id = id;
 		this.member = member;
-		this.oAuthId = oAuthId;
-		this.oAuthType = oAuthType;
+		this.oauthId = oauthId;
+		this.oauthType = oauthType;
 		this.externalEmail = externalEmail;
 	}
 }

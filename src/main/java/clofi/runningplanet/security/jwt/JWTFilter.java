@@ -52,7 +52,7 @@ public class JWTFilter extends OncePerRequestFilter {
 		}
 
 		//토큰
-		String token = authorization.split(" ")[1];
+		String token = authorization;
 
 		//토큰 소멸 시간 검증
 		if (jwtUtil.isExpired(token)) {
