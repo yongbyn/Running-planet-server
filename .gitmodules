@@ -1,0 +1,3 @@
+[submodule "Running-planet-server-private"]
+	path = Running-planet-server-private
+	url = https://github.com/Clo-fi/Running-planet-server-private.git
