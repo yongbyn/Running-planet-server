@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ class BoardReadServiceTest {
 	@Autowired
 	private BoardReadService boardReadService;
 
-	@BeforeEach
+	@AfterEach
 	void tearDown() {
 		commentRepository.deleteAllInBatch();
 		boardRepository.deleteAllInBatch();
