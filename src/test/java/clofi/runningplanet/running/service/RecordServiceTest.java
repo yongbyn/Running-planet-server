@@ -72,7 +72,7 @@ class RecordServiceTest {
 
 		// when
 		Member member = memberRepository.save(createMember());
-		Record savedRecord = recordService.save(recordSaveRequest, member.getNickname());
+		Record savedRecord = recordService.save(recordSaveRequest, member.getId());
 
 		// then
 		assertThat(savedRecord.getId()).isNotNull();
@@ -105,7 +105,7 @@ class RecordServiceTest {
 		);
 
 		Member member = memberRepository.save(createMember());
-		recordService.save(recordSaveRequest1, member.getNickname());
+		recordService.save(recordSaveRequest1, member.getId());
 
 		RecordSaveRequest recordSaveRequest2 = new RecordSaveRequest(
 			200.23,
@@ -121,7 +121,7 @@ class RecordServiceTest {
 		);
 
 		// when
-		Record updatedRecord = recordService.save(recordSaveRequest2, member.getNickname());
+		Record updatedRecord = recordService.save(recordSaveRequest2, member.getId());
 
 		// then
 		assertThat(updatedRecord.getId()).isNotNull();
@@ -173,7 +173,7 @@ class RecordServiceTest {
 		int month = 2;
 
 		// when
-		List<RecordFindAllResponse> response = recordService.findAll(year, month, member.getNickname());
+		List<RecordFindAllResponse> response = recordService.findAll(year, month, member.getId());
 
 		assertThat(response).hasSize(2)
 			.extracting("id", "runDistance", "day")
@@ -200,7 +200,7 @@ class RecordServiceTest {
 		Long recordId = savedRecord.getId();
 
 		// when
-		RecordFindResponse response = recordService.find(recordId, member.getNickname());
+		RecordFindResponse response = recordService.find(recordId, member.getId());
 
 		// then
 		assertThat(response.id()).isNotNull();
@@ -233,7 +233,7 @@ class RecordServiceTest {
 
 		// when & then
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> recordService.find(recordId, member.getNickname()))
+			.isThrownBy(() -> recordService.find(recordId, member.getId()))
 			.withMessage("운동 기록을 찾을 수 없습니다.");
 	}
 
@@ -242,6 +242,7 @@ class RecordServiceTest {
 	void findRecordByInvalidRequest() {
 		// given
 		Member member = memberRepository.save(createMember());
+		Member member2 = memberRepository.save(createMember());
 
 		LocalDateTime endTime = LocalDateTime.now().withNano(0);
 		Record record = createRecord(member, 65, 1.00, 3665, 300, endTime);
@@ -255,10 +256,10 @@ class RecordServiceTest {
 
 		// when & then
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> recordService.find(recordId + 1, member.getNickname()))
+			.isThrownBy(() -> recordService.find(recordId + 1, member.getId()))
 			.withMessage("운동 기록을 찾을 수 없습니다.");
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> recordService.find(recordId, "someone"))
+			.isThrownBy(() -> recordService.find(recordId, member2.getId()))
 			.withMessage("운동 기록을 찾을 수 없습니다.");
 	}
 
@@ -276,7 +277,7 @@ class RecordServiceTest {
 		coordinateRepository.save(coordinate2);
 
 		// when
-		RecordFindCurrentResponse response = recordService.findCurrentRecord(member.getNickname());
+		RecordFindCurrentResponse response = recordService.findCurrentRecord(member.getId());
 
 		// then
 		assertThat(response.id()).isNotNull();
@@ -303,7 +304,7 @@ class RecordServiceTest {
 		coordinateRepository.save(coordinate);
 
 		// when
-		RecordFindCurrentResponse response = recordService.findCurrentRecord(member.getNickname());
+		RecordFindCurrentResponse response = recordService.findCurrentRecord(member.getId());
 
 		// then
 		assertThat(response).isNull();
