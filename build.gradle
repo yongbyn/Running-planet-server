@@ -60,3 +60,11 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+processResources.dependsOn('copySecret')
+
+tasks.register('copySecret', Copy) {
+    from './Running-planet-server-private'
+    include "*.yml"
+    into './src/main/resources'
+}
