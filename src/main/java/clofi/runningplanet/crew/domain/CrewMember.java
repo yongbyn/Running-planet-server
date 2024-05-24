@@ -60,4 +60,8 @@ public class CrewMember extends BaseSoftDeleteEntity {
 	public static CrewMember of(Crew crew, Member member, Role role) {
 		return new CrewMember(null, crew, member, role);
 	}
+
+	public boolean isLeader() {
+		return role == Role.LEADER;
+	}
 }
