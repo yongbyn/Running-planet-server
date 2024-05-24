@@ -37,8 +37,8 @@ public record CreateCrewReqDto(
 	@NotNull
 	RuleDto rule
 ) {
-	public Crew toEntity(Long crewId) {
-		return new Crew(crewId, crewName, limitMemberCnt, limitRunScore, category, approvalType, introduction,
+	public Crew toEntity(Long leaderId) {
+		return new Crew(leaderId, crewName, limitMemberCnt, limitRunScore, category, approvalType, introduction,
 			rule.weeklyRun(), rule.distance());
 	}
 }

@@ -28,8 +28,9 @@ public class CrewController {
 	private final CrewService crewService;
 
 	@PostMapping("/api/crew")
-	public ResponseEntity<Void> createCrew(@RequestBody @Valid CreateCrewReqDto reqDto) {
-		Long crewId = crewService.createCrew(reqDto);
+	public ResponseEntity<Void> createCrew(@RequestBody @Valid CreateCrewReqDto reqDto,
+		@AuthenticationPrincipal CustomOAuth2User principal) {
+		Long crewId = crewService.createCrew(reqDto, principal.getId());
 		return ResponseEntity.created(URI.create("/api/crew/" + crewId)).build();
 	}
 
