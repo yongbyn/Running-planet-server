@@ -29,8 +29,8 @@ public class RecordService {
 	private final MemberRepository memberRepository;
 
 	@Transactional
-	public Record save(RecordSaveRequest request, String username) {
-		Member member = getMember(username);
+	public Record save(RecordSaveRequest request, Long memberId) {
+		Member member = getMember(memberId);
 		Record record = getCurrentRecordOrElseNew(member);
 
 		record.update(request.runTime(), request.runDistance(), request.calories(), request.avgPace().min(),
@@ -44,8 +44,9 @@ public class RecordService {
 		return savedRecord;
 	}
 
-	private Member getMember(String username) {
-		return memberRepository.findByNickname(username);
+	private Member getMember(Long memberId) {
+		return memberRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 	}
 
 	private Record getCurrentRecordOrElseNew(Member member) {
@@ -53,8 +54,8 @@ public class RecordService {
 			.orElse(Record.builder().member(member).build());
 	}
 
-	public List<RecordFindAllResponse> findAll(Integer year, Integer month, String username) {
-		Member member = getMember(username);
+	public List<RecordFindAllResponse> findAll(Integer year, Integer month, Long memberId) {
+		Member member = getMember(memberId);
 		YearMonth yearMonth = YearMonth.of(year, month);
 
 		LocalDateTime startDateTime = getStartDateTime(yearMonth);
@@ -75,8 +76,8 @@ public class RecordService {
 		return yearMonth.atEndOfMonth().atTime(23, 59, 59);
 	}
 
-	public RecordFindResponse find(Long recordId, String username) {
-		Member member = getMember(username);
+	public RecordFindResponse find(Long recordId, Long memberId) {
+		Member member = getMember(memberId);
 		Record record = getCurrentRecord(recordId, member);
 		List<Coordinate> coordinates = coordinateRepository.findAllByRecord(record);
 
@@ -88,8 +89,8 @@ public class RecordService {
 			.orElseThrow(() -> new IllegalArgumentException("운동 기록을 찾을 수 없습니다."));
 	}
 
-	public RecordFindCurrentResponse findCurrentRecord(String username) {
-		Member member = getMember(username);
+	public RecordFindCurrentResponse findCurrentRecord(Long memberId) {
+		Member member = getMember(memberId);
 		Optional<Record> optionalRecord = recordRepository.findOneByMemberAndEndTimeIsNull(member);
 		if (optionalRecord.isEmpty()) {
 			return null;

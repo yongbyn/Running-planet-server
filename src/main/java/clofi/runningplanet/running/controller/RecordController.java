@@ -33,7 +33,7 @@ public class RecordController {
 		@RequestBody @Valid RecordSaveRequest request,
 		@AuthenticationPrincipal CustomOAuth2User user
 	) {
-		Record record = recordService.save(request, user.getName());
+		Record record = recordService.save(request, user.getId());
 		return new RecordSaveResponse(record.getId());
 	}
 
@@ -43,7 +43,7 @@ public class RecordController {
 		@RequestParam Integer month,
 		@AuthenticationPrincipal CustomOAuth2User user
 	) {
-		return recordService.findAll(year, month, user.getName());
+		return recordService.findAll(year, month, user.getId());
 	}
 
 	@GetMapping("/record/{recordId}")
@@ -51,11 +51,11 @@ public class RecordController {
 		@PathVariable("recordId") Long recordId,
 		@AuthenticationPrincipal CustomOAuth2User user
 	) {
-		return recordService.find(recordId, user.getName());
+		return recordService.find(recordId, user.getId());
 	}
 
 	@GetMapping("/record/current")
 	public RecordFindCurrentResponse getCurrentRecord(@AuthenticationPrincipal CustomOAuth2User user) {
-		return recordService.findCurrentRecord(user.getName());
+		return recordService.findCurrentRecord(user.getId());
 	}
 }
