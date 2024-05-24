@@ -15,6 +15,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,9 +33,9 @@ public class Record extends BaseSoftDeleteEntity {
 	@Column(name = "record_id", nullable = false)
 	private Long id;
 
-	// @ManyToOne(fetch = FetchType.LAZY)
-	// @JoinColumn(name = "member_id", nullable = false)
-	// private Member member;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_id", nullable = false)
+	private Member member;
 
 	@Column(name = "run_time", nullable = false)
 	private int runTime;
@@ -50,12 +52,32 @@ public class Record extends BaseSoftDeleteEntity {
 	@Column(name = "end_time")
 	private LocalDateTime endTime;
 
+	@Column(name = "is_end")
+	private boolean isEnd;
+
 	@Builder
-	private Record(int runTime, double runDistance, int calories, int avgPace, LocalDateTime endTime) {
+	private Record(Member member, int runTime, double runDistance, int calories, int avgPace, LocalDateTime endTime) {
+		this.member = member;
 		this.runTime = runTime;
 		this.runDistance = runDistance;
 		this.calories = calories;
 		this.avgPace = avgPace;
 		this.endTime = endTime;
+	}
+
+	public void update(int runTime, double runDistance, int calories, int min, int sec, boolean isEnd) {
+		this.runTime = runTime;
+		this.runDistance = runDistance;
+		this.calories = calories;
+		this.avgPace = min * 60 + sec;
+		this.isEnd = isEnd;
+	}
+
+	@PrePersist
+	@PreUpdate
+	protected void onUpdate() {
+		if (this.isEnd) {
+			this.endTime = LocalDateTime.now();
+		}
 	}
 }
