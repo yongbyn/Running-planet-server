@@ -36,6 +36,10 @@ jobs:
     needs: build
     runs-on: [ self-hosted, dev ]
     steps:
+      - name: Change permission
+        run: |
+          sudo chown -R ${{ secrets.NAME }}:${{ secrets.PASSWORD }} ${{ secrets.build_path }}
+
       - name: download build artifact
         uses: actions/download-artifact@v2
         with:
