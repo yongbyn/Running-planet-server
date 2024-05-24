@@ -49,21 +49,21 @@ public class MemberService extends DefaultOAuth2UserService {
 
 			if (!socialLoginRepository.existsByOauthTypeAndOauthId(OAuthType.valueOf(oAuthType.toUpperCase()), oAuthId)){
 
-			Member member = Member.builder()
-				.nickname(oAuth2Response.getName())
-				.profileImg(oAuth2Response.getProfileImage())
-				.build();
-			memberRepository.save(member);
+				Member member = Member.builder()
+					.nickname(oAuth2Response.getName())
+					.profileImg(oAuth2Response.getProfileImage())
+					.build();
+				Member savedMember = memberRepository.save(member);
 
-			SocialLogin socialLogin = SocialLogin.builder()
-				.member(member)
-				.oauthId(oAuth2Response.getProviderId())
-				.oauthType(OAuthType.valueOf(oAuth2Response.getProvider().toUpperCase()))
-				.externalEmail(oAuth2Response.getEmail())
-				.build();
-			socialLoginRepository.save(socialLogin);
+				SocialLogin socialLogin = SocialLogin.builder()
+					.member(savedMember)
+					.oauthId(oAuth2Response.getProviderId())
+					.oauthType(OAuthType.valueOf(oAuth2Response.getProvider().toUpperCase()))
+					.externalEmail(oAuth2Response.getEmail())
+					.build();
+				socialLoginRepository.save(socialLogin);
 
-			return new CustomOAuth2User(member);
+				return new CustomOAuth2User(savedMember);
 
 			} else {
 
@@ -74,6 +74,7 @@ public class MemberService extends DefaultOAuth2UserService {
 				log.info(member.getNickname());
 
 				return new CustomOAuth2User(member);
+
 			}
 
 		} else {
