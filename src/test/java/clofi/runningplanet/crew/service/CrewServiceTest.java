@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.CrewMember;
@@ -101,6 +102,8 @@ class CrewServiceTest {
 		given(crewMemberRepository.save(any(CrewMember.class))).willReturn(
 			new CrewMember(1L, crew, MEMBER, Role.LEADER));
 		given(memberRepository.findById(anyLong())).willReturn(Optional.of(MEMBER));
+		given(crewMemberRepository.existsByMemberId(anyLong()))
+			.willReturn(false);
 
 		// when
 		Long result = crewService.createCrew(reqDto, leaderId);
@@ -132,6 +135,34 @@ class CrewServiceTest {
 		//then
 		assertThatThrownBy(() -> crewService.createCrew(reqDto, MEMBER.getId()))
 			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("크루에 속해있는 사용자가 크루 생성시 예외 발생")
+	@Test
+	void test() {
+		//given
+		RuleDto rule = new RuleDto(5, 100);
+
+		CreateCrewReqDto reqDto = new CreateCrewReqDto(
+			"크루명",
+			5,
+			50,
+			RUNNING,
+			List.of("성실"),
+			AUTO,
+			"크루를 소개하는 글",
+			rule
+		);
+
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.ofNullable(MEMBER));
+		given(crewMemberRepository.existsByMemberId(anyLong()))
+			.willReturn(true);
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.createCrew(reqDto, MEMBER.getId()))
+			.isInstanceOf(ConflictException.class);
 	}
 
 	@DisplayName("크루 목록 조회 성공")
