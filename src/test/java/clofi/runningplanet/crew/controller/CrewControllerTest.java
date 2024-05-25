@@ -71,16 +71,14 @@ class CrewControllerTest {
 			100
 		);
 
-		//todo 인증 기능 구현 완료 후 테스트 변경
-
 		CreateCrewReqDto reqDto = new CreateCrewReqDto(
-			"구름 크루",
+			"크루명",
 			5,
 			50,
 			RUNNING,
 			List.of("성실"),
 			AUTO,
-			"구름 크루는 성실한 크루",
+			"크루를 소개하는 글",
 			rule
 		);
 

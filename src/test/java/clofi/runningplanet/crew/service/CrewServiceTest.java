@@ -5,6 +5,7 @@ import static clofi.runningplanet.crew.domain.Category.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +35,17 @@ import clofi.runningplanet.member.repository.MemberRepository;
 @ExtendWith(MockitoExtension.class)
 class CrewServiceTest {
 
+	private static final Member MEMBER = Member.builder()
+		.id(1L)
+		.nickname("닉네임")
+		.age(20)
+		.gender(Gender.MALE)
+		.profileImg("https://image-url.com")
+		.avgDistance(10)
+		.totalDistance(100)
+		.runScore(50)
+		.build();
+
 	@Mock
 	private CrewRepository crewRepository;
 
@@ -52,54 +64,48 @@ class CrewServiceTest {
 	@DisplayName("크루 생성 성공")
 	@Test
 	void successCreateCrew() {
-		//given
+		// given
 		Long leaderId = 1L;
 
-		final RuleDto rule = new RuleDto(
-			5,
-			100
-		);
-
-		//todo 인증 기능 구현 완료 후 테스트 변경
+		RuleDto rule = new RuleDto(5, 100);
 
 		CreateCrewReqDto reqDto = new CreateCrewReqDto(
-			"구름 크루",
+			"크루명",
 			5,
 			50,
 			RUNNING,
 			List.of("성실"),
 			AUTO,
-			"구름 크루는 성실한 크루",
+			"크루를 소개하는 글",
 			rule
 		);
 
-		given(crewRepository.save(any()))
-			.willReturn(
-				new Crew(1L, null, null, 0,
-					0, null, null, null,
-					0, 0, 0, 0));
-		given(tagRepository.saveAll(anyList()))
-			.willReturn(null);
-		given(crewMemberRepository.save(any()))
-			.willReturn(new CrewMember(1L, null, null, Role.LEADER));
-		given(memberRepository.findById(anyLong()))
-			.willReturn(Optional.ofNullable(Member.builder()
-				.id(1L)
-				.nickname(null)
-				.age(15)
-				.gender(Gender.MALE)
-				.profileImg(null)
-				.avgDistance(0)
-				.totalDistance(0)
-				.runScore(0)
-				.build()));
+		Crew crew = new Crew(
+			1L,
+			MEMBER.getId(),
+			"크루명",
+			5,
+			50,
+			RUNNING,
+			AUTO,
+			"크루를 소개하는 글",
+			5,
+			100,
+			0,
+			0
+		);
 
-		//when
+		given(crewRepository.save(any(Crew.class))).willReturn(crew);
+		given(tagRepository.saveAll(anyList())).willReturn(Collections.emptyList());
+		given(crewMemberRepository.save(any(CrewMember.class))).willReturn(
+			new CrewMember(1L, crew, MEMBER, Role.LEADER));
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(MEMBER));
+
+		// when
 		Long result = crewService.createCrew(reqDto, leaderId);
 
-		//then
+		// then
 		assertThat(result).isEqualTo(1L);
-
 	}
 
 	@DisplayName("크루 목록 조회 성공")
