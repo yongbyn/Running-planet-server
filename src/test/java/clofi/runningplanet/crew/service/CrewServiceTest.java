@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.crew.domain.Role;
@@ -106,6 +107,31 @@ class CrewServiceTest {
 
 		// then
 		assertThat(result).isEqualTo(1L);
+	}
+
+	@DisplayName("크루 생성시 등록되지 않은 사용자가 들어올 경우 예외 발생")
+	@Test
+	void failCreateCrewByNotFoundMember() {
+		//given
+		RuleDto rule = new RuleDto(5, 100);
+
+		CreateCrewReqDto reqDto = new CreateCrewReqDto(
+			"크루명",
+			5,
+			50,
+			RUNNING,
+			List.of("성실"),
+			AUTO,
+			"크루를 소개하는 글",
+			rule
+		);
+
+		given(memberRepository.findById(anyLong())).willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.createCrew(reqDto, MEMBER.getId()))
+			.isInstanceOf(NotFoundException.class);
 	}
 
 	@DisplayName("크루 목록 조회 성공")
