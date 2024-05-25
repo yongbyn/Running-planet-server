@@ -16,14 +16,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.domain.CrewMember;
+import clofi.runningplanet.crew.domain.Role;
 import clofi.runningplanet.crew.domain.Tag;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
-import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
+import clofi.runningplanet.member.domain.Gender;
+import clofi.runningplanet.member.domain.Member;
+import clofi.runningplanet.member.repository.MemberRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CrewServiceTest {
@@ -34,6 +40,12 @@ class CrewServiceTest {
 	@Mock
 	private TagRepository tagRepository;
 
+	@Mock
+	private CrewMemberRepository crewMemberRepository;
+
+	@Mock
+	private MemberRepository memberRepository;
+
 	@InjectMocks
 	private CrewService crewService;
 
@@ -41,6 +53,8 @@ class CrewServiceTest {
 	@Test
 	void successCreateCrew() {
 		//given
+		Long leaderId = 1L;
+
 		final RuleDto rule = new RuleDto(
 			5,
 			100
@@ -66,9 +80,22 @@ class CrewServiceTest {
 					0, 0, 0, 0));
 		given(tagRepository.saveAll(anyList()))
 			.willReturn(null);
+		given(crewMemberRepository.save(any()))
+			.willReturn(new CrewMember(1L, null, null, Role.LEADER));
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.ofNullable(Member.builder()
+				.id(1L)
+				.nickname(null)
+				.age(15)
+				.gender(Gender.MALE)
+				.profileImg(null)
+				.avgDistance(0)
+				.totalDistance(0)
+				.runScore(0)
+				.build()));
 
 		//when
-		Long result = crewService.createCrew(reqDto);
+		Long result = crewService.createCrew(reqDto, leaderId);
 
 		//then
 		assertThat(result).isEqualTo(1L);
@@ -95,7 +122,6 @@ class CrewServiceTest {
 			.willReturn(List.of(
 				new Tag(2L, null, "최고")
 			));
-
 
 		//when
 		List<FindAllCrewResDto> result = crewService.findAllCrew();
@@ -137,7 +163,7 @@ class CrewServiceTest {
 				Optional.of(new Crew(1L, 1L, "구름 크루", 10, 50,
 					RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
 					0, 0))
-				);
+			);
 
 		given(tagRepository.findAllByCrewId(anyLong()))
 			.willReturn(List.of(
