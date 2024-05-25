@@ -29,6 +29,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import clofi.runningplanet.common.WithMockCustomMember;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
@@ -61,6 +62,7 @@ class CrewControllerTest {
 	}
 
 	@DisplayName("크루 생성 성공")
+	@WithMockCustomMember
 	@Test
 	void createCrew() throws Exception {
 		//given
