@@ -43,4 +43,12 @@ public class CrewMember extends BaseSoftDeleteEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "role", nullable = false, length = 10)
 	private Role role;
+
+	@Builder
+	public CrewMember(Long id, Crew crew, Member member, Role role) {
+		this.id = id;
+		this.crew = crew;
+		this.member = member;
+		this.role = role;
+	}
 }
