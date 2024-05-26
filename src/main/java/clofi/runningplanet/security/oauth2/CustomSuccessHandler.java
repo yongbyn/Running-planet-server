@@ -1,18 +1,14 @@
 package clofi.runningplanet.security.oauth2;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import clofi.runningplanet.security.jwt.JWTUtil;
 import clofi.runningplanet.security.jwt.JwtToken;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,9 +27,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		//OAuth2User
 		CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
-		String username = customUserDetails.getName();
+		Long userId = customUserDetails.getId();
 
-		JwtToken jwt = jwtUtil.createJwt(username, 60 * 60 * 60L * 1000);
+		JwtToken jwt = jwtUtil.createJwt(userId, 60 * 60 * 60L * 1000);
 
 		response.addCookie(createCookie("Authorization", jwt.getAccessToken()));
 		response.sendRedirect("http://localhost:5173");
