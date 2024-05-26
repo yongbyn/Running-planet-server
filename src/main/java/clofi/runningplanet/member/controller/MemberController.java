@@ -1,10 +1,11 @@
 package clofi.runningplanet.member.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import clofi.runningplanet.member.dto.ProfileResponse;
 import clofi.runningplanet.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 
@@ -14,10 +15,10 @@ public class MemberController {
 
 	private final MemberService memberService;
 
-	@GetMapping("/test")
-	public @ResponseBody String loginTest() {
+	@GetMapping("/api/profile/{memberId}")
+	public ResponseEntity<ProfileResponse> getProfile(@PathVariable("memberId") Long memberId) {
 
-		return "kakao test";
+		return memberService.getProfile(memberId);
 	}
 
 }

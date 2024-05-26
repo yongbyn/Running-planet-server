@@ -1,5 +1,8 @@
 package clofi.runningplanet.member.service;
 
+import java.util.Optional;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -8,12 +11,15 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import clofi.runningplanet.crew.domain.CrewMember;
+import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.domain.OAuthType;
 import clofi.runningplanet.member.domain.SocialLogin;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import clofi.runningplanet.member.dto.KakaoResponse;
 import clofi.runningplanet.member.dto.OAuth2Response;
+import clofi.runningplanet.member.dto.ProfileResponse;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.member.repository.SocialLoginRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberService extends DefaultOAuth2UserService {
 
 	private final MemberRepository memberRepository;
+	private final CrewMemberRepository crewMemberRepository;
 	private final SocialLoginRepository socialLoginRepository;
 
 	@Override
@@ -84,4 +91,22 @@ public class MemberService extends DefaultOAuth2UserService {
 			throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.getDescription());
 		}
 	}
+
+	public ResponseEntity<ProfileResponse> getProfile(Long memberId) {
+		Member member = getMember(memberId);
+		CrewMember crewMember = getCrewMember(memberId);
+
+		return ResponseEntity.ok(new ProfileResponse(member,crewMember));
+	}
+
+	private Member getMember(Long memberId) {
+		return memberRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+	}
+
+	private CrewMember getCrewMember(Long memberId) {
+		return crewMemberRepository.findByMemberId(memberId)
+			.orElse(null);
+	}
+
 }
