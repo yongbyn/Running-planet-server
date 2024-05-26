@@ -38,10 +38,14 @@ public class JWTUtil {
 		return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
 	}
 
-	public JwtToken createJwt(String username, Long expiredMs) {
+	public Long getUserId(String token) {
+
+		return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
+	}
+	public JwtToken createJwt(Long userId, Long expiredMs) {
 
 		String accessToken = Jwts.builder()
-			.claim("username", username)
+			.claim("userId", userId)
 			.issuedAt(new Date(System.currentTimeMillis()))
 			.expiration(new Date(System.currentTimeMillis() + expiredMs))
 			.signWith(secretKey)
