@@ -388,4 +388,27 @@ class CrewServiceTest {
 		assertThatThrownBy(() -> crewService.applyCrew(reqDto, crewId, memberId))
 			.isInstanceOf(ConflictException.class);
 	}
+
+	@DisplayName("가입 신청한 크루가 없는 경우 예외 처리")
+	@Test
+	void failApplyCrewByNotFoundCrew() {
+		//given
+		ApplyCrewReqDto reqDto = new ApplyCrewReqDto("크루 신청서");
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.of(MEMBER));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+		given(crewApplicationRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.empty());
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.applyCrew(reqDto, crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
 }
