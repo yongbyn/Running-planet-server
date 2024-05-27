@@ -1,5 +1,6 @@
 package clofi.runningplanet.security.config;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,8 +10,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -19,6 +22,7 @@ import clofi.runningplanet.security.jwt.JWTFilter;
 import clofi.runningplanet.security.jwt.JWTUtil;
 import clofi.runningplanet.security.oauth2.CustomSuccessHandler;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -64,6 +68,9 @@ public class SecurityConfig {
 		http
 			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
+		http
+			.exceptionHandling(e -> e.authenticationEntryPoint(new AuthenticationEntryPoint()));
+
 		//세션 설정 : STATELESS
 		http
 			.sessionManagement((session) -> session
@@ -92,5 +99,18 @@ public class SecurityConfig {
 			}));
 
 		return http.build();
+	}
+
+	public static class AuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint {
+		public AuthenticationEntryPoint() {
+			super("");
+		}
+
+		@Override
+		public void commence(HttpServletRequest request, HttpServletResponse response,
+			AuthenticationException authException)
+			throws IOException {
+			response.sendError(401, "Unauthorized");
+		}
 	}
 }
