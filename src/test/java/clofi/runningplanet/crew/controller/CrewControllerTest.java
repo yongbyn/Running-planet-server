@@ -32,7 +32,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import clofi.runningplanet.common.WithMockCustomMember;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
+import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.service.CrewService;
@@ -161,6 +163,36 @@ class CrewControllerTest {
 		assertThat(resDto).isEqualTo(expected);
 	}
 
+	@DisplayName("크루 신청 성공")
+	@WithMockCustomMember
+	@Test
+	void successApplyCrew() throws Exception {
+		//given
+		Long crewId = 1L;
+		ApplyCrewReqDto reqDto = new ApplyCrewReqDto("크루 신청서");
+
+		ApplyCrewResDto expected = new ApplyCrewResDto(crewId, 1L, true);
+
+		given(crewService.applyCrew(any(ApplyCrewReqDto.class), anyLong(), anyLong()))
+			.willReturn(expected);
+
+		//when
+		ResultActions resultActions = applyCrew(reqDto, crewId);
+
+		//then
+		MvcResult mvcResult = resultActions
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		ApplyCrewResDto resDto = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<>() {
+			}
+		);
+
+		assertThat(expected).isEqualTo(resDto);
+	}
+
 	private ResultActions createCrew(CreateCrewReqDto reqDto) throws Exception {
 		return mockMvc.perform(post("/api/crew")
 			.contentType(APPLICATION_JSON)
@@ -176,5 +208,12 @@ class CrewControllerTest {
 	private ResultActions findCrew(Long crewId) throws Exception {
 		return mockMvc.perform(get("/api/crew/{crewId}", crewId)
 			.contentType(APPLICATION_JSON));
+	}
+
+	private ResultActions applyCrew(ApplyCrewReqDto reqDto, Long crewId) throws Exception {
+		return mockMvc.perform(post("/api/crew/{crewId}", crewId)
+			.contentType(APPLICATION_JSON)
+			.header(AUTHORIZATION, "Bearer accessToken")
+			.content(objectMapper.writeValueAsString(reqDto)));
 	}
 }
