@@ -84,4 +84,10 @@ public class Crew extends BaseSoftDeleteEntity {
 		this.weeklyDistance = weeklyDistance;
 		this.totalDistance = totalDistance;
 	}
+
+	public void checkRunScore(int runScore) {
+		if (this.limitRunScore > runScore) {
+			throw new IllegalArgumentException("운동 점수가 제한 운동 점수보다 낮아 지원할 수 없습니다.");
+		}
+	}
 }
