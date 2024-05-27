@@ -323,7 +323,7 @@ class CrewServiceTest {
 
 	@DisplayName("크루 신청 성공 테스트 코드")
 	@Test
-	void test1() {
+	void successApplyCrew() {
 		//given
 		ApplyCrewReqDto reqDto = new ApplyCrewReqDto("크루 신청서");
 		Long crewId = 1L;
@@ -351,5 +351,22 @@ class CrewServiceTest {
 		ApplyCrewResDto applyCrewResDto = new ApplyCrewResDto(crewId, memberId, true);
 
 		assertThat(result).isEqualTo(applyCrewResDto);
+	}
+
+	@DisplayName("크루 신청한 사용자가 가입된 사용자가 아닌 경우 예외 발생")
+	@Test
+	void failApplyCrewByNotFoundMember() {
+		//given
+		ApplyCrewReqDto reqDto = new ApplyCrewReqDto("크루 신청서");
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.applyCrew(reqDto, crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
 	}
 }
