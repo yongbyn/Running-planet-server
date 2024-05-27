@@ -40,12 +40,13 @@ public class CrewController {
 	}
 
 	@GetMapping("/api/crew/{crewId}")
-	public ResponseEntity<FindCrewResDto> findCrew(@PathVariable Long crewId) {
+	public ResponseEntity<FindCrewResDto> findCrew(@PathVariable("crewId") Long crewId) {
 		return ResponseEntity.ok(crewService.findCrew(crewId));
 	}
 
 	@PostMapping("/api/crew/{crewId}")
-	public ResponseEntity<ApplyCrewResDto> applyCrew(@PathVariable Long crewId, @RequestBody ApplyCrewReqDto reqDto,
+	public ResponseEntity<ApplyCrewResDto> applyCrew(@PathVariable("crewId") Long crewId,
+		@RequestBody ApplyCrewReqDto reqDto,
 		@AuthenticationPrincipal CustomOAuth2User principal) {
 		return ResponseEntity.ok(crewService.applyCrew(reqDto, crewId, principal.getName()));
 	}
