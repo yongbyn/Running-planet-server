@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
@@ -15,7 +16,6 @@ import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationF
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 import clofi.runningplanet.member.service.MemberService;
 import clofi.runningplanet.security.jwt.JWTFilter;
@@ -37,13 +37,13 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.csrf((auth) -> auth.disable());
+			.csrf(AbstractHttpConfigurer::disable);
 
 		http
-			.formLogin((auth) -> auth.disable());
+			.formLogin(AbstractHttpConfigurer::disable);
 
 		http
-			.httpBasic((auth) -> auth.disable());
+			.httpBasic(AbstractHttpConfigurer::disable);
 
 		// http
 		// 	.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
@@ -61,8 +61,8 @@ public class SecurityConfig {
 
 		//경로별 인가 작업
 		http
-			.authorizeRequests((auth) -> auth
-				.requestMatchers("/error", "/ws/**", "/h2-console/**","/oauth/**","/oauth2/**").permitAll()
+			.authorizeHttpRequests((auth) -> auth
+				.requestMatchers("/error", "/ws/**", "/h2-console/**").permitAll()
 				.anyRequest().authenticated());
 
 		http
@@ -78,24 +78,19 @@ public class SecurityConfig {
 
 		//CORS
 		http
-			.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+			.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
 
-				@Override
-				public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+				CorsConfiguration configuration = new CorsConfiguration();
 
-					CorsConfiguration configuration = new CorsConfiguration();
+				configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "https://runple.site/"));
+				configuration.setAllowedMethods(Collections.singletonList("*"));
+				configuration.setAllowCredentials(true);
+				configuration.setAllowedHeaders(Collections.singletonList("*"));
+				configuration.setMaxAge(3600L);
 
-					configuration.setAllowedOrigins(List.of("http://localhost:3000","http://localhost:5173"));
-					configuration.setAllowedMethods(Collections.singletonList("*"));
-					configuration.setAllowCredentials(true);
-					configuration.setAllowedHeaders(Collections.singletonList("*"));
-					configuration.setMaxAge(3600L);
+				configuration.setExposedHeaders(Collections.singletonList("Authorization"));
 
-					configuration.setExposedHeaders(List.of("Set-Cookie","Authorization"));
-
-
-					return configuration;
-				}
+				return configuration;
 			}));
 
 		return http.build();

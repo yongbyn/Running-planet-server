@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import clofi.runningplanet.security.jwt.JWTUtil;
 import clofi.runningplanet.security.jwt.JwtToken;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,22 +30,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		JwtToken jwt = jwtUtil.createJwt(userId, 60 * 60 * 60L * 1000);
 
-		response.addCookie(createCookie("Authorization", jwt.getAccessToken()));
-		response.sendRedirect("http://localhost:5173");
-
+		response.sendRedirect("http://localhost:5173/callback?Authorization=" + jwt.getAccessToken());
 	}
-
-	private Cookie createCookie(String key, String value) {
-
-		Cookie cookie = new Cookie(key, value);
-		cookie.setMaxAge(60*60*60);
-		cookie.setSecure(true);
-		cookie.setAttribute("SameSite","None");
-		cookie.setPath("/");
-		cookie.setHttpOnly(true);
-
-		return cookie;
-
-	}
-
 }
