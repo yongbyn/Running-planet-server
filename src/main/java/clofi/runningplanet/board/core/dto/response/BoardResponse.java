@@ -18,6 +18,7 @@ public class BoardResponse {
 	private Integer likeCnt;
 	private String content;
 	private List<ImageList> imageList;
+	
 	public BoardResponse(Board board, List<ImageList> boardImageList, int commentCnt, int likeCnt) {
 		this.id = board.getId();
 		this.title = board.getTitle();

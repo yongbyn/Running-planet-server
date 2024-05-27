@@ -5,6 +5,7 @@ import static clofi.runningplanet.crew.domain.Category.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,18 +16,37 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import clofi.runningplanet.common.exception.ConflictException;
+import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.domain.CrewMember;
+import clofi.runningplanet.crew.domain.Role;
 import clofi.runningplanet.crew.domain.Tag;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
-import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
+import clofi.runningplanet.member.domain.Gender;
+import clofi.runningplanet.member.domain.Member;
+import clofi.runningplanet.member.repository.MemberRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CrewServiceTest {
+
+	private static final Member MEMBER = Member.builder()
+		.id(1L)
+		.nickname("닉네임")
+		.age(20)
+		.gender(Gender.MALE)
+		.profileImg("https://image-url.com")
+		.avgDistance(10)
+		.totalDistance(100)
+		.runScore(50)
+		.build();
 
 	@Mock
 	private CrewRepository crewRepository;
@@ -34,45 +54,115 @@ class CrewServiceTest {
 	@Mock
 	private TagRepository tagRepository;
 
+	@Mock
+	private CrewMemberRepository crewMemberRepository;
+
+	@Mock
+	private MemberRepository memberRepository;
+
 	@InjectMocks
 	private CrewService crewService;
 
 	@DisplayName("크루 생성 성공")
 	@Test
 	void successCreateCrew() {
-		//given
-		final RuleDto rule = new RuleDto(
-			5,
-			100
-		);
+		// given
+		Long leaderId = 1L;
 
-		//todo 인증 기능 구현 완료 후 테스트 변경
+		RuleDto rule = new RuleDto(5, 100);
 
 		CreateCrewReqDto reqDto = new CreateCrewReqDto(
-			"구름 크루",
+			"크루명",
 			5,
 			50,
 			RUNNING,
 			List.of("성실"),
 			AUTO,
-			"구름 크루는 성실한 크루",
+			"크루를 소개하는 글",
 			rule
 		);
 
-		given(crewRepository.save(any()))
-			.willReturn(
-				new Crew(1L, null, null, 0,
-					0, null, null, null,
-					0, 0, 0, 0));
-		given(tagRepository.saveAll(anyList()))
-			.willReturn(null);
+		Crew crew = new Crew(
+			1L,
+			MEMBER.getId(),
+			"크루명",
+			5,
+			50,
+			RUNNING,
+			AUTO,
+			"크루를 소개하는 글",
+			5,
+			100,
+			0,
+			0
+		);
+
+		given(crewRepository.save(any(Crew.class))).willReturn(crew);
+		given(tagRepository.saveAll(anyList())).willReturn(Collections.emptyList());
+		given(crewMemberRepository.save(any(CrewMember.class))).willReturn(
+			new CrewMember(1L, crew, MEMBER, Role.LEADER));
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(MEMBER));
+		given(crewMemberRepository.existsByMemberId(anyLong()))
+			.willReturn(false);
+
+		// when
+		Long result = crewService.createCrew(reqDto, leaderId);
+
+		// then
+		assertThat(result).isEqualTo(1L);
+	}
+
+	@DisplayName("크루 생성시 등록되지 않은 사용자가 들어올 경우 예외 발생")
+	@Test
+	void failCreateCrewByNotFoundMember() {
+		//given
+		RuleDto rule = new RuleDto(5, 100);
+
+		CreateCrewReqDto reqDto = new CreateCrewReqDto(
+			"크루명",
+			5,
+			50,
+			RUNNING,
+			List.of("성실"),
+			AUTO,
+			"크루를 소개하는 글",
+			rule
+		);
+
+		given(memberRepository.findById(anyLong())).willReturn(Optional.empty());
 
 		//when
-		Long result = crewService.createCrew(reqDto);
-
 		//then
-		assertThat(result).isEqualTo(1L);
+		assertThatThrownBy(() -> crewService.createCrew(reqDto, MEMBER.getId()))
+			.isInstanceOf(NotFoundException.class);
+	}
 
+	@DisplayName("크루에 속해있는 사용자가 크루 생성시 예외 발생")
+	@Test
+	void test() {
+		//given
+		RuleDto rule = new RuleDto(5, 100);
+
+		CreateCrewReqDto reqDto = new CreateCrewReqDto(
+			"크루명",
+			5,
+			50,
+			RUNNING,
+			List.of("성실"),
+			AUTO,
+			"크루를 소개하는 글",
+			rule
+		);
+
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.ofNullable(MEMBER));
+		given(crewMemberRepository.existsByMemberId(anyLong()))
+			.willReturn(true);
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.createCrew(reqDto, MEMBER.getId()))
+			.isInstanceOf(ConflictException.class);
 	}
 
 	@DisplayName("크루 목록 조회 성공")
@@ -95,7 +185,6 @@ class CrewServiceTest {
 			.willReturn(List.of(
 				new Tag(2L, null, "최고")
 			));
-
 
 		//when
 		List<FindAllCrewResDto> result = crewService.findAllCrew();
@@ -137,7 +226,7 @@ class CrewServiceTest {
 				Optional.of(new Crew(1L, 1L, "구름 크루", 10, 50,
 					RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
 					0, 0))
-				);
+			);
 
 		given(tagRepository.findAllByCrewId(anyLong()))
 			.willReturn(List.of(
