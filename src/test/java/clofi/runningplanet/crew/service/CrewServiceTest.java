@@ -19,14 +19,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.domain.CrewApplication;
 import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.crew.domain.Role;
 import clofi.runningplanet.crew.domain.Tag;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
+import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.repository.CrewApplicationRepository;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
@@ -59,6 +63,9 @@ class CrewServiceTest {
 
 	@Mock
 	private MemberRepository memberRepository;
+
+	@Mock
+	private CrewApplicationRepository crewApplicationRepository;
 
 	@InjectMocks
 	private CrewService crewService;
@@ -312,5 +319,37 @@ class CrewServiceTest {
 		//then
 		assertThatThrownBy(() -> crewService.findCrew(crewId))
 			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("크루 신청 성공 테스트 코드")
+	@Test
+	void test1() {
+		//given
+		ApplyCrewReqDto reqDto = new ApplyCrewReqDto("크루 신청서");
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = new Crew(1L, 2L, "구름 크루", 10, 50,
+			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.of(MEMBER));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+		given(crewApplicationRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.empty());
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewApplicationRepository.save(any(CrewApplication.class)))
+			.willReturn(any());
+
+		//when
+		ApplyCrewResDto result = crewService.applyCrew(reqDto, crewId, memberId);
+
+		//then
+		ApplyCrewResDto applyCrewResDto = new ApplyCrewResDto(crewId, memberId, true);
+
+		assertThat(result).isEqualTo(applyCrewResDto);
 	}
 }
