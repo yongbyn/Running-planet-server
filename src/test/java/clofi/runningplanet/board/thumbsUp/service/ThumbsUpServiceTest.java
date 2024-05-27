@@ -49,7 +49,7 @@ class ThumbsUpServiceTest {
 		Member memberId = memberRepository.save(member);
 		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
-		Board boardInstance = new Board("테스트", "테스트", crew);
+		Board boardInstance = new Board("테스트", "테스트", crew, memberId);
 		Board board = boardRepository.save(boardInstance);
 		//when
 		thumbsUpService.createLike(crew.getId(), board.getId(), memberId.getId());
@@ -66,7 +66,7 @@ class ThumbsUpServiceTest {
 		Member memberId = memberRepository.save(member);
 		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
-		Board boardInstance = new Board("테스트", "테스트", crew);
+		Board boardInstance = new Board("테스트", "테스트", crew, memberId);
 		Board board = boardRepository.save(boardInstance);
 		ThumbsUp thumbsUp = new ThumbsUp(board, member);
 		thumbsUpRepository.save(thumbsUp);

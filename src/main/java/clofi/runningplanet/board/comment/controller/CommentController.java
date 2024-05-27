@@ -24,10 +24,10 @@ public class CommentController {
 		@PathVariable(value = "crewId") Long crewId,
 		@PathVariable(value = "boardId") Long boardId,
 		@RequestBody CreateCommentRequest createCommentRequest,
-		@AuthenticationPrincipal CustomOAuth2User user
+		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
-		String userName = user.getName();
+		Long memberId = customOAuth2User.getId();
 		return ResponseEntity.status(HttpStatus.CREATED)
-			.body(commentService.create(crewId, boardId, createCommentRequest, userName));
+			.body(commentService.create(crewId, boardId, createCommentRequest, memberId));
 	}
 }

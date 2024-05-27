@@ -6,15 +6,16 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
+import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
+import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
 import clofi.runningplanet.board.core.repository.BoardImageRepository;
 import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.board.core.service.S3StorageManagerUseCase;
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.BoardImage;
-import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
-import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
-import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
 import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.member.domain.Member;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -24,8 +25,9 @@ public class BoardFactory {
 	private final BoardImageRepository boardImageRepository;
 	private final S3StorageManagerUseCase s3StorageManagerUseCase;
 
-	public CreateBoardResponse insert(Crew crew, CreateBoardRequest createBoardRequest, List<String> imageUrlList) {
-		Board board = boardRepository.save(createBoardRequest.toBoard(crew));
+	public CreateBoardResponse insert(Crew crew, CreateBoardRequest createBoardRequest, List<String> imageUrlList,
+		Member member) {
+		Board board = boardRepository.save(createBoardRequest.toBoard(crew, member));
 		insertImage(board, imageUrlList);
 		return CreateBoardResponse.of(board);
 	}

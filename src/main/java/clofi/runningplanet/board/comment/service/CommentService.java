@@ -8,12 +8,9 @@ import clofi.runningplanet.board.comment.repository.CommentRepository;
 import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.Comment;
-import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.domain.Member;
-import clofi.runningplanet.member.dto.CustomOAuth2User;
 import clofi.runningplanet.member.repository.MemberRepository;
-import clofi.runningplanet.security.oauth2.CustomSuccessHandler;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,12 +22,13 @@ public class CommentService {
 	private final BoardRepository boardRepository;
 	private final MemberRepository memberRepository;
 
-	public Long create(Long crewId, Long boardId, CreateCommentRequest createCommentRequest, String customOAuth2User) {
+	public Long create(Long crewId, Long boardId, CreateCommentRequest createCommentRequest, Long memberId) {
 		crewRepository.findById(crewId).orElseThrow(() -> new IllegalArgumentException("크루가 존재하지 않습니다."));
 		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
-		Member member = memberRepository.findByNickname(customOAuth2User);
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("회원이 없습니다."));
 		Comment comment = commentRepository.save(createCommentRequest.toComment(board, member));
 		return comment.getId();
 	}

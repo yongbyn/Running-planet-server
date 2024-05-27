@@ -1,7 +1,5 @@
 package clofi.runningplanet.board.comment.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,25 +41,23 @@ class CommentServiceTest {
 		memberRepository.deleteAllInBatch();
 	}
 
-
 	@DisplayName("사용자는 댓글을 작성할 수 있다.")
 	@Test
-	void createCommentTest(){
-	    //given
-		Member member = new Member(1L, "테스트", Gender.MALE, 10, "테스트", 10, 10, 10, 10);
+	void createCommentTest() {
+		//given
+		Member member = new Member(null, "테스트", Gender.MALE, 10, "테스트", 10, 10, 10, 10);
 		memberRepository.save(member);
 		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
-		Board boardInstance = new Board("기존 게시글 제목", "기존 게시글 내용", crew);
+		Board boardInstance = new Board("기존 게시글 제목", "기존 게시글 내용", crew, member);
 		Board board = boardRepository.save(boardInstance);
 		CreateCommentRequest commentRequest = new CreateCommentRequest("댓글");
 		//when
-		Long comment = commentService.create(crew.getId(), board.getId(), commentRequest, member.getNickname());
+		Long comment = commentService.create(crew.getId(), board.getId(), commentRequest, member.getId());
 		Comment saveComment = commentRepository.findById(comment)
 			.orElseThrow(() -> new IllegalArgumentException("댓글이 없습니다."));
 		//then
 		Assertions.assertThat(saveComment.getContent()).isEqualTo("댓글");
-
-	  }
+	}
 
 }

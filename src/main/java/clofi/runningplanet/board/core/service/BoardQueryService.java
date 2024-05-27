@@ -16,6 +16,8 @@ import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.repository.CrewRepository;
+import clofi.runningplanet.member.domain.Member;
+import clofi.runningplanet.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -26,12 +28,14 @@ public class BoardQueryService {
 	private final BoardFactory boardFactory;
 	private final CrewRepository crewRepository;
 	private final BoardRepository boardRepository;
+	private final MemberRepository memberRepository;
 	private final S3StorageManagerUseCase storageManagerUseCase;
 
 	public CreateBoardResponse create(Long crewId, CreateBoardRequest createBoardRequest,
-		List<MultipartFile> imageFile) {
+		List<MultipartFile> imageFile, Long memberId) {
 
-		//TODO: 멤버
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("회원이 아닙니다."));
 		Crew crew = crewRepository.findById(crewId).orElseThrow(
 			() -> new IllegalArgumentException("크루가 존재하지 않습니다"));
 
@@ -40,14 +44,19 @@ public class BoardQueryService {
 			.map(storageManagerUseCase::uploadImages)
 			.orElseGet(ArrayList::new);
 
-		return boardFactory.insert(crew, createBoardRequest, imageUrlList);
+		return boardFactory.insert(crew, createBoardRequest, imageUrlList, member);
 	}
 
 	public CreateBoardResponse update(Long crewId, Long boardId, UpdateBoardRequest updateBoardRequest,
-		List<MultipartFile> imageFile) {
+		List<MultipartFile> imageFile, Long memberId) {
 		Crew crew = crewRepository.findById(crewId).orElseThrow(() -> new IllegalArgumentException("크루가 존재하지 않습니다."));
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+		if (board.getMember().getId() != member.getId()) {
+			throw new IllegalArgumentException("작성자가 아니여서 수정할 수 없습니다.");
+		}
 		boardFactory.update(crew, board, updateBoardRequest, imageFile);
 		return CreateBoardResponse.of(board);
 	}
