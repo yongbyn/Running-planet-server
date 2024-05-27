@@ -18,12 +18,11 @@ public class BoardResponse {
 	private Integer likeCnt;
 	private String content;
 	private List<ImageList> imageList;
-	
+
 	public BoardResponse(Board board, List<ImageList> boardImageList, int commentCnt, int likeCnt) {
 		this.id = board.getId();
 		this.title = board.getTitle();
-		this.author = "게시글 작성자";
-		// this.author = board.getMember().getNickname();
+		this.author = board.getMember().getNickname();
 		this.writtenDate = board.getCreatedAt().toLocalDate();
 		this.commentCnt = commentCnt;
 		this.likeCnt = likeCnt;

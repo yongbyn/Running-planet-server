@@ -19,7 +19,6 @@ import clofi.runningplanet.board.domain.ThumbsUp;
 import clofi.runningplanet.board.thumbsUp.repository.ThumbsUpRepository;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.repository.CrewRepository;
-import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -35,9 +34,9 @@ public class BoardReadService {
 	private final ThumbsUpRepository thumbsUpRepository;
 	private final MemberRepository memberRepository;
 
-	public List<BoardResponse> getBoardList(Long crewId) {
+	public List<BoardResponse> getBoardList(Long crewId, Long memberId) {
 		List<BoardResponse> boardResponses = new ArrayList<>();
-
+		memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 		Crew crew = crewRepository.findById(crewId)
 			.orElseThrow(() -> new IllegalArgumentException("크루가 존재하지 않습니다"));
 
@@ -52,11 +51,10 @@ public class BoardReadService {
 		return boardResponses;
 	}
 
-	public BoardDetailResponse getBoardDetail(Long crewId, Long boardId, String name) {
-		Member member = memberRepository.findByNickname(name);
-
+	public BoardDetailResponse getBoardDetail(Long crewId, Long boardId, Long memberId) {
+		memberRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("회원이 없습니다."));
 		crewRepository.findById(crewId).orElseThrow(() -> new IllegalArgumentException("크루가 존재하지 않습니다."));
-
 		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
 
