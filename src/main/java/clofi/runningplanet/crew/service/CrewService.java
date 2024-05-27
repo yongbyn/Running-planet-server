@@ -67,9 +67,9 @@ public class CrewService {
 	}
 
 	@Transactional
-	public ApplyCrewResDto applyCrew(ApplyCrewReqDto reqDto, Long crewId, String nickname) {
+	public ApplyCrewResDto applyCrew(ApplyCrewReqDto reqDto, Long crewId, Long memberId) {
 
-		Member findMember = memberRepository.findByNickname(nickname);
+		Member findMember = getMemberByMemberId(memberId);
 
 		validateMemberNotInCrew(findMember.getId());
 		validateCrewApplicationNotExist(crewId, findMember.getId());
@@ -89,13 +89,13 @@ public class CrewService {
 
 	private void validateCrewApplicationNotExist(Long crewId, Long memberId) {
 		if (crewApplicationRepository.findByCrewIdAndMemberId(crewId, memberId).isPresent()) {
-			throw new IllegalArgumentException("이미 신청한 크루입니다.");
+			throw new ConflictException("이미 신청한 크루입니다.");
 		}
 	}
 
 	private void validateMemberNotInCrew(Long memberId) {
 		if (crewMemberRepository.findByMemberId(memberId).isPresent()) {
-			throw new IllegalArgumentException("이미 크루에 소속되어 있습니다.");
+			throw new ConflictException("이미 크루에 소속되어 있습니다.");
 		}
 	}
 

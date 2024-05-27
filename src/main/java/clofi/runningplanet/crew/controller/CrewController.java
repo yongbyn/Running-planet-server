@@ -48,6 +48,6 @@ public class CrewController {
 	public ResponseEntity<ApplyCrewResDto> applyCrew(@PathVariable("crewId") Long crewId,
 		@RequestBody ApplyCrewReqDto reqDto,
 		@AuthenticationPrincipal CustomOAuth2User principal) {
-		return ResponseEntity.ok(crewService.applyCrew(reqDto, crewId, principal.getName()));
+		return ResponseEntity.ok(crewService.applyCrew(reqDto, crewId, principal.getId()));
 	}
 }
