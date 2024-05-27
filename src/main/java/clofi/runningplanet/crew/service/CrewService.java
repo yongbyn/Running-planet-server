@@ -139,8 +139,14 @@ public class CrewService {
 	}
 
 	private CrewLeaderDto findCrewLeader(Long leaderId) {
-		// todo member 기능 구현 후 로직 개선
-		return new CrewLeaderDto(leaderId, "임시 닉네임");
+		Member crewLeader = getMemberByMemberId(leaderId);
+		return new CrewLeaderDto(leaderId, crewLeader.getNickname());
+	}
+
+	private Member getMemberByMemberId(Long leaderId) {
+		return memberRepository.findById(leaderId).orElseThrow(
+			() -> new NotFoundException("크루장이 존재하지 않습니다.")
+		);
 	}
 
 	private List<String> findTagsToStrings(Long crewId) {
