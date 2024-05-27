@@ -16,6 +16,7 @@ import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
+import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
@@ -86,7 +87,7 @@ public class CrewService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<GetApplyCrewResDto> getApplyCrewList(Long crewId, Long memberId) {
+	public ApprovalMemberResDto getApplyCrewList(Long crewId, Long memberId) {
 		CrewMember findCrewMember = getCrewMemberByMemberId(memberId);
 
 		findCrewMember.validateMembership(crewId);
@@ -94,7 +95,8 @@ public class CrewService {
 		checkCrewExistById(crewId);
 
 		List<CrewApplication> crewApplicationList = crewApplicationRepository.findAllByCrewId(crewId);
-		return makeGetApplyDtoList(crewApplicationList);
+		List<GetApplyCrewResDto> getApplyCrewResDtos = makeGetApplyDtoList(crewApplicationList);
+		return new ApprovalMemberResDto(getApplyCrewResDtos);
 	}
 
 	private CrewMember getCrewMemberByMemberId(Long memberId) {

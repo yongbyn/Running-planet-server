@@ -29,6 +29,7 @@ import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
+import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
@@ -458,15 +459,17 @@ class CrewServiceTest {
 			.willReturn(List.of(crewApplication1, crewApplication2));
 
 		//when
-		List<GetApplyCrewResDto> result = crewService.getApplyCrewList(crewId, memberId);
+		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, memberId);
 
 		//then
 		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글1", 80, Gender.MALE, 30,
 			Approval.PENDING);
 		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글2", 70, Gender.FEMALE, 15,
 			Approval.PENDING);
+		ApprovalMemberResDto approvalMemberResDto = new ApprovalMemberResDto(
+			List.of(getApplyCrewResDto1, getApplyCrewResDto2));
 
-		assertThat(result).isEqualTo(List.of(getApplyCrewResDto1, getApplyCrewResDto2));
+		assertThat(result).isEqualTo(approvalMemberResDto);
 	}
 
 	@DisplayName("크루에 신청한 사람이 없는 경우 빈 리스트 반환")
@@ -489,10 +492,10 @@ class CrewServiceTest {
 			.willReturn(Collections.emptyList());
 
 		//when
-		List<GetApplyCrewResDto> result = crewService.getApplyCrewList(crewId, memberId);
+		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, memberId);
 
 		//then
-		assertThat(result).isEqualTo(Collections.emptyList());
+		assertThat(result).isEqualTo(new ApprovalMemberResDto(Collections.emptyList()));
 	}
 
 	@DisplayName("인증된 사용자가 아닌 경우 예외 발생")

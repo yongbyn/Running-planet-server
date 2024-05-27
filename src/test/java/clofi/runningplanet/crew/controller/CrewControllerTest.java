@@ -36,6 +36,7 @@ import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
+import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
@@ -207,9 +208,11 @@ class CrewControllerTest {
 			Approval.PENDING);
 		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글2", 70, Gender.FEMALE, 15,
 			Approval.PENDING);
+		ApprovalMemberResDto expected = new ApprovalMemberResDto(
+			List.of(getApplyCrewResDto1, getApplyCrewResDto2));
 
 		given(crewService.getApplyCrewList(anyLong(), anyLong()))
-			.willReturn(List.of(getApplyCrewResDto1, getApplyCrewResDto2));
+			.willReturn(expected);
 
 		//when
 		ResultActions resultActions = getApplyCrewList(crewId);
@@ -219,13 +222,13 @@ class CrewControllerTest {
 			.andExpect(status().isOk())
 			.andReturn();
 
-		List<GetApplyCrewResDto> resDto = objectMapper.readValue(
+		ApprovalMemberResDto resDto = objectMapper.readValue(
 			mvcResult.getResponse().getContentAsString(),
 			new TypeReference<>() {
 			}
 		);
 
-		assertThat(List.of(getApplyCrewResDto1, getApplyCrewResDto2)).isEqualTo(resDto);
+		assertThat(expected).isEqualTo(resDto);
 	}
 
 	private ResultActions createCrew(CreateCrewReqDto reqDto) throws Exception {
