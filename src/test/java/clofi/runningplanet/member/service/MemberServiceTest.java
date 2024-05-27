@@ -74,8 +74,8 @@ class MemberServiceTest {
 		Member member2 = memberRepository.save(createMember());
 
 		//when
-		ProfileResponse profileResponseWithCrew = memberService.getProfile(member1.getId()).getBody();
-		ProfileResponse profileResponseWithoutCrew = memberService.getProfile(member2.getId()).getBody();
+		ProfileResponse profileResponseWithCrew = memberService.getProfile(member1.getId());
+		ProfileResponse profileResponseWithoutCrew = memberService.getProfile(member2.getId());
 
 
 		//then
@@ -85,7 +85,7 @@ class MemberServiceTest {
 
 		assertNotNull(profileResponseWithoutCrew);
 		assertEquals(member2.getNickname(), profileResponseWithoutCrew.nickname());
-		assertEquals("없음", profileResponseWithoutCrew.myCrew());;
+		assertNull(profileResponseWithoutCrew.myCrew());;
 	}
 
 
