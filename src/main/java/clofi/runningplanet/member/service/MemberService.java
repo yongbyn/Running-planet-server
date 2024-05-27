@@ -92,11 +92,11 @@ public class MemberService extends DefaultOAuth2UserService {
 		}
 	}
 
-	public ResponseEntity<ProfileResponse> getProfile(Long memberId) {
+	public ProfileResponse getProfile(Long memberId) {
 		Member member = getMember(memberId);
 		CrewMember crewMember = getCrewMember(memberId);
 
-		return ResponseEntity.ok(new ProfileResponse(member,crewMember));
+		return new ProfileResponse(member, crewMember);
 	}
 
 	private Member getMember(Long memberId) {

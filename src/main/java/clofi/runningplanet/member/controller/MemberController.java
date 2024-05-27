@@ -18,7 +18,7 @@ public class MemberController {
 	@GetMapping("/api/profile/{memberId}")
 	public ResponseEntity<ProfileResponse> getProfile(@PathVariable("memberId") Long memberId) {
 
-		return memberService.getProfile(memberId);
+		return ResponseEntity.ok(memberService.getProfile(memberId));
 	}
 
 }
