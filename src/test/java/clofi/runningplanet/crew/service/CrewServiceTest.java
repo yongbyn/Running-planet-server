@@ -469,6 +469,32 @@ class CrewServiceTest {
 		assertThat(result).isEqualTo(List.of(getApplyCrewResDto1, getApplyCrewResDto2));
 	}
 
+	@DisplayName("크루에 신청한 사람이 없는 경우 빈 리스트 반환")
+	@Test
+	void successGetApplyEmptyList() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewApplicationRepository.findAllByCrewId(anyLong()))
+			.willReturn(Collections.emptyList());
+
+		//when
+		List<GetApplyCrewResDto> result = crewService.getApplyCrewList(crewId, memberId);
+
+		//then
+		assertThat(result).isEqualTo(Collections.emptyList());
+	}
+
 	@DisplayName("인증된 사용자가 아닌 경우 예외 발생")
 	@Test
 	void failGetApplyListByNotFoundMember() {
