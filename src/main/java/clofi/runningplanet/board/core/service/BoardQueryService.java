@@ -44,14 +44,19 @@ public class BoardQueryService {
 			.map(storageManagerUseCase::uploadImages)
 			.orElseGet(ArrayList::new);
 
-		return boardFactory.insert(crew, createBoardRequest, imageUrlList);
+		return boardFactory.insert(crew, createBoardRequest, imageUrlList, member);
 	}
 
 	public CreateBoardResponse update(Long crewId, Long boardId, UpdateBoardRequest updateBoardRequest,
-		List<MultipartFile> imageFile) {
+		List<MultipartFile> imageFile, Long memberId) {
 		Crew crew = crewRepository.findById(crewId).orElseThrow(() -> new IllegalArgumentException("크루가 존재하지 않습니다."));
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
 		Board board = boardRepository.findById(boardId)
 			.orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+		if (board.getMember().getId() != member.getId()) {
+			throw new IllegalArgumentException("작성자가 아니여서 수정할 수 없습니다.");
+		}
 		boardFactory.update(crew, board, updateBoardRequest, imageFile);
 		return CreateBoardResponse.of(board);
 	}

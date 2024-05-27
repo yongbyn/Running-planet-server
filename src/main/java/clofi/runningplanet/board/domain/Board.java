@@ -33,9 +33,9 @@ public class Board extends BaseSoftDeleteEntity {
 	@JoinColumn(name = "crew_id", nullable = false)
 	private Crew crew;
 
-	/*@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id", nullable = false)
-	private Member member;*/
+	private Member member;
 
 	@Column(name = "title", nullable = false)
 	private String title;
@@ -43,10 +43,11 @@ public class Board extends BaseSoftDeleteEntity {
 	@Column(name = "content", columnDefinition = "TEXT")
 	private String content;
 
-	public Board(String title, String content, Crew crew) {
+	public Board(String title, String content, Crew crew, Member member) {
 		this.title = title;
 		this.content = content;
 		this.crew = crew;
+		this.member = member;
 	}
 
 	public void updateBoard(String title, String content) {

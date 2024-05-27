@@ -48,7 +48,8 @@ public class BoardController {
 		@PathVariable(value = "crewId") Long crewId,
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
-		return ResponseEntity.ok(boardReadService.getBoardList(crewId));
+		Long memberId = customOAuth2User.getId();
+		return ResponseEntity.ok(boardReadService.getBoardList(crewId, memberId));
 	}
 
 	@GetMapping("/api/crew/{crewId}/board/{boardId}")
@@ -57,9 +58,9 @@ public class BoardController {
 		@PathVariable(value = "boardId") Long boardId,
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
-		String name = customOAuth2User.getName();
+		Long memberId = customOAuth2User.getId();
 
-		return ResponseEntity.ok(boardReadService.getBoardDetail(crewId, boardId, name));
+		return ResponseEntity.ok(boardReadService.getBoardDetail(crewId, boardId, memberId));
 	}
 
 	@PatchMapping("/api/crew/{crewId}/board/{boardId}")
@@ -67,9 +68,11 @@ public class BoardController {
 		@PathVariable(value = "crewId") Long crewId,
 		@PathVariable(value = "boardId") Long boardId,
 		@RequestPart(value = "createBoard") @Valid UpdateBoardRequest updateBoardRequest,
-		@RequestPart(value = "imageFile") List<MultipartFile> imageFile
+		@RequestPart(value = "imageFile") List<MultipartFile> imageFile,
+		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
+		Long memberId = customOAuth2User.getId();
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(boardQueryService.update(crewId, boardId, updateBoardRequest, imageFile));
+			.body(boardQueryService.update(crewId, boardId, updateBoardRequest, imageFile, memberId));
 	}
 }
