@@ -17,7 +17,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -50,5 +49,14 @@ public class CrewMember extends BaseSoftDeleteEntity {
 		this.crew = crew;
 		this.member = member;
 		this.role = role;
+	}
+
+
+	public static CrewMember createLeader(Crew crew, Member member) {
+		return new CrewMember(null, crew, member, Role.LEADER);
+	}
+
+	public static CrewMember of(Crew crew, Member member, Role role) {
+		return new CrewMember(null, crew, member, role);
 	}
 }

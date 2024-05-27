@@ -61,17 +61,11 @@ public class Crew extends BaseSoftDeleteEntity {
 	@Column(name = "total_distance", nullable = false)
 	private int totalDistance;
 
-	public Crew(Long leaderId, String crewName, int limitMemberCnt, int limitRunScore, Category category, ApprovalType approvalType,
+	public Crew(Long leaderId, String crewName, int limitMemberCnt, int limitRunScore, Category category,
+		ApprovalType approvalType,
 		String introduction, int ruleRunCnt, int ruleDistance) {
-		this.leaderId = leaderId;
-		this.crewName = crewName;
-		this.limitMemberCnt = limitMemberCnt;
-		this.limitRunScore = limitRunScore;
-		this.category = category;
-		this.approvalType = approvalType;
-		this.introduction = introduction;
-		this.ruleRunCnt = ruleRunCnt;
-		this.ruleDistance = ruleDistance;
+		this(null, leaderId, crewName, limitMemberCnt, limitRunScore, category, approvalType, introduction, ruleRunCnt,
+			ruleDistance, 0, 0);
 	}
 
 	public Crew(Long id, Long leaderId, String crewName, int limitMemberCnt, int limitRunScore, Category category,
