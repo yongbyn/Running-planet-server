@@ -468,4 +468,20 @@ class CrewServiceTest {
 
 		assertThat(result).isEqualTo(List.of(getApplyCrewResDto1, getApplyCrewResDto2));
 	}
+
+	@DisplayName("인증된 사용자가 아닌 경우 예외 발생")
+	@Test
+	void failGetApplyList() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.getApplyCrewList(crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
 }
