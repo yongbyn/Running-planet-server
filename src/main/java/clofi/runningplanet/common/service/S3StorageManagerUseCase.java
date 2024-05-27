@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.core.service;
+package clofi.runningplanet.common.service;
 
 import java.util.List;
 

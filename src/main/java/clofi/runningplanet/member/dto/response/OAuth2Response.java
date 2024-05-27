@@ -1,4 +1,4 @@
-package clofi.runningplanet.member.dto;
+package clofi.runningplanet.member.dto.response;
 
 public interface OAuth2Response {
 

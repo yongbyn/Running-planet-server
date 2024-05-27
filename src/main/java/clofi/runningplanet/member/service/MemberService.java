@@ -1,8 +1,8 @@
 package clofi.runningplanet.member.service;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -10,16 +10,20 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.domain.OAuthType;
 import clofi.runningplanet.member.domain.SocialLogin;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
-import clofi.runningplanet.member.dto.KakaoResponse;
-import clofi.runningplanet.member.dto.OAuth2Response;
-import clofi.runningplanet.member.dto.ProfileResponse;
+import clofi.runningplanet.member.dto.request.UpdateProfileRequest;
+import clofi.runningplanet.member.dto.response.KakaoResponse;
+import clofi.runningplanet.member.dto.response.OAuth2Response;
+import clofi.runningplanet.member.dto.response.ProfileResponse;
+import clofi.runningplanet.member.dto.response.UpdateProfileResponse;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.member.repository.SocialLoginRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +38,7 @@ public class MemberService extends DefaultOAuth2UserService {
 	private final MemberRepository memberRepository;
 	private final CrewMemberRepository crewMemberRepository;
 	private final SocialLoginRepository socialLoginRepository;
+	private final S3StorageManagerUseCase s3StorageManagerUseCase;;
 
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -99,6 +104,23 @@ public class MemberService extends DefaultOAuth2UserService {
 		return new ProfileResponse(member, crewMember);
 	}
 
+	public UpdateProfileResponse updateProfile(Long memberId, UpdateProfileRequest request, MultipartFile imageFile) {
+		Member member = getMember(memberId);
+
+		s3StorageManagerUseCase.deleteImages(member.getProfileImg());
+
+		List<String> updatedProfileImageUrl = s3StorageManagerUseCase.uploadImages(Collections.singletonList(imageFile));
+
+		member.update(request.nickname(), updatedProfileImageUrl.getFirst());
+
+		memberRepository.save(member);
+
+		return new UpdateProfileResponse(member.getNickname(), updatedProfileImageUrl.getFirst());
+
+	}
+
+
+
 	private Member getMember(Long memberId) {
 		return memberRepository.findById(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
@@ -108,5 +130,6 @@ public class MemberService extends DefaultOAuth2UserService {
 		return crewMemberRepository.findByMemberId(memberId)
 			.orElse(null);
 	}
+
 
 }

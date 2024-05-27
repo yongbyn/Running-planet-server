@@ -1,11 +1,11 @@
-package clofi.runningplanet.board.core.factory.fake;
+package clofi.runningplanet.common;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import clofi.runningplanet.board.core.service.S3StorageManagerUseCase;
+import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 
 public class FakeS3StorageManager implements S3StorageManagerUseCase {
 	@Override

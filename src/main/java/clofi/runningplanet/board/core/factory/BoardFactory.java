@@ -11,7 +11,7 @@ import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
 import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
 import clofi.runningplanet.board.core.repository.BoardImageRepository;
 import clofi.runningplanet.board.core.repository.BoardRepository;
-import clofi.runningplanet.board.core.service.S3StorageManagerUseCase;
+import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.BoardImage;
 import clofi.runningplanet.crew.domain.Crew;

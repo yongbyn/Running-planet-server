@@ -1,4 +1,4 @@
-package clofi.runningplanet.board.core.service;
+package clofi.runningplanet.common.service;
 
 import java.io.IOException;
 import java.util.List;
@@ -64,4 +64,6 @@ public class S3StorageManagerService implements S3StorageManagerUseCase{
 
 		return UUID.randomUUID() + "-" + originalFilename;
 	}
+
+
 }

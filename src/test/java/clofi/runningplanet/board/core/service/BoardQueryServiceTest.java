@@ -19,7 +19,7 @@ import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
 import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
 import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
 import clofi.runningplanet.board.core.factory.BoardFactory;
-import clofi.runningplanet.board.core.factory.fake.FakeS3StorageManager;
+import clofi.runningplanet.common.FakeS3StorageManager;
 import clofi.runningplanet.board.core.repository.BoardImageRepository;
 import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.board.domain.Board;
