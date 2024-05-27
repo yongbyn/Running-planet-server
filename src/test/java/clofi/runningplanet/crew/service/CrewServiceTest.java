@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
+import clofi.runningplanet.crew.domain.Approval;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.CrewApplication;
 import clofi.runningplanet.crew.domain.CrewMember;
@@ -30,6 +31,7 @@ import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
 import clofi.runningplanet.crew.repository.CrewApplicationRepository;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
@@ -410,5 +412,60 @@ class CrewServiceTest {
 		//then
 		assertThatThrownBy(() -> crewService.applyCrew(reqDto, crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("크루 신청 목록 조회 성공")
+	@Test
+	void successGetApplyList() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+
+		Member member1 = Member.builder()
+			.id(2L)
+			.nickname("닉네임1")
+			.age(30)
+			.gender(Gender.MALE)
+			.profileImg("https://image-url1.com")
+			.avgDistance(50)
+			.totalDistance(2000)
+			.runScore(80)
+			.build();
+		Member member2 = Member.builder()
+			.id(3L)
+			.nickname("닉네임2")
+			.age(15)
+			.gender(Gender.FEMALE)
+			.profileImg("https://image-url2.com")
+			.avgDistance(5)
+			.totalDistance(20)
+			.runScore(70)
+			.build();
+
+		CrewApplication crewApplication1 = new CrewApplication(1L, "크루 신청글1", Approval.PENDING, crew, member1);
+		CrewApplication crewApplication2 = new CrewApplication(2L, "크루 신청글2", Approval.PENDING, crew, member2);
+
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewApplicationRepository.findAllByCrewId(anyLong()))
+			.willReturn(List.of(crewApplication1, crewApplication2));
+
+		//when
+		List<GetApplyCrewResDto> result = crewService.getApplyCrewList(crewId, memberId);
+
+		//then
+		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글1", 80, Gender.MALE, 30,
+			Approval.PENDING);
+		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글2", 70, Gender.FEMALE, 15,
+			Approval.PENDING);
+
+		assertThat(result).isEqualTo(List.of(getApplyCrewResDto1, getApplyCrewResDto2));
 	}
 }

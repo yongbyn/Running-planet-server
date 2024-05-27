@@ -65,7 +65,7 @@ public class CrewMember extends BaseSoftDeleteEntity {
 	}
 
 	public void validateMembership(Long crewId) {
-		if (this.crew.getId().equals(crewId)) {
+		if (!this.crew.getId().equals(crewId)) {
 			throw new IllegalArgumentException("크루에 속해있는 사용자만 이용할 수 있습니다.");
 		}
 	}
