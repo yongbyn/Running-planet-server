@@ -169,34 +169,35 @@ class CrewServiceTest {
 	@Test
 	void successFindAllCrew() {
 		//given
+		Crew crew1 = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+		Crew crew2 = new Crew(2L, 2L, "클로피 크루", 8, 90,
+			RUNNING, MANUAL, "클로피 크루는 최고의 크루", 7, 500,
+			1000, 3000);
+
 		given(crewRepository.findAll())
-			.willReturn(List.of(
-				new Crew(1L, 1L, "구름 크루", 10, 50,
-					RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
-					0, 0),
-				new Crew(2L, 2L, "클로피 크루", 8, 90,
-					RUNNING, MANUAL, "클로피 크루는 최고의 크루", 7, 500,
-					1000, 3000)));
+			.willReturn(List.of(crew1, crew2));
 
 		given(tagRepository.findAllByCrewId(anyLong()))
 			.willReturn(List.of(
-				new Tag(1L, null, "성실")
+				new Tag(1L, crew1, "성실")
 			))
 			.willReturn(List.of(
-				new Tag(2L, null, "최고")
+				new Tag(2L, crew2, "최고")
 			));
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.of(MEMBER));
 
 		//when
 		List<FindAllCrewResDto> result = crewService.findAllCrew();
 
 		//then
-		final FindAllCrewResDto firstFindAllCrewResDto = FindAllCrewResDto.of(new Crew(1L, 1L, "구름 크루", 10, 50,
-			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
-			0, 0), List.of("성실"), new CrewLeaderDto(1L, "임시 닉네임"));
+		final FindAllCrewResDto firstFindAllCrewResDto = FindAllCrewResDto.of(crew1, List.of("성실"),
+			new CrewLeaderDto(1L, "닉네임"));
 
-		final FindAllCrewResDto secondFindAllCrewResDto = FindAllCrewResDto.of(new Crew(2L, 2L, "클로피 크루", 8, 90,
-			RUNNING, MANUAL, "클로피 크루는 최고의 크루", 7, 500,
-			1000, 3000), List.of("최고"), new CrewLeaderDto(2L, "임시 닉네임"));
+		final FindAllCrewResDto secondFindAllCrewResDto = FindAllCrewResDto.of(crew2, List.of("최고"),
+			new CrewLeaderDto(2L, "닉네임"));
 
 		final List<FindAllCrewResDto> expect = List.of(firstFindAllCrewResDto, secondFindAllCrewResDto);
 
@@ -217,30 +218,99 @@ class CrewServiceTest {
 		assertThat(result).isEmpty();
 	}
 
+	@DisplayName("크루장이 실제 사용자가 아닌 경우 예외 발생")
+	@Test
+	void failEmptyCrew() {
+		//given
+		Crew crew1 = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+
+		given(crewRepository.findAll())
+			.willReturn(List.of(crew1));
+
+		given(tagRepository.findAllByCrewId(anyLong()))
+			.willReturn(List.of(
+				new Tag(1L, crew1, "성실")
+			));
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.findAllCrew())
+			.isInstanceOf(NotFoundException.class);
+	}
+
 	@DisplayName("크루 상세 조회 성공")
 	@Test
 	void successFindCrew() {
 		//given
+		Long crewId = 1L;
+
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+
 		given(crewRepository.findById(anyLong()))
-			.willReturn(
-				Optional.of(new Crew(1L, 1L, "구름 크루", 10, 50,
-					RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
-					0, 0))
-			);
+			.willReturn(Optional.of(crew));
 
 		given(tagRepository.findAllByCrewId(anyLong()))
 			.willReturn(List.of(
 				new Tag(1L, null, "성실")
 			));
 
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.of(MEMBER));
+
 		//when
-		FindCrewResDto result = crewService.findCrew(1L);
+		FindCrewResDto result = crewService.findCrew(crewId);
 
 		//then
-		final FindCrewResDto findCrewResDto = FindCrewResDto.of(new Crew(1L, 1L, "구름 크루", 10, 50,
-			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
-			0, 0), new CrewLeaderDto(1L, "임시 닉네임"), List.of("성실"));
+		final FindCrewResDto findCrewResDto = FindCrewResDto.of(crew, new CrewLeaderDto(1L, "닉네임"), List.of("성실"));
 
 		assertThat(result).isEqualTo(findCrewResDto);
+	}
+
+	@DisplayName("상세 조회한 크루가 없는 경우 예외 발생")
+	@Test
+	void failFindCrewByNotFoundCrew() {
+		//given
+		Long crewId = 10L;
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.findCrew(crewId))
+			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("상세 조회한 크루장이 실제 사용자가 아닌 경우 예외 발생")
+	@Test
+	void failFindCrewByNotFoundLeader() {
+		//given
+		Long crewId = 1L;
+
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+
+		given(tagRepository.findAllByCrewId(anyLong()))
+			.willReturn(List.of(
+				new Tag(1L, null, "성실")
+			));
+
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.findCrew(crewId))
+			.isInstanceOf(NotFoundException.class);
 	}
 }

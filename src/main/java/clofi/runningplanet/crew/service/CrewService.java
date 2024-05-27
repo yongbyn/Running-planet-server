@@ -61,9 +61,7 @@ public class CrewService {
 		Crew findCrew = getByCrewId(crewId);
 
 		List<String> tags = findTagsToStrings(findCrew.getId());
-
-		//todo member 기능 구현 후 로직 개선
-		CrewLeaderDto crewLeader = findCrewLeader(1L);
+		CrewLeaderDto crewLeader = convertCrewLeaderDto(findCrew.getLeaderId());
 
 		return FindCrewResDto.of(findCrew, crewLeader, tags);
 	}
@@ -134,13 +132,13 @@ public class CrewService {
 
 	private FindAllCrewResDto convertToFindAllCrewResDto(Crew crew) {
 		List<String> tags = findTagsToStrings(crew.getId());
-		CrewLeaderDto crewLeaderDto = findCrewLeader(crew.getLeaderId());
+		CrewLeaderDto crewLeaderDto = convertCrewLeaderDto(crew.getLeaderId());
 		return FindAllCrewResDto.of(crew, tags, crewLeaderDto);
 	}
 
-	private CrewLeaderDto findCrewLeader(Long leaderId) {
-		// todo member 기능 구현 후 로직 개선
-		return new CrewLeaderDto(leaderId, "임시 닉네임");
+	private CrewLeaderDto convertCrewLeaderDto(Long leaderId) {
+		Member crewLeader = getMemberByMemberId(leaderId);
+		return new CrewLeaderDto(leaderId, crewLeader.getNickname());
 	}
 
 	private List<String> findTagsToStrings(Long crewId) {
