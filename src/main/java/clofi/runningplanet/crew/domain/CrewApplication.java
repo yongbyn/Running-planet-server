@@ -53,4 +53,10 @@ public class CrewApplication extends BaseSoftDeleteEntity {
 	public CrewApplication(String introduction, Crew crew, Member member) {
 		this(null, introduction, Approval.PENDING, crew, member);
 	}
+
+	public void checkDuplicateApply() {
+		if (this.approval == Approval.PENDING) {
+			throw new IllegalArgumentException("이미 신청한 크루입니다.");
+		}
+	}
 }

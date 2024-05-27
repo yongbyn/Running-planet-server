@@ -1,6 +1,7 @@
 package clofi.runningplanet.crew.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +73,7 @@ public class CrewService {
 		Member findMember = getMemberByMemberId(memberId);
 
 		validateMemberNotInCrew(findMember.getId());
-		validateCrewApplicationNotExist(crewId, findMember.getId());
+		validateDuplicateApply(crewId, findMember.getId());
 
 		Crew findCrew = getByCrewId(crewId);
 
@@ -89,16 +90,16 @@ public class CrewService {
 		);
 	}
 
-	private void validateCrewApplicationNotExist(Long crewId, Long memberId) {
-		if (crewApplicationRepository.findByCrewIdAndMemberId(crewId, memberId).isPresent()) {
-			throw new ConflictException("이미 신청한 크루입니다.");
-		}
+	private void validateDuplicateApply(Long crewId, Long memberId) {
+		Optional<CrewApplication> crewApplicationOpt = crewApplicationRepository.findByCrewIdAndMemberId(crewId,
+			memberId);
+		crewApplicationOpt.ifPresent(CrewApplication::checkDuplicateApply);
 	}
 
 	private void validateMemberNotInCrew(Long memberId) {
-		if (crewMemberRepository.findByMemberId(memberId).isPresent()) {
+		crewMemberRepository.findByMemberId(memberId).ifPresent(crewMember -> {
 			throw new ConflictException("이미 크루에 소속되어 있습니다.");
-		}
+		});
 	}
 
 	private void createAndSaveCrewMember(Crew savedCrew, Member findMember) {
