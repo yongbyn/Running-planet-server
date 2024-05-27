@@ -52,7 +52,6 @@ public class CrewMember extends BaseSoftDeleteEntity {
 		this.role = role;
 	}
 
-
 	public static CrewMember createLeader(Crew crew, Member member) {
 		return new CrewMember(null, crew, member, Role.LEADER);
 	}
@@ -63,5 +62,17 @@ public class CrewMember extends BaseSoftDeleteEntity {
 
 	public boolean isLeader() {
 		return role == Role.LEADER;
+	}
+
+	public void validateMembership(Long crewId) {
+		if (this.crew.getId().equals(crewId)) {
+			throw new IllegalArgumentException("크루에 속해있는 사용자만 이용할 수 있습니다.");
+		}
+	}
+
+	public void checkLeaderPrivilege() {
+		if (!isLeader()) {
+			throw new IllegalArgumentException("리더만 사용할 수 있는 기능입니다.");
+		}
 	}
 }

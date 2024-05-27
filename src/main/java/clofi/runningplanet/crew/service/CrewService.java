@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import clofi.runningplanet.common.exception.ConflictException;
-import clofi.runningplanet.common.exception.ForbiddenException;
 import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.CrewApplication;
@@ -89,7 +88,9 @@ public class CrewService {
 	@Transactional(readOnly = true)
 	public List<GetApplyCrewResDto> getApplyCrewList(Long crewId, Long memberId) {
 		CrewMember findCrewMember = getCrewMemberByMemberId(memberId);
-		handleAccessLeader(findCrewMember);
+
+		findCrewMember.validateMembership(crewId);
+		findCrewMember.checkLeaderPrivilege();
 		checkCrewExistById(crewId);
 
 		List<CrewApplication> crewApplicationList = crewApplicationRepository.findAllByCrewId(crewId);
@@ -105,12 +106,6 @@ public class CrewService {
 	private void checkCrewExistById(Long crewId) {
 		if (!crewRepository.existsById(crewId)) {
 			throw new NotFoundException("크루가 존재하지 않습니다.");
-		}
-	}
-
-	private static void handleAccessLeader(CrewMember crewMember) {
-		if (crewMember.isLeader()) {
-			throw new ForbiddenException("크루장만 사용할 수 있는 기능입니다.");
 		}
 	}
 
