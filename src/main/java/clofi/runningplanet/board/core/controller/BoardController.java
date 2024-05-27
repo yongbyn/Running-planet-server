@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
 import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
 import clofi.runningplanet.board.core.dto.response.BoardDetailResponse;
 import clofi.runningplanet.board.core.dto.response.BoardResponse;
 import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
-import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
-import clofi.runningplanet.board.core.service.BoardReadService;
 import clofi.runningplanet.board.core.service.BoardQueryService;
+import clofi.runningplanet.board.core.service.BoardReadService;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +35,12 @@ public class BoardController {
 	private ResponseEntity<CreateBoardResponse> create(
 		@PathVariable(value = "crewId") Long crewId,
 		@RequestPart(value = "createBoard") @Valid CreateBoardRequest createBoardRequest,
-		@RequestPart(value = "imageFile") List<MultipartFile> imageFile
+		@RequestPart(value = "imageFile") List<MultipartFile> imageFile,
+		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
+		Long memberId = customOAuth2User.getId();
 		return ResponseEntity.status(HttpStatus.CREATED)
-			.body(boardQueryService.create(crewId, createBoardRequest, imageFile));
+			.body(boardQueryService.create(crewId, createBoardRequest, imageFile, memberId));
 	}
 
 	@GetMapping("/api/crew/{crewId}/board")
