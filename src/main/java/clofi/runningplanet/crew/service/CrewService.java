@@ -143,12 +143,6 @@ public class CrewService {
 		return new CrewLeaderDto(leaderId, crewLeader.getNickname());
 	}
 
-	private Member getMemberByMemberId(Long leaderId) {
-		return memberRepository.findById(leaderId).orElseThrow(
-			() -> new NotFoundException("크루장이 존재하지 않습니다.")
-		);
-	}
-
 	private List<String> findTagsToStrings(Long crewId) {
 		return tagRepository.findAllByCrewId(crewId).stream()
 			.map(Tag::getContent)
