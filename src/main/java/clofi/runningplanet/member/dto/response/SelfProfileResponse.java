@@ -46,6 +46,6 @@ public record SelfProfileResponse(
 	private static AvgPace calculateAvgPace(int totalSec) {
 		int min = totalSec / 60;
 		int sec = totalSec % 60;
-		return new SelfProfileResponse.AvgPace(min, sec);
+		return new AvgPace(min, sec);
 	}
 }
