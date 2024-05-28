@@ -17,7 +17,7 @@ public record SelfProfileResponse(
 
 	Integer runScore,
 
-	ProfileResponse.AvgPace avgPace,
+	SelfProfileResponse.AvgPace avgPace,
 
 	Integer avgDistance,
 
@@ -43,9 +43,9 @@ public record SelfProfileResponse(
 	) {
 	}
 
-	private static ProfileResponse.AvgPace calculateAvgPace(int totalSec) {
+	private static SelfProfileResponse.AvgPace calculateAvgPace(int totalSec) {
 		int min = totalSec / 60;
 		int sec = totalSec % 60;
-		return new ProfileResponse.AvgPace(min, sec);
+		return new SelfProfileResponse.AvgPace(min, sec);
 	}
 }
