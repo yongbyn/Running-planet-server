@@ -137,7 +137,7 @@ class MemberServiceTest {
 		assertThat(profileResponseWithCrew).isNotNull();
 		assertThat(profileResponseWithCrew.nickname()).isEqualTo(member1.getNickname());
 		assertThat(profileResponseWithCrew.myCrew()).isEqualTo("고구마크루");
-		assertThat(profileResponseWithCrew.myCrewId()).isEqualTo(crewMember1.getId());
+		assertThat(profileResponseWithCrew.myCrewId()).isEqualTo(crewMember1.getCrew().getId());
 
 		assertThat(profileResponseWithoutCrew).isNotNull();
 		assertThat(profileResponseWithoutCrew.nickname()).isEqualTo(member2.getNickname());
