@@ -4,12 +4,14 @@ import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.member.domain.Gender;
 import clofi.runningplanet.member.domain.Member;
 
-public record ProfileResponse(
+public record SelfProfileResponse(
 	String nickname,
 
 	Gender gender,
 
 	Integer age,
+
+	Integer weight,
 
 	String profileImg,
 
@@ -21,12 +23,17 @@ public record ProfileResponse(
 
 	int totalDistance,
 
-	String myCrew
+	String myCrew,
+
+	Long myCrewId
 ) {
-	public ProfileResponse(Member member, CrewMember crewMember) {
-		this(member.getNickname(), member.getGender(), member.getAge(), member.getProfileImg(), member.getRunScore(),
+	public SelfProfileResponse(Member member, CrewMember crewMember) {
+		this(member.getNickname(), member.getGender(), member.getAge(), member.getWeight(), member.getProfileImg(),
+			member.getRunScore(),
 			calculateAvgPace(member.getAvgPace())
-			, member.getAvgDistance(), member.getTotalDistance(), crewMember != null? crewMember.getCrew().getCrewName() : null);
+			, member.getAvgDistance(), member.getTotalDistance(),
+			crewMember != null ? crewMember.getCrew().getCrewName() : null,
+			(crewMember != null && crewMember.getId() != null) ? crewMember.getId() : null);
 	}
 
 	public record AvgPace(

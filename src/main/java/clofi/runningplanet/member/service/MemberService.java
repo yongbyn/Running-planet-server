@@ -23,6 +23,7 @@ import clofi.runningplanet.member.dto.request.UpdateProfileRequest;
 import clofi.runningplanet.member.dto.response.KakaoResponse;
 import clofi.runningplanet.member.dto.response.OAuth2Response;
 import clofi.runningplanet.member.dto.response.ProfileResponse;
+import clofi.runningplanet.member.dto.response.SelfProfileResponse;
 import clofi.runningplanet.member.dto.response.UpdateProfileResponse;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.member.repository.SocialLoginRepository;
@@ -102,6 +103,13 @@ public class MemberService extends DefaultOAuth2UserService {
 		CrewMember crewMember = getCrewMember(memberId);
 
 		return new ProfileResponse(member, crewMember);
+	}
+
+	public SelfProfileResponse getSelfProfile(Long memberId) {
+		Member member = getMember(memberId);
+		CrewMember crewMember = getCrewMember(memberId);
+
+		return new SelfProfileResponse(member, crewMember);
 	}
 
 	public UpdateProfileResponse updateProfile(Long memberId, UpdateProfileRequest request, MultipartFile imageFile) {
