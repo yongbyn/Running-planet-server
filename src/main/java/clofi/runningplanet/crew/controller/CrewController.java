@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,6 +65,13 @@ public class CrewController {
 	public ResponseEntity<Void> proceedApplyCrew(@PathVariable("crewId") Long crewId,
 		@RequestBody ProceedApplyReqDto reqDto, @AuthenticationPrincipal CustomOAuth2User principal) {
 		crewService.proceedApplyCrew(reqDto, crewId, principal.getId());
+		return ResponseEntity.ok().build();
+	}
+
+	@DeleteMapping("/api/crew/{crewId}/{memberId}")
+	public ResponseEntity<Void> removeCrewMember(@PathVariable("crewId") Long crewId,
+		@PathVariable("memberId") Long memberId, @AuthenticationPrincipal CustomOAuth2User principal) {
+		crewService.removeCrewMember(crewId, memberId, principal.getId());
 		return ResponseEntity.ok().build();
 	}
 }
