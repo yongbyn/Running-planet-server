@@ -17,4 +17,6 @@ public interface CrewMemberRepository extends JpaRepository<CrewMember, Long> {
 	List<CrewMember> findByCrewId(Long crewId);
 
 	int countByCrewId(Long id);
+
+	Optional<CrewMember> findByCrewIdAndMemberId(Long crewId, Long memberId);
 }

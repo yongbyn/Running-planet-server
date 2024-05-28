@@ -253,6 +253,27 @@ class CrewControllerTest {
 			.andReturn();
 	}
 
+	@DisplayName("크루원 강퇴 성공")
+	@WithMockCustomMember
+	@Test
+	void successRemove() throws Exception {
+		//given
+		Long crewId = 1L;
+		Long memberId = 2L;
+
+		doNothing()
+			.when(crewService)
+			.removeCrewMember(anyLong(), anyLong(), anyLong());
+
+		//when
+		ResultActions resultActions = removeCrew(crewId, memberId);
+
+		//then
+		resultActions
+			.andExpect(status().isOk())
+			.andReturn();
+	}
+
 	private ResultActions createCrew(CreateCrewReqDto reqDto) throws Exception {
 		return mockMvc.perform(post("/api/crew")
 			.contentType(APPLICATION_JSON)
@@ -286,5 +307,10 @@ class CrewControllerTest {
 		return mockMvc.perform(post("/api/crew/{crewId}/request", crewId)
 			.contentType(APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(reqDto)));
+	}
+
+	private ResultActions removeCrew(Long crewId, Long memberId) throws Exception {
+		return mockMvc.perform(delete("/api/crew/{crewId}/{memberId}", crewId, memberId)
+			.contentType(APPLICATION_JSON));
 	}
 }

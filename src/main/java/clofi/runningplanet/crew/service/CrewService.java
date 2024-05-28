@@ -112,6 +112,32 @@ public class CrewService {
 		}
 	}
 
+	@Transactional
+	public void removeCrewMember(Long crewId, Long memberId, Long leaderId) {
+		checkCrewExistById(crewId);
+		validateLeaderPrivilege(crewId, leaderId);
+		checkMemberExist(memberId);
+
+		CrewMember crewMember = findCrewMember(crewId, memberId);
+		deleteCrewMember(crewMember);
+	}
+
+	private void checkMemberExist(Long memberId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new NotFoundException("존재하지 않는 회원입니다.");
+		}
+	}
+
+	private void deleteCrewMember(CrewMember crewMember) {
+		crewMemberRepository.deleteById(crewMember.getId());
+	}
+
+	private CrewMember findCrewMember(Long crewId, Long memberId) {
+		return crewMemberRepository.findByCrewIdAndMemberId(crewId, memberId).orElseThrow(
+			() -> new NotFoundException("크루에 소속된 크루원이 아닙니다.")
+		);
+	}
+
 	private void processApproval(ProceedApplyReqDto reqDto, Crew findCrew, CrewApplication crewApplication) {
 		validateCrewMemberLimit(findCrew);
 
