@@ -29,7 +29,7 @@ public class MemberController {
 		return ResponseEntity.ok(memberService.getProfile(memberId));
 	}
 
-	@GetMapping("api/profile")
+	@GetMapping("/api/profile")
 	public ResponseEntity<SelfProfileResponse> getSelfProfile(
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
