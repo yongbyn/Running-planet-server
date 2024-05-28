@@ -1052,6 +1052,9 @@ class CrewServiceTest {
 		given(crewMemberRepository.countByCrewId(anyLong()))
 			.willReturn(1);
 		doNothing()
+			.when(crewRepository)
+			.deleteById(anyLong());
+		doNothing()
 			.when(crewMemberRepository)
 			.deleteById(anyLong());
 

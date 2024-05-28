@@ -141,6 +141,11 @@ public class CrewService {
 		if (memberCnt > 1) {
 			throw new ConflictException("크루장은 크루원 수가 1인 일 경우에 탈퇴할 수 있습니다.");
 		}
+		deleteCrew(crewId);
+	}
+
+	private void deleteCrew(Long crewId) {
+		crewRepository.deleteById(crewId);
 	}
 
 	private int getCrewMemberCnt(Long crewId) {
