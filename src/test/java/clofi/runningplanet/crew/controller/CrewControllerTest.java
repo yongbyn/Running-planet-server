@@ -274,6 +274,27 @@ class CrewControllerTest {
 			.andReturn();
 	}
 
+	@DisplayName("크루 탈퇴 성공")
+	@WithMockCustomMember
+	@Test
+	void successLeaveCrew() throws Exception {
+		//given
+		Long crewId = 1L;
+
+		doNothing()
+			.when(crewService)
+			.leaveCrew(anyLong(), anyLong());
+
+		//when
+		ResultActions resultActions = leaveCrew(crewId);
+
+		//then
+		resultActions
+			.andExpect(status().isOk())
+			.andReturn();
+
+	}
+
 	private ResultActions createCrew(CreateCrewReqDto reqDto) throws Exception {
 		return mockMvc.perform(post("/api/crew")
 			.contentType(APPLICATION_JSON)
@@ -310,7 +331,10 @@ class CrewControllerTest {
 	}
 
 	private ResultActions removeCrew(Long crewId, Long memberId) throws Exception {
-		return mockMvc.perform(delete("/api/crew/{crewId}/{memberId}", crewId, memberId)
-			.contentType(APPLICATION_JSON));
+		return mockMvc.perform(delete("/api/crew/{crewId}/{memberId}", crewId, memberId));
+	}
+
+	private ResultActions leaveCrew(Long crewId) throws Exception {
+		return mockMvc.perform(delete("/api/crew/{crewId}", crewId));
 	}
 }
