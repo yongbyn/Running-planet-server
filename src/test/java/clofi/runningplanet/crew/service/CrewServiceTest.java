@@ -945,4 +945,32 @@ class CrewServiceTest {
 		assertThatThrownBy(() -> crewService.removeCrewMember(crewId, memberId, leaderId))
 			.isInstanceOf(NotFoundException.class);
 	}
+
+	@DisplayName("크루멤버의 크루 탈퇴 성공")
+	@Test
+	void successLeaveCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 2L;
+
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+
+		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.MEMBER);
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewMember));
+		doNothing()
+			.when(crewMemberRepository)
+			.deleteById(anyLong());
+
+		//when
+		//then
+		assertDoesNotThrow(() -> crewService.leaveCrew(crewId, memberId));
+	}
 }
