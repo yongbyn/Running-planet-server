@@ -811,7 +811,7 @@ class CrewServiceTest {
 			.isInstanceOf(ConflictException.class);
 	}
 
-	@DisplayName("크루 강퇴 성공")
+	@DisplayName("크루원 강퇴 성공")
 	@Test
 	void successRemoveCrewMember() {
 		//given
@@ -850,5 +850,22 @@ class CrewServiceTest {
 		//when
 		//then
 		assertDoesNotThrow(() -> crewService.removeCrewMember(crewId, memberId, leaderId));
+	}
+
+	@DisplayName("강퇴하려는 크루가 없는 경우에 크루원 강퇴할 경우 예외 발생")
+	@Test
+	void failRemoveCrewMemberByNotFoundCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 2L;
+		Long leaderId = 1L;
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(false);
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.removeCrewMember(crewId, memberId, leaderId))
+			.isInstanceOf(NotFoundException.class);
 	}
 }
