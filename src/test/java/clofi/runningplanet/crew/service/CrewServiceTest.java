@@ -841,6 +841,8 @@ class CrewServiceTest {
 			.willReturn(true);
 		given(crewMemberRepository.findByMemberId(anyLong()))
 			.willReturn(Optional.of(crewLeader));
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
 		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
 			.willReturn(Optional.of(crewMember));
 		doNothing()
@@ -906,6 +908,8 @@ class CrewServiceTest {
 			.willReturn(true);
 		given(crewMemberRepository.findByMemberId(anyLong()))
 			.willReturn(Optional.of(crewLeader));
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
 		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
 			.willReturn(Optional.empty());
 
