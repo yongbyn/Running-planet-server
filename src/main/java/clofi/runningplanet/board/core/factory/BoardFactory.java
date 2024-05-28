@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import clofi.runningplanet.board.comment.repository.CommentRepository;
 import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
 import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
 import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
@@ -14,6 +15,7 @@ import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.BoardImage;
+import clofi.runningplanet.board.thumbsUp.repository.ThumbsUpRepository;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.member.domain.Member;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 public class BoardFactory {
 	private final BoardRepository boardRepository;
 	private final BoardImageRepository boardImageRepository;
+	private final CommentRepository commentRepository;
+	private final ThumbsUpRepository thumbsUpRepository;
 	private final S3StorageManagerUseCase s3StorageManagerUseCase;
 
 	public CreateBoardResponse insert(Crew crew, CreateBoardRequest createBoardRequest, List<String> imageUrlList,
@@ -50,5 +54,16 @@ public class BoardFactory {
 				.collect(Collectors.toList());
 			boardImageRepository.saveAll(images);
 		}
+	}
+
+	public void delete(Board board) {
+		List<BoardImage> imgList = boardImageRepository.findAllByBoard(board);
+		for (BoardImage boardImage : imgList) {
+			s3StorageManagerUseCase.deleteImages(boardImage.getImageUrl());
+		}
+		boardImageRepository.deleteAllByBoard(board);
+		commentRepository.deleteAllByBoard(board);
+		thumbsUpRepository.deleteAllByBoard(board);
+		boardRepository.deleteById(board.getId());
 	}
 }

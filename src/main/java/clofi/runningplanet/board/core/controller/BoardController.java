@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,16 +64,28 @@ public class BoardController {
 		return ResponseEntity.ok(boardReadService.getBoardDetail(crewId, boardId, memberId));
 	}
 
-	@PatchMapping("/api/crew/{crewId}/board/{boardId}")
+	@PatchMapping(value = "/api/crew/{crewId}/board/{boardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	private ResponseEntity<CreateBoardResponse> updateBoard(
 		@PathVariable(value = "crewId") Long crewId,
 		@PathVariable(value = "boardId") Long boardId,
-		@RequestPart(value = "createBoard") @Valid UpdateBoardRequest updateBoardRequest,
+		@RequestPart(value = "updateRequest") @Valid UpdateBoardRequest updateBoardRequest,
 		@RequestPart(value = "imageFile") List<MultipartFile> imageFile,
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
 		Long memberId = customOAuth2User.getId();
 		return ResponseEntity.status(HttpStatus.OK)
 			.body(boardQueryService.update(crewId, boardId, updateBoardRequest, imageFile, memberId));
+	}
+
+	@DeleteMapping("/api/crew/{crewId}/board/{boardId}")
+	private ResponseEntity<Void> deleteBoard(
+		@PathVariable("crewId") Long crewId,
+		@PathVariable("boardId") Long boardId,
+		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
+
+	) {
+		Long memberId = customOAuth2User.getId();
+		boardQueryService.deleteBoard(crewId, boardId, memberId);
+		return ResponseEntity.noContent().build();
 	}
 }

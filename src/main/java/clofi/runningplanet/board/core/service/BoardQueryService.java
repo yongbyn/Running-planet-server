@@ -61,4 +61,14 @@ public class BoardQueryService {
 		boardFactory.update(crew, board, updateBoardRequest, imageFile);
 		return CreateBoardResponse.of(board);
 	}
+
+	public void deleteBoard(Long crewId, Long boardId, Long memberId) {
+		crewRepository.findById(crewId).orElseThrow(() -> new IllegalArgumentException("크루가 존재하지 않습니다."));
+		Board board = boardRepository.findById(boardId).orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
+		if (board.getMember().getId() != memberId) {
+			throw new IllegalArgumentException("타인이 작성한 게시글은 삭제할 수 없습니다.");
+		}
+
+		boardFactory.delete(board);
+	}
 }

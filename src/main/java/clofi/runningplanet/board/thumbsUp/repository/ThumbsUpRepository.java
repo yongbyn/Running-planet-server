@@ -14,4 +14,6 @@ public interface ThumbsUpRepository extends JpaRepository<ThumbsUp, Long> {
 	ThumbsUp findByMemberAndBoard(Member member, Board board);
 
 	List<ThumbsUp> findAllByBoard(Board board);
+
+	void deleteAllByBoard(Board board);
 }
