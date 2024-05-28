@@ -9,17 +9,17 @@ public record ProfileResponse(
 
 	Gender gender,
 
-	int age,
+	Integer age,
 
 	String profileImg,
 
-	int runScore,
+	Integer runScore,
 
 	AvgPace avgPace,
 
-	double avgDistance,
+	Integer avgDistance,
 
-	double totalDistance,
+	int totalDistance,
 
 	String myCrew
 ) {

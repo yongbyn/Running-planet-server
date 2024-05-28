@@ -35,7 +35,7 @@ public class Member extends BaseSoftDeleteEntity {
 	private Gender gender;
 
 	@Column(name = "age")
-	private int age;
+	private Integer age;
 
 	@Column(name = "profile_img", nullable = false)
 	private String profileImg;
@@ -49,7 +49,7 @@ public class Member extends BaseSoftDeleteEntity {
 	@Column(name = "avg_distance")
 	private Integer avgDistance;
 
-	@Column(name = "total_distance", nullable = false)
+	@Column(name = "total_distance", nullable = false, columnDefinition = "int default 0")
 	private int totalDistance;
 
 	@Builder
