@@ -1007,4 +1007,24 @@ class CrewServiceTest {
 		assertThatThrownBy(() -> crewService.leaveCrew(crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
 	}
+
+	@DisplayName("소속 크루원이 아닌 경우 크루 탈퇴 시 예외 발생")
+	@Test
+	void failLeaveCrewByNotInCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 2L;
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.leaveCrew(crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
 }
