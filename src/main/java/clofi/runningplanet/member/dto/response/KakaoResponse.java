@@ -1,4 +1,4 @@
-package clofi.runningplanet.member.dto;
+package clofi.runningplanet.member.dto.response;
 
 import java.util.Map;
 

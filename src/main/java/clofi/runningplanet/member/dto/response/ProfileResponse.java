@@ -1,4 +1,4 @@
-package clofi.runningplanet.member.dto;
+package clofi.runningplanet.member.dto.response;
 
 import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.member.domain.Gender;
