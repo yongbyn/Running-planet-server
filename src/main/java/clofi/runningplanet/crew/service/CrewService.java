@@ -122,6 +122,19 @@ public class CrewService {
 		deleteCrewMember(crewMember);
 	}
 
+	@Transactional
+	public void leaveCrew(Long crewId, Long memberId) {
+		checkCrewExistById(crewId);
+		checkMemberExist(memberId);
+
+		CrewMember crewMember = findCrewMember(crewId, memberId);
+		deleteCrewMember(crewMember);
+	}
+
+	private int getCrewMemberCnt(Long crewId) {
+		return crewMemberRepository.countByCrewId(crewId);
+	}
+
 	private void checkMemberExist(Long memberId) {
 		if (!memberRepository.existsById(memberId)) {
 			throw new NotFoundException("존재하지 않는 회원입니다.");
@@ -154,7 +167,7 @@ public class CrewService {
 	}
 
 	private void validateCrewMemberLimit(Crew crew) {
-		int memberCnt = crewMemberRepository.countByCrewId(crew.getId());
+		int memberCnt = getCrewMemberCnt(crew.getId());
 		if (crew.checkReachedMemberLimit(memberCnt)) {
 			throw new ConflictException("최대 인원수를 초과해서 크루원을 받을 수 없습니다.");
 		}
