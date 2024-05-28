@@ -810,4 +810,45 @@ class CrewServiceTest {
 		assertThatThrownBy(() -> crewService.proceedApplyCrew(reqDto, crewId, memberId))
 			.isInstanceOf(ConflictException.class);
 	}
+
+	@DisplayName("크루 강퇴 성공")
+	@Test
+	void successRemoveCrewMember() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 2L;
+		Long leaderId = 1L;
+
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+
+		Member member1 = Member.builder()
+			.id(2L)
+			.nickname("닉네임1")
+			.age(30)
+			.gender(Gender.MALE)
+			.profileImg("https://image-url1.com")
+			.avgDistance(50)
+			.totalDistance(2000)
+			.runScore(80)
+			.build();
+
+		CrewMember crewLeader = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+		CrewMember crewMember = new CrewMember(2L, crew, member1, Role.MEMBER);
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.of(crewLeader));
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewMember));
+		doNothing()
+			.when(crewMemberRepository)
+			.deleteById(anyLong());
+
+		//when
+		//then
+		assertDoesNotThrow(() -> crewService.removeCrewMember(crewId, memberId, leaderId));
+	}
 }
