@@ -13,6 +13,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -1056,5 +1058,34 @@ class CrewServiceTest {
 		//when
 		//then
 		assertDoesNotThrow(() -> crewService.leaveCrew(crewId, memberId));
+	}
+
+	@DisplayName("크루원이 2명 이상 존재할 경우 크루장 탈퇴 시 예외 발생")
+	@ParameterizedTest
+	@ValueSource(ints = {2, 3, 10, 29})
+	void failLeaderLeaveCrewsByMemberCnt(int currentMemberCnt) {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+
+		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(crewMemberRepository.countByCrewId(anyLong()))
+			.willReturn(currentMemberCnt);
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.leaveCrew(crewId, memberId))
+			.isInstanceOf(ConflictException.class);
 	}
 }
