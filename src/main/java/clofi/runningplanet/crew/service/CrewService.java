@@ -16,8 +16,10 @@ import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
+import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
 import clofi.runningplanet.crew.repository.CrewApplicationRepository;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
@@ -59,7 +61,7 @@ public class CrewService {
 
 	@Transactional(readOnly = true)
 	public FindCrewResDto findCrew(Long crewId) {
-		Crew findCrew = getByCrewId(crewId);
+		Crew findCrew = getCrewByCrewId(crewId);
 
 		List<String> tags = findTagsToStrings(findCrew.getId());
 		CrewLeaderDto crewLeader = convertCrewLeaderDto(findCrew.getLeaderId());
@@ -75,7 +77,7 @@ public class CrewService {
 		validateMemberNotInCrew(findMember.getId());
 		validateDuplicateApply(crewId, findMember.getId());
 
-		Crew findCrew = getByCrewId(crewId);
+		Crew findCrew = getCrewByCrewId(crewId);
 
 		findCrew.checkRunScore(findMember.getRunScore());
 
@@ -84,7 +86,38 @@ public class CrewService {
 		return new ApplyCrewResDto(crewId, findMember.getId(), true);
 	}
 
-	private Crew getByCrewId(Long crewId) {
+	@Transactional(readOnly = true)
+	public ApprovalMemberResDto getApplyCrewList(Long crewId, Long memberId) {
+		CrewMember findCrewMember = getCrewMemberByMemberId(memberId);
+
+		findCrewMember.validateMembership(crewId);
+		findCrewMember.checkLeaderPrivilege();
+		checkCrewExistById(crewId);
+
+		List<CrewApplication> crewApplicationList = crewApplicationRepository.findAllByCrewId(crewId);
+		List<GetApplyCrewResDto> getApplyCrewResDtos = makeGetApplyDtoList(crewApplicationList);
+		return new ApprovalMemberResDto(getApplyCrewResDtos);
+	}
+
+	private CrewMember getCrewMemberByMemberId(Long memberId) {
+		return crewMemberRepository.findByMemberId(memberId).orElseThrow(
+			() -> new NotFoundException("크루 소속이 아닙니다.")
+		);
+	}
+
+	private void checkCrewExistById(Long crewId) {
+		if (!crewRepository.existsById(crewId)) {
+			throw new NotFoundException("크루가 존재하지 않습니다.");
+		}
+	}
+
+	private List<GetApplyCrewResDto> makeGetApplyDtoList(List<CrewApplication> crewApplicationList) {
+		return crewApplicationList.stream()
+			.map(GetApplyCrewResDto::new)
+			.toList();
+	}
+
+	private Crew getCrewByCrewId(Long crewId) {
 		return crewRepository.findById(crewId).orElseThrow(
 			() -> new NotFoundException("크루를 찾을 수 없습니다.")
 		);

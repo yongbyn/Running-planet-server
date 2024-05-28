@@ -30,14 +30,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import clofi.runningplanet.common.WithMockCustomMember;
+import clofi.runningplanet.crew.domain.Approval;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
+import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
 import clofi.runningplanet.crew.service.CrewService;
+import clofi.runningplanet.member.domain.Gender;
 
 @WebMvcTest(CrewController.class)
 @MockBean(JpaMetamodelMappingContext.class)
@@ -193,6 +197,40 @@ class CrewControllerTest {
 		assertThat(expected).isEqualTo(resDto);
 	}
 
+	@DisplayName("크루 신청 목록 조회 성공")
+	@WithMockCustomMember
+	@Test
+	void successGetApplyList() throws Exception {
+		//given
+		Long crewId = 1L;
+
+		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글1", 80, Gender.MALE, 30,
+			Approval.PENDING);
+		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글2", 70, Gender.FEMALE, 15,
+			Approval.PENDING);
+		ApprovalMemberResDto expected = new ApprovalMemberResDto(
+			List.of(getApplyCrewResDto1, getApplyCrewResDto2));
+
+		given(crewService.getApplyCrewList(anyLong(), anyLong()))
+			.willReturn(expected);
+
+		//when
+		ResultActions resultActions = getApplyCrewList(crewId);
+
+		//then
+		MvcResult mvcResult = resultActions
+			.andExpect(status().isOk())
+			.andReturn();
+
+		ApprovalMemberResDto resDto = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<>() {
+			}
+		);
+
+		assertThat(expected).isEqualTo(resDto);
+	}
+
 	private ResultActions createCrew(CreateCrewReqDto reqDto) throws Exception {
 		return mockMvc.perform(post("/api/crew")
 			.contentType(APPLICATION_JSON)
@@ -215,5 +253,10 @@ class CrewControllerTest {
 			.contentType(APPLICATION_JSON)
 			.header(AUTHORIZATION, "Bearer accessToken")
 			.content(objectMapper.writeValueAsString(reqDto)));
+	}
+
+	private ResultActions getApplyCrewList(Long crewId) throws Exception {
+		return mockMvc.perform(get("/api/crew/{crewId}/request", crewId)
+			.contentType(APPLICATION_JSON));
 	}
 }
