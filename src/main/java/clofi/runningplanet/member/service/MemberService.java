@@ -38,7 +38,7 @@ public class MemberService extends DefaultOAuth2UserService {
 	private final MemberRepository memberRepository;
 	private final CrewMemberRepository crewMemberRepository;
 	private final SocialLoginRepository socialLoginRepository;
-	private final S3StorageManagerUseCase s3StorageManagerUseCase;;
+	private final S3StorageManagerUseCase s3StorageManagerUseCase;
 
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
