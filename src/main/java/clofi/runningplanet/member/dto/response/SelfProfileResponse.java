@@ -33,7 +33,7 @@ public record SelfProfileResponse(
 			calculateAvgPace(member.getAvgPace())
 			, member.getAvgDistance(), member.getTotalDistance(),
 			crewMember != null ? crewMember.getCrew().getCrewName() : null,
-			(crewMember != null && crewMember.getId() != null) ? crewMember.getId() : null);
+			(crewMember != null && crewMember.getCrew().getId() != null) ? crewMember.getCrew().getId() : null);
 	}
 
 	public record AvgPace(
