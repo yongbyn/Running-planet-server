@@ -1,14 +1,10 @@
 package clofi.runningplanet.member.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +14,6 @@ import clofi.runningplanet.member.dto.request.UpdateProfileRequest;
 import clofi.runningplanet.member.dto.response.ProfileResponse;
 import clofi.runningplanet.member.dto.response.UpdateProfileResponse;
 import clofi.runningplanet.member.service.MemberService;
-import clofi.runningplanet.security.jwt.JWTUtil;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -26,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 public class MemberController {
 
 	private final MemberService memberService;
-	private final JWTUtil jwtUtil;
 
 	@GetMapping("/api/profile/{memberId}")
 	public ResponseEntity<ProfileResponse> getProfile(@PathVariable("memberId") Long memberId) {
