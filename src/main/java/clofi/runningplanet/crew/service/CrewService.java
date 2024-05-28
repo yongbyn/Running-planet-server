@@ -128,7 +128,19 @@ public class CrewService {
 		checkMemberExist(memberId);
 
 		CrewMember crewMember = findCrewMember(crewId, memberId);
+		validateLeaderLeaveCrew(crewId, crewMember);
 		deleteCrewMember(crewMember);
+	}
+
+	private void validateLeaderLeaveCrew(Long crewId, CrewMember crewMember) {
+		if (!crewMember.isLeader()) {
+			return;
+		}
+
+		int memberCnt = getCrewMemberCnt(crewId);
+		if (memberCnt > 1) {
+			throw new ConflictException("크루장은 크루원 수가 1인 일 경우에 탈퇴할 수 있습니다.");
+		}
 	}
 
 	private int getCrewMemberCnt(Long crewId) {
