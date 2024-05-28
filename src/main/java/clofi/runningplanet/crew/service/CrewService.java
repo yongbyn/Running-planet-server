@@ -116,9 +116,16 @@ public class CrewService {
 	public void removeCrewMember(Long crewId, Long memberId, Long leaderId) {
 		checkCrewExistById(crewId);
 		validateLeaderPrivilege(crewId, leaderId);
+		checkMemberExist(memberId);
 
 		CrewMember crewMember = findCrewMember(crewId, memberId);
 		deleteCrewMember(crewMember);
+	}
+
+	private void checkMemberExist(Long memberId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new NotFoundException("존재하지 않는 회원입니다.");
+		}
 	}
 
 	private void deleteCrewMember(CrewMember crewMember) {
