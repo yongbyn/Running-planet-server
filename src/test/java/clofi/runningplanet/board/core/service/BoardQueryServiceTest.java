@@ -144,7 +144,6 @@ class BoardQueryServiceTest {
 		ThumbsUp thumbsUp = new ThumbsUp(board, member);
 		thumbsUpRepository.save(thumbsUp);
 		//when//then
-		//when//then
 		Assertions.assertDoesNotThrow(
 			() -> boardQueryService.deleteBoard(crew.getId(), board.getId(), member.getId()));
 	}
