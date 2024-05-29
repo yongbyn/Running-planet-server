@@ -15,11 +15,11 @@ public record SelfProfileResponse(
 
 	String profileImg,
 
-	Integer runScore,
+	int runScore,
 
 	AvgPace avgPace,
 
-	Integer avgDistance,
+	int avgDistance,
 
 	int totalDistance,
 
