@@ -52,7 +52,7 @@ public class Member extends BaseSoftDeleteEntity {
 	@Column(name = "avg_distance")
 	private int avgDistance;
 
-	@Column(name = "total_distance", nullable = false, columnDefinition = "int default 0")
+	@Column(name = "total_distance", nullable = false)
 	private int totalDistance;
 
 	@Builder
