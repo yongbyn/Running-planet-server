@@ -19,6 +19,7 @@ import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.domain.OAuthType;
 import clofi.runningplanet.member.domain.SocialLogin;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
+import clofi.runningplanet.member.dto.request.CreateOnboardingRequest;
 import clofi.runningplanet.member.dto.request.UpdateProfileRequest;
 import clofi.runningplanet.member.dto.response.KakaoResponse;
 import clofi.runningplanet.member.dto.response.OAuth2Response;
@@ -96,6 +97,13 @@ public class MemberService extends DefaultOAuth2UserService {
 				"The registration id is invalid: " + registrationId, null);
 			throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.getDescription());
 		}
+	}
+
+	public void createOnboarding(Long memberId, CreateOnboardingRequest request) {
+		Member member = getMember(memberId);
+		member.onboarding(request.gender(),request.age(),request.weight());
+
+		memberRepository.save(member);
 	}
 
 	public ProfileResponse getProfile(Long memberId) {

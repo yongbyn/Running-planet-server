@@ -76,4 +76,10 @@ public class Member extends BaseSoftDeleteEntity {
 		this.nickname = nickname;
 		this.profileImg = profileImg;
 	}
+
+	public void onboarding(Gender gender, Integer age, Integer weight) {
+		this.gender = gender;
+		this.age = age;
+		this.weight = weight;
+	}
 }

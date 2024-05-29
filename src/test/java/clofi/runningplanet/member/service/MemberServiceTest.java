@@ -20,6 +20,7 @@ import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.domain.Gender;
 import clofi.runningplanet.member.domain.Member;
+import clofi.runningplanet.member.dto.request.CreateOnboardingRequest;
 import clofi.runningplanet.member.dto.request.UpdateProfileRequest;
 import clofi.runningplanet.member.dto.response.ProfileResponse;
 import clofi.runningplanet.member.dto.response.SelfProfileResponse;
@@ -48,6 +49,25 @@ class MemberServiceTest {
 		crewMemberRepository.deleteAllInBatch();
 		crewRepository.deleteAllInBatch();
 		memberRepository.deleteAllInBatch();
+	}
+
+	@DisplayName("추가정보를 등록할 수 있다.")
+	@Test
+	void createOnboardingTest() {
+		//given
+		Member member = createMember();
+
+		memberRepository.save(member);
+		CreateOnboardingRequest request = new CreateOnboardingRequest(Gender.MALE, 30, 100);
+
+		//when
+		memberService.createOnboarding(member.getId(), request);
+		Member savedMember = memberRepository.findById(member.getId()).get();
+
+		//then
+		assertThat(savedMember.getGender()).isEqualTo(request.gender());
+		assertThat(savedMember.getAge()).isEqualTo(request.age());
+		assertThat(savedMember.getWeight()).isEqualTo(request.weight());
 	}
 
 	@DisplayName("memberId로 조회할 수 있다.")
@@ -173,8 +193,6 @@ class MemberServiceTest {
 			.nickname("고구마")
 			.profileImg(
 				"https://pbs.twimg.com/media/E86TJH1VkAQ0BGV.png")
-			.age(34)
-			.gender(Gender.MALE)
 			.runScore(20)
 			.avgPace(2400)
 			.avgDistance(5000)
