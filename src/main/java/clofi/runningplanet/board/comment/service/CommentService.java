@@ -32,4 +32,14 @@ public class CommentService {
 		Comment comment = commentRepository.save(createCommentRequest.toComment(board, member));
 		return comment.getId();
 	}
+
+	public void deleteComment(Long crewId, Long boardId, Long commentId, Long memberId) {
+		boardRepository.findById(boardId).orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new IllegalArgumentException("댓글이 없습니다."));
+		if (comment.getMember().getId() != memberId) {
+			throw new IllegalArgumentException("댓글 작성자만 댓글을 삭제할 수 있습니다.");
+		}
+		commentRepository.deleteById(commentId);
+	}
 }

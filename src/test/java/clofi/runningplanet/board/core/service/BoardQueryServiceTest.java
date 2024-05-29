@@ -7,23 +7,29 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import clofi.runningplanet.board.comment.repository.CommentRepository;
 import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
 import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
 import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
 import clofi.runningplanet.board.core.factory.BoardFactory;
-import clofi.runningplanet.common.FakeS3StorageManager;
 import clofi.runningplanet.board.core.repository.BoardImageRepository;
 import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.BoardImage;
+import clofi.runningplanet.board.domain.Comment;
+import clofi.runningplanet.board.domain.ThumbsUp;
+import clofi.runningplanet.board.thumbsUp.repository.ThumbsUpRepository;
+import clofi.runningplanet.common.FakeS3StorageManager;
 import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.domain.Crew;
@@ -43,20 +49,31 @@ class BoardQueryServiceTest {
 	private CrewRepository crewRepository;
 	@Autowired
 	private MemberRepository memberRepository;
+	@Autowired
+	private CommentRepository commentRepository;
+	@Autowired
+	private ThumbsUpRepository thumbsUpRepository;
+	@Autowired
+	private BoardQueryService boardQueryService;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
 	@AfterEach
 	void tearDown() {
-		boardImageRepository.deleteAllInBatch();
-		boardRepository.deleteAllInBatch();
-		crewRepository.deleteAllInBatch();
-		memberRepository.deleteAllInBatch();
+		jdbcTemplate.execute("DELETE FROM board_image");
+		jdbcTemplate.execute("DELETE FROM comment");
+		jdbcTemplate.execute("DELETE FROM thumbs_up");
+		jdbcTemplate.execute("DELETE FROM board");
+		jdbcTemplate.execute("DELETE FROM crew");
+		jdbcTemplate.execute("DELETE FROM member");
 	}
 
 	@DisplayName("사용자는 게시글을 작성할 수 있다.")
 	@Test
 	void createBoardTest() {
 		//given
-		Member memberInstance = new Member(null, "테스트", Gender.FEMALE, 10, 100,"테스트", 10, 10, 10, 10);
+		Member memberInstance = new Member(null, "테스트", Gender.FEMALE, 10, 100, "테스트", 10, 10, 10, 10);
 		Member member = memberRepository.save(memberInstance);
 		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
@@ -83,7 +100,7 @@ class BoardQueryServiceTest {
 	@Transactional
 	void updateTest() {
 		//given
-		Member memberInstance = new Member(null, "테스트", Gender.FEMALE, 10, 100,"테스트", 10, 10, 10, 10);
+		Member memberInstance = new Member(null, "테스트", Gender.FEMALE, 10, 100, "테스트", 10, 10, 10, 10);
 		Member member = memberRepository.save(memberInstance);
 		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
@@ -110,6 +127,27 @@ class BoardQueryServiceTest {
 
 	}
 
+	@DisplayName("사용자는 게시글을 삭제할 수 있다.")
+	@Test
+	void deleteBoardTest() {
+		//given
+		Member member = new Member(null, "테스트", Gender.MALE, 10, 100, "테스트", 10, 10, 10, 10);
+		memberRepository.save(member);
+		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crew = crewRepository.save(crewInstance);
+		Board boardInstance = new Board("기존 게시글 제목", "기존 게시글 내용", crew, member);
+		Board board = boardRepository.save(boardInstance);
+		Comment commentInstance = new Comment(board, "댓글", member);
+		Comment comment = commentRepository.save(commentInstance);
+		BoardImage boardImageInstance = new BoardImage(board, "이미지 주소");
+		boardImageRepository.save(boardImageInstance);
+		ThumbsUp thumbsUp = new ThumbsUp(board, member);
+		thumbsUpRepository.save(thumbsUp);
+		//when//then
+		Assertions.assertDoesNotThrow(
+			() -> boardQueryService.deleteBoard(crew.getId(), board.getId(), member.getId()));
+	}
+
 	private List<MultipartFile> getImageFile() {
 
 		return Arrays.asList(
@@ -134,6 +172,8 @@ class BoardQueryServiceTest {
 			new BoardFactory(
 				boardRepository,
 				boardImageRepository,
+				commentRepository,
+				thumbsUpRepository,
 				fakeS3StorageManager
 			),
 			crewRepository,
