@@ -1164,4 +1164,24 @@ class CrewServiceTest {
 		assertThatThrownBy(() -> crewService.cancelCrewApplication(crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
 	}
+
+	@DisplayName("크루에 신청하지 않은 사용자가 크루 신청 취소할 경우 예외 발생")
+	@Test
+	void failCancelCrewApplicationByNotInCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 2L;
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewApplicationRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.cancelCrewApplication(crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
 }
