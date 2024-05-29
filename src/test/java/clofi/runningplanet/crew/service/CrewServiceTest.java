@@ -1116,6 +1116,8 @@ class CrewServiceTest {
 
 		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
 
+		ApplyCrewResDto expected = new ApplyCrewResDto(crewId, memberId, false);
+
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
 		given(memberRepository.existsById(anyLong()))
@@ -1127,8 +1129,10 @@ class CrewServiceTest {
 			.deleteById(anyLong());
 
 		//when
+		ApplyCrewResDto result = crewService.cancelCrewApplication(crewId, memberId);
+
 		//then
-		assertDoesNotThrow(() -> crewService.cancelCrewApplication(crewId, memberId));
+		assertThat(result).isEqualTo(expected);
 	}
 
 	@DisplayName("신청을 취소하려는 크루가 없을 경우 예외 발생")
