@@ -45,4 +45,17 @@ class CrewApplicationTest {
 		//then
 		assertThat(crewApplication.getApproval()).isEqualTo(Approval.REJECT);
 	}
+
+	@DisplayName("크루 가입 취소 메서드 테스트")
+	@Test
+	void successCancel() {
+		//given
+		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청서", Approval.PENDING, null, null);
+
+		//when
+		crewApplication.cancel();
+
+		//then
+		assertThat(crewApplication.getApproval()).isEqualTo(Approval.CANCEL);
+	}
 }
