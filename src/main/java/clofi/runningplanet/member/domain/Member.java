@@ -43,23 +43,23 @@ public class Member extends BaseSoftDeleteEntity {
 	@Column(name = "profile_img", nullable = false)
 	private String profileImg;
 
-	@Column(name = "run_score")
-	private Integer runScore;
+	@Column(name = "run_score", columnDefinition = "int default 50")
+	private int runScore;
 
 	@Column(name = "avg_pace")
-	private Integer avgPace;
+	private int avgPace;
 
 	@Column(name = "avg_distance")
-	private Integer avgDistance;
+	private int avgDistance;
 
 	@Column(name = "total_distance", nullable = false, columnDefinition = "int default 0")
 	private int totalDistance;
 
 	@Builder
 	public Member(Long id, String nickname, Gender gender, Integer age, Integer weight, String profileImg,
-		Integer runScore,
-		Integer avgPace,
-		Integer avgDistance, int totalDistance) {
+		int runScore,
+		int avgPace,
+		int avgDistance, int totalDistance) {
 		this.id = id;
 		this.nickname = nickname;
 		this.gender = gender;
