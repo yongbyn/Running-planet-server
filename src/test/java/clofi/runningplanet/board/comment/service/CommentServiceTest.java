@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import clofi.runningplanet.board.comment.dto.request.CreateCommentRequest;
+import clofi.runningplanet.board.comment.dto.request.UpdateCommentRequest;
 import clofi.runningplanet.board.comment.repository.CommentRepository;
 import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.board.domain.Board;
@@ -82,6 +83,30 @@ class CommentServiceTest {
 		//when//then
 		Assertions.assertDoesNotThrow(
 			() -> commentService.deleteComment(crew.getId(), board.getId(), comment.getId(), member.getId()));
+	}
+
+	@DisplayName("사용자는 댓글을 수정할 수 있다.")
+	@Test
+	void updateCommentTest() {
+		//given
+		Member member = new Member(null, "테스트", Gender.MALE, 10, 100, "테스트", 10, 10, 10, 10);
+		memberRepository.save(member);
+		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crew = crewRepository.save(crewInstance);
+		Board boardInstance = new Board("기존 게시글 제목", "기존 게시글 내용", crew, member);
+		Board board = boardRepository.save(boardInstance);
+		Comment commentInstance = new Comment(board, "댓글", member);
+		Comment comment = commentRepository.save(commentInstance);
+		UpdateCommentRequest updateCommentRequest = new UpdateCommentRequest("게시글 댓글수정 요청");
+		//when
+		Long updateComment = commentService.updateComment(crew.getId(), board.getId(), comment.getId(), member.getId(),
+			updateCommentRequest);
+		Comment updatedComment = commentRepository.findById(updateComment)
+			.orElseThrow(() -> new IllegalArgumentException("댓글이 없습니다."));
+		//then
+		assertThat(updatedComment.getId()).isEqualTo(comment.getId());
+		assertThat(updatedComment.getContent()).isEqualTo("게시글 댓글수정 요청");
+
 	}
 
 }

@@ -3,6 +3,7 @@ package clofi.runningplanet.board.domain;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import clofi.runningplanet.board.comment.dto.request.UpdateCommentRequest;
 import clofi.runningplanet.common.domain.BaseSoftDeleteEntity;
 import clofi.runningplanet.member.domain.Member;
 import jakarta.persistence.Column;
@@ -43,5 +44,9 @@ public class Comment extends BaseSoftDeleteEntity {
 		this.board = board;
 		this.content = content;
 		this.member = member;
+	}
+
+	public void updateComment(UpdateCommentRequest updateCommentRequest) {
+		this.content = updateCommentRequest.content();
 	}
 }
