@@ -36,7 +36,7 @@ public class BoardController {
 	private ResponseEntity<CreateBoardResponse> create(
 		@PathVariable(value = "crewId") Long crewId,
 		@RequestPart(value = "createBoard") @Valid CreateBoardRequest createBoardRequest,
-		@RequestPart(value = "imageFile") List<MultipartFile> imageFile,
+		@RequestPart(value = "imgFile", required = false) List<MultipartFile> imageFile,
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
 		Long memberId = customOAuth2User.getId();
@@ -69,7 +69,7 @@ public class BoardController {
 		@PathVariable(value = "crewId") Long crewId,
 		@PathVariable(value = "boardId") Long boardId,
 		@RequestPart(value = "updateRequest") @Valid UpdateBoardRequest updateBoardRequest,
-		@RequestPart(value = "imageFile") List<MultipartFile> imageFile,
+		@RequestPart(value = "imgFile", required = false) List<MultipartFile> imageFile,
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
 		Long memberId = customOAuth2User.getId();
