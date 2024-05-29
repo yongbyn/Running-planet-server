@@ -122,6 +122,36 @@ public class CrewService {
 		deleteCrewMember(crewMember);
 	}
 
+	@Transactional
+	public void leaveCrew(Long crewId, Long memberId) {
+		checkCrewExistById(crewId);
+		checkMemberExist(memberId);
+
+		CrewMember crewMember = findCrewMember(crewId, memberId);
+		validateLeaderLeaveCrew(crewId, crewMember);
+		deleteCrewMember(crewMember);
+	}
+
+	private void validateLeaderLeaveCrew(Long crewId, CrewMember crewMember) {
+		if (!crewMember.isLeader()) {
+			return;
+		}
+
+		int memberCnt = getCrewMemberCnt(crewId);
+		if (memberCnt > 1) {
+			throw new ConflictException("크루장은 크루원 수가 1인 일 경우에 탈퇴할 수 있습니다.");
+		}
+		deleteCrew(crewId);
+	}
+
+	private void deleteCrew(Long crewId) {
+		crewRepository.deleteById(crewId);
+	}
+
+	private int getCrewMemberCnt(Long crewId) {
+		return crewMemberRepository.countByCrewId(crewId);
+	}
+
 	private void checkMemberExist(Long memberId) {
 		if (!memberRepository.existsById(memberId)) {
 			throw new NotFoundException("존재하지 않는 회원입니다.");
@@ -154,7 +184,7 @@ public class CrewService {
 	}
 
 	private void validateCrewMemberLimit(Crew crew) {
-		int memberCnt = crewMemberRepository.countByCrewId(crew.getId());
+		int memberCnt = getCrewMemberCnt(crew.getId());
 		if (crew.checkReachedMemberLimit(memberCnt)) {
 			throw new ConflictException("최대 인원수를 초과해서 크루원을 받을 수 없습니다.");
 		}

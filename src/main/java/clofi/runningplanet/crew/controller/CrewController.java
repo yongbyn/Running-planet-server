@@ -74,4 +74,11 @@ public class CrewController {
 		crewService.removeCrewMember(crewId, memberId, principal.getId());
 		return ResponseEntity.ok().build();
 	}
+
+	@DeleteMapping("/api/crew/{crewId}")
+	public ResponseEntity<Void> leaveCrew(@PathVariable("crewId") Long crewId,
+		@AuthenticationPrincipal CustomOAuth2User principal) {
+		crewService.leaveCrew(crewId, principal.getId());
+		return ResponseEntity.ok().build();
+	}
 }
