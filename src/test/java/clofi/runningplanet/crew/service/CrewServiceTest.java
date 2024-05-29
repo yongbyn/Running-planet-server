@@ -1091,4 +1091,43 @@ class CrewServiceTest {
 		assertThatThrownBy(() -> crewService.leaveCrew(crewId, memberId))
 			.isInstanceOf(ConflictException.class);
 	}
+
+	@DisplayName("크루 신청 취소 성공")
+	@Test
+	void successCancelCrewApplication() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 2L;
+
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
+			0, 0);
+
+		Member member1 = Member.builder()
+			.id(2L)
+			.nickname("닉네임1")
+			.age(30)
+			.gender(Gender.MALE)
+			.profileImg("https://image-url1.com")
+			.avgDistance(50)
+			.totalDistance(2000)
+			.runScore(80)
+			.build();
+
+		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewApplicationRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewApplication));
+		doNothing()
+			.when(crewApplicationRepository)
+			.deleteById(anyLong());
+
+		//when
+		//then
+		assertDoesNotThrow(() -> crewService.cancelCrewApplication(crewId, memberId));
+	}
 }

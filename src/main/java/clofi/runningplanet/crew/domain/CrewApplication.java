@@ -67,4 +67,8 @@ public class CrewApplication extends BaseSoftDeleteEntity {
 	public void reject() {
 		this.approval = Approval.REJECT;
 	}
+
+	public void cancel() {
+		this.approval = Approval.CANCEL;
+	}
 }
