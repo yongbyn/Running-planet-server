@@ -29,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig {
-
 	private final MemberService memberService;
 	private final CustomSuccessHandler customSuccessHandler;
 	private final JWTUtil jwtUtil;
