@@ -14,10 +14,7 @@ import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorH
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import lombok.RequiredArgsConstructor;
-
 @Profile("prod")
-@RequiredArgsConstructor
 @Configuration
 public class OAuthProxyConfig {
 
