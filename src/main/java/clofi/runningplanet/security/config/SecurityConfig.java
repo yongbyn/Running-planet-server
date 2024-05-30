@@ -56,7 +56,7 @@ public class SecurityConfig {
 			.oauth2Login((oauth2) -> oauth2
 				.userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
 					.userService(memberService))
-				. successHandler(customSuccessHandler)
+				.successHandler(customSuccessHandler)
 			);
 
 		//경로별 인가 작업
