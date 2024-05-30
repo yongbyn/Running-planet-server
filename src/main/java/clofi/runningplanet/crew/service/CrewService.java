@@ -132,6 +132,21 @@ public class CrewService {
 		deleteCrewMember(crewMember);
 	}
 
+	@Transactional
+	public ApplyCrewResDto cancelCrewApplication(Long crewId, Long memberId) {
+		checkCrewExistById(crewId);
+		checkMemberExist(memberId);
+
+		CrewApplication crewApplication = getCrewApplicationByCrewIdAndMemberId(crewId, memberId);
+		processCancelApplication(crewApplication);
+		return new ApplyCrewResDto(crewId, memberId, false);
+	}
+
+	private void processCancelApplication(CrewApplication crewApplication) {
+		crewApplication.cancel();
+		crewApplicationRepository.deleteById(crewApplication.getId());
+	}
+
 	private void validateLeaderLeaveCrew(Long crewId, CrewMember crewMember) {
 		if (!crewMember.isLeader()) {
 			return;
