@@ -1,8 +1,13 @@
 package clofi.runningplanet.member.service;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -10,6 +15,7 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import clofi.runningplanet.common.service.S3StorageManagerUseCase;
@@ -28,19 +34,34 @@ import clofi.runningplanet.member.dto.response.SelfProfileResponse;
 import clofi.runningplanet.member.dto.response.UpdateProfileResponse;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.member.repository.SocialLoginRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
-@Slf4j
+@Service
 public class MemberService extends DefaultOAuth2UserService {
-
 	private final MemberRepository memberRepository;
 	private final CrewMemberRepository crewMemberRepository;
 	private final SocialLoginRepository socialLoginRepository;
 	private final S3StorageManagerUseCase s3StorageManagerUseCase;
+
+	@Value("${spring.profiles.default}")
+	private String activeProfile;
+
+	@PostConstruct
+	public void init() {
+		if ("prod".equals(activeProfile)) {
+			SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+			Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("krmp-proxy.9rum.cc", 3128));
+			factory.setProxy(proxy);
+			RestTemplate proxyRestTemplate = new RestTemplate(factory);
+			proxyRestTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
+			this.setRestOperations(proxyRestTemplate);
+		}
+	}
 
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -49,7 +70,7 @@ public class MemberService extends DefaultOAuth2UserService {
 
 		String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
-		OAuth2Response oAuth2Response = null;
+		OAuth2Response oAuth2Response;
 		if (registrationId.equals("kakao")) {
 			oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
 

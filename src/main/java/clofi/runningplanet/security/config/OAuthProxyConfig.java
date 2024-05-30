@@ -11,11 +11,13 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.RequiredArgsConstructor;
+
 @Profile("prod")
+@RequiredArgsConstructor
 @Configuration
 public class OAuthProxyConfig {
 
@@ -31,17 +33,6 @@ public class OAuthProxyConfig {
 		accessTokenResponseClient.setRestOperations(proxyRestTemplate);
 
 		return accessTokenResponseClient;
-	}
-
-	@Bean
-	public DefaultOAuth2UserService oAuth2UserService() {
-		DefaultOAuth2UserService defaultOAuth2UserService = new DefaultOAuth2UserService();
-		RestTemplate proxyRestTemplate = new RestTemplate(getProxyFactory());
-		proxyRestTemplate.setErrorHandler(new OAuth2ErrorResponseErrorHandler());
-
-		defaultOAuth2UserService.setRestOperations(proxyRestTemplate);
-
-		return defaultOAuth2UserService;
 	}
 
 	private static SimpleClientHttpRequestFactory getProxyFactory() {
