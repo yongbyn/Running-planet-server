@@ -5,10 +5,12 @@ import java.net.Proxy;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.oauth2.client.endpoint.DefaultAuthorizationCodeTokenResponseClient;
 import org.springframework.web.client.RestTemplate;
 
+@Profile("prod")
 @Configuration
 public class OAuthProxyConfig {
 
