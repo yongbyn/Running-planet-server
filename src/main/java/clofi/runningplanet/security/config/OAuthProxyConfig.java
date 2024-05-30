@@ -26,7 +26,7 @@ public class OAuthProxyConfig {
 	@Bean
 	public RestTemplate proxyRestTemplate() {
 		SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("http://krmp-proxy.9rum.cc", 3128));
+		Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("krmp-proxy.9rum.cc", 3128));
 		factory.setProxy(proxy);
 		return new RestTemplate(factory);
 	}
