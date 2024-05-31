@@ -81,11 +81,9 @@ public class MemberService extends DefaultOAuth2UserService {
 
 			} else {
 
-				SocialLogin socialLogin = socialLoginRepository.findByOauthTypeAndOauthId(OAuthType.valueOf(oAuthType.toUpperCase()),oAuthId);
+				SocialLogin socialLogin = socialLoginRepository.
+					findByOauthTypeAndOauthIdWithMember(OAuthType.valueOf(oAuthType.toUpperCase()),oAuthId);
 				Member member = socialLogin.getMember();
-
-				//TODO 패치조인으로 수정
-				log.info(member.getNickname());
 
 				return new CustomOAuth2User(member);
 
@@ -134,8 +132,6 @@ public class MemberService extends DefaultOAuth2UserService {
 		return new UpdateProfileResponse(member.getNickname(), updatedProfileImageUrl.getFirst());
 
 	}
-
-
 
 	private Member getMember(Long memberId) {
 		return memberRepository.findById(memberId)
