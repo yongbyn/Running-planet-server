@@ -43,9 +43,7 @@ public class KakaoResponse implements OAuth2Response{
 
 	@Override
 	public String getProfileImage() {
-		if (properties.containsKey("profile_image")) {
-			return properties.get("profile_image").toString();
-		}
-		return null;
+		Object profileImage = properties.get("profile_image");
+		return profileImage != null ? profileImage.toString() : null;
 	}
 }
