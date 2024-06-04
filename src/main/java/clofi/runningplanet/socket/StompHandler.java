@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import clofi.runningplanet.common.exception.UnauthorizedException;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import clofi.runningplanet.security.jwt.JWTUtil;
@@ -30,6 +31,9 @@ public class StompHandler implements ChannelInterceptor {
 
 		if (StompCommand.CONNECT == accessor.getCommand()) {
 			String token = extractToken(accessor.getFirstNativeHeader(AUTHORIZATION_HEADER));
+			if (token == null || jwtUtil.isExpired(token)) {
+				throw new UnauthorizedException("Invalid token");
+			}
 			Long userId = jwtUtil.getUserId(token);
 			Authentication authentication = createAuthentication(userId);
 			accessor.setUser(authentication);
