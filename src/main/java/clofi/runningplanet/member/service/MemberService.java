@@ -175,6 +175,7 @@ public class MemberService extends DefaultOAuth2UserService {
 				"invalid_response", "유효하지 않은 정보입니다.", null));
 		}
 	}
+
 	private Member getMember(Long memberId) {
 		return memberRepository.findById(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
