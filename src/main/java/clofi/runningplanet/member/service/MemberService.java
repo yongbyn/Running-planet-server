@@ -27,7 +27,9 @@ import clofi.runningplanet.member.domain.SocialLogin;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import clofi.runningplanet.member.dto.request.CreateOnboardingRequest;
 import clofi.runningplanet.member.dto.request.UpdateProfileRequest;
+import clofi.runningplanet.member.dto.response.GoogleResponse;
 import clofi.runningplanet.member.dto.response.KakaoResponse;
+import clofi.runningplanet.member.dto.response.NaverResponse;
 import clofi.runningplanet.member.dto.response.OAuth2Response;
 import clofi.runningplanet.member.dto.response.ProfileResponse;
 import clofi.runningplanet.member.dto.response.SelfProfileResponse;
@@ -51,6 +53,9 @@ public class MemberService extends DefaultOAuth2UserService {
 	@Value("${spring.profiles.default}")
 	private String activeProfile;
 
+	@Value("${default.profile.image}")
+	private String defaultProfileImage;
+
 	@PostConstruct
 	public void init() {
 		if ("prod".equals(activeProfile)) {
@@ -72,50 +77,60 @@ public class MemberService extends DefaultOAuth2UserService {
 
 		OAuth2Response oAuth2Response;
 		if (registrationId.equals("kakao")) {
+
 			oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
 
-			if (oAuth2Response.getName() == null || oAuth2Response.getProfileImage() == null) {
-				throw new OAuth2AuthenticationException(new OAuth2Error(
-					"invalid_kakao_response", "Invalid Kakao response data", null));
-			}
+		} else if (registrationId.equals("naver")){
 
-			String oAuthType = oAuth2Response.getProvider();
-			String oAuthId = oAuth2Response.getProviderId();
+			oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
 
-			if (!socialLoginRepository.existsByOauthTypeAndOauthId(OAuthType.valueOf(oAuthType.toUpperCase()), oAuthId)){
+		} else if (registrationId.equals("google")){
 
-				Member member = Member.builder()
-					.nickname(oAuth2Response.getName())
-					.profileImg(oAuth2Response.getProfileImage())
-					.build();
-				Member savedMember = memberRepository.save(member);
-
-				SocialLogin socialLogin = SocialLogin.builder()
-					.member(savedMember)
-					.oauthId(oAuth2Response.getProviderId())
-					.oauthType(OAuthType.valueOf(oAuth2Response.getProvider().toUpperCase()))
-					.externalEmail(oAuth2Response.getEmail())
-					.build();
-				socialLoginRepository.save(socialLogin);
-
-				return new CustomOAuth2User(savedMember);
-
-			} else {
-
-				SocialLogin socialLogin = socialLoginRepository.
-					findByOauthTypeAndOauthIdWithMember(OAuthType.valueOf(oAuthType.toUpperCase()),oAuthId);
-				Member member = socialLogin.getMember();
-
-				return new CustomOAuth2User(member);
-
-			}
-
-		} else {
+			oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
+		}
+		else {
 			//로그인 id가 일치하지 않을 경우
 			OAuth2Error oauth2Error = new OAuth2Error("invalid_registration_id",
 				"The registration id is invalid: " + registrationId, null);
 			throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.getDescription());
 		}
+
+		validateOAuth2Response(oAuth2Response);
+
+		String oAuthType = oAuth2Response.getProvider();
+		String oAuthId = oAuth2Response.getProviderId();
+
+		String profileImage = oAuth2Response.getProfileImage() != null ? oAuth2Response.getProfileImage() : defaultProfileImage;
+
+
+		if (!socialLoginRepository.existsByOauthTypeAndOauthId(OAuthType.valueOf(oAuthType.toUpperCase()), oAuthId)){
+
+			Member member = Member.builder()
+				.nickname(oAuth2Response.getName())
+				.profileImg(profileImage)
+				.build();
+			Member savedMember = memberRepository.save(member);
+
+			SocialLogin socialLogin = SocialLogin.builder()
+				.member(savedMember)
+				.oauthId(oAuth2Response.getProviderId())
+				.oauthType(OAuthType.valueOf(oAuth2Response.getProvider().toUpperCase()))
+				.externalEmail(oAuth2Response.getEmail())
+				.build();
+			socialLoginRepository.save(socialLogin);
+
+			return new CustomOAuth2User(savedMember);
+
+		} else {
+
+			SocialLogin socialLogin = socialLoginRepository.
+				findByOauthTypeAndOauthIdWithMember(OAuthType.valueOf(oAuthType.toUpperCase()),oAuthId);
+			Member member = socialLogin.getMember();
+
+			return new CustomOAuth2User(member);
+
+		}
+
 	}
 
 	public void createOnboarding(Long memberId, CreateOnboardingRequest request) {
@@ -152,6 +167,13 @@ public class MemberService extends DefaultOAuth2UserService {
 
 		return new UpdateProfileResponse(member.getNickname(), updatedProfileImageUrl.getFirst());
 
+	}
+
+	private void validateOAuth2Response(OAuth2Response oAuth2Response) {
+		if (oAuth2Response.getName() == null) {
+			throw new OAuth2AuthenticationException(new OAuth2Error(
+				"invalid_response", "유효하지 않은 정보입니다.", null));
+		}
 	}
 
 	private Member getMember(Long memberId) {
