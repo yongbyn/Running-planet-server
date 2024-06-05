@@ -81,7 +81,6 @@ class CrewControllerTest {
 		CreateCrewReqDto reqDto = new CreateCrewReqDto(
 			"크루명",
 			5,
-			50,
 			RUNNING,
 			List.of("성실"),
 			AUTO,

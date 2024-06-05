@@ -17,9 +17,6 @@ public record CreateCrewReqDto(
 	@Size(max = 50)
 	String crewName,
 
-	@Range(min = 1, max = 10)
-	int limitMemberCnt,
-
 	@Range(min = 0, max = 100)
 	int limitRunScore,
 
@@ -38,7 +35,7 @@ public record CreateCrewReqDto(
 	RuleDto rule
 ) {
 	public Crew toEntity(Long leaderId) {
-		return new Crew(leaderId, crewName, limitMemberCnt, limitRunScore, category, approvalType, introduction,
+		return new Crew(leaderId, crewName, 10, limitRunScore, category, approvalType, introduction,
 			rule.weeklyRun(), rule.distance());
 	}
 }
