@@ -1,5 +1,7 @@
 package clofi.runningplanet.member.controller;
 
+import java.io.IOException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,7 @@ import clofi.runningplanet.member.dto.response.ProfileResponse;
 import clofi.runningplanet.member.dto.response.SelfProfileResponse;
 import clofi.runningplanet.member.dto.response.UpdateProfileResponse;
 import clofi.runningplanet.member.service.MemberService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +29,11 @@ import lombok.RequiredArgsConstructor;
 public class MemberController {
 
 	private final MemberService memberService;
+
+	@GetMapping("/api/kakaoLogin")
+	public void kakaoLogin(HttpServletResponse response)throws IOException {
+		response.sendRedirect("/oauth2/authorization/kakao");
+	}
 
 	@PostMapping("/api/onboarding")
 	public ResponseEntity<Void> createOnboarding(
