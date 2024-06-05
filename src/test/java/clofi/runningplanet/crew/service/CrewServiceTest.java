@@ -48,17 +48,6 @@ import clofi.runningplanet.member.repository.MemberRepository;
 @ExtendWith(MockitoExtension.class)
 class CrewServiceTest {
 
-	private static final Member MEMBER = Member.builder()
-		.id(1L)
-		.nickname("닉네임")
-		.age(20)
-		.gender(Gender.MALE)
-		.profileImg("https://image-url.com")
-		.avgDistance(10)
-		.totalDistance(100)
-		.runScore(50)
-		.build();
-
 	@Mock
 	private CrewRepository crewRepository;
 
@@ -83,36 +72,16 @@ class CrewServiceTest {
 		// given
 		Long leaderId = 1L;
 
-		RuleDto rule = new RuleDto(5, 100);
+		CreateCrewReqDto reqDto = getCreateCrewReqDto();
 
-		CreateCrewReqDto reqDto = new CreateCrewReqDto(
-			"크루명",
-			RUNNING,
-			List.of("성실"),
-			AUTO,
-			"크루를 소개하는 글",
-			rule
-		);
-
-		Crew crew = new Crew(
-			1L,
-			MEMBER.getId(),
-			"크루명",
-			10,
-			RUNNING,
-			AUTO,
-			"크루를 소개하는 글",
-			5,
-			100,
-			0,
-			0
-		);
+		Crew crew = createCrew();
+		Member leader = createLeader();
 
 		given(crewRepository.save(any(Crew.class))).willReturn(crew);
 		given(tagRepository.saveAll(anyList())).willReturn(Collections.emptyList());
 		given(crewMemberRepository.save(any(CrewMember.class))).willReturn(
-			new CrewMember(1L, crew, MEMBER, Role.LEADER));
-		given(memberRepository.findById(anyLong())).willReturn(Optional.of(MEMBER));
+			new CrewMember(1L, crew, leader, Role.LEADER));
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(leader));
 		given(crewMemberRepository.existsByMemberId(anyLong()))
 			.willReturn(false);
 
@@ -127,22 +96,15 @@ class CrewServiceTest {
 	@Test
 	void failCreateCrewByNotFoundMember() {
 		//given
-		RuleDto rule = new RuleDto(5, 100);
+		CreateCrewReqDto reqDto = getCreateCrewReqDto();
 
-		CreateCrewReqDto reqDto = new CreateCrewReqDto(
-			"크루명",
-			RUNNING,
-			List.of("성실"),
-			AUTO,
-			"크루를 소개하는 글",
-			rule
-		);
+		Member leader = createLeader();
 
 		given(memberRepository.findById(anyLong())).willReturn(Optional.empty());
 
 		//when
 		//then
-		assertThatThrownBy(() -> crewService.createCrew(reqDto, MEMBER.getId()))
+		assertThatThrownBy(() -> crewService.createCrew(reqDto, leader.getId()))
 			.isInstanceOf(NotFoundException.class);
 	}
 
@@ -150,25 +112,18 @@ class CrewServiceTest {
 	@Test
 	void test() {
 		//given
-		RuleDto rule = new RuleDto(5, 100);
+		CreateCrewReqDto reqDto = getCreateCrewReqDto();
 
-		CreateCrewReqDto reqDto = new CreateCrewReqDto(
-			"크루명",
-			RUNNING,
-			List.of("성실"),
-			AUTO,
-			"크루를 소개하는 글",
-			rule
-		);
+		Member leader = createLeader();
 
 		given(memberRepository.findById(anyLong()))
-			.willReturn(Optional.ofNullable(MEMBER));
+			.willReturn(Optional.of(leader));
 		given(crewMemberRepository.existsByMemberId(anyLong()))
 			.willReturn(true);
 
 		//when
 		//then
-		assertThatThrownBy(() -> crewService.createCrew(reqDto, MEMBER.getId()))
+		assertThatThrownBy(() -> crewService.createCrew(reqDto, leader.getId()))
 			.isInstanceOf(ConflictException.class);
 	}
 
@@ -176,12 +131,11 @@ class CrewServiceTest {
 	@Test
 	void successFindAllCrew() {
 		//given
-		Crew crew1 = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-		Crew crew2 = new Crew(2L, 2L, "클로피 크루", 8,
-			RUNNING, MANUAL, "클로피 크루는 최고의 크루", 7, 500,
-			1000, 3000);
+		Crew crew1 = createCrew();
+		Crew crew2 = createAutoCrew();
+
+		Member leader = createLeader();
+		Member leader2 = createMember();
 
 		given(crewRepository.findAll())
 			.willReturn(List.of(crew1, crew2));
@@ -194,17 +148,18 @@ class CrewServiceTest {
 				new Tag(2L, crew2, "최고")
 			));
 		given(memberRepository.findById(anyLong()))
-			.willReturn(Optional.of(MEMBER));
+			.willReturn(Optional.of(leader))
+			.willReturn(Optional.of(leader2));
 
 		//when
 		List<FindAllCrewResDto> result = crewService.findAllCrew();
 
 		//then
 		final FindAllCrewResDto firstFindAllCrewResDto = FindAllCrewResDto.of(crew1, List.of("성실"),
-			new CrewLeaderDto(1L, "닉네임"));
+			new CrewLeaderDto(1L, "크루장"));
 
 		final FindAllCrewResDto secondFindAllCrewResDto = FindAllCrewResDto.of(crew2, List.of("최고"),
-			new CrewLeaderDto(2L, "닉네임"));
+			new CrewLeaderDto(2L, "사용자"));
 
 		final List<FindAllCrewResDto> expect = List.of(firstFindAllCrewResDto, secondFindAllCrewResDto);
 
@@ -229,16 +184,14 @@ class CrewServiceTest {
 	@Test
 	void failEmptyCrew() {
 		//given
-		Crew crew1 = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
 
 		given(crewRepository.findAll())
-			.willReturn(List.of(crew1));
+			.willReturn(List.of(crew));
 
 		given(tagRepository.findAllByCrewId(anyLong()))
 			.willReturn(List.of(
-				new Tag(1L, crew1, "성실")
+				new Tag(1L, crew, "성실")
 			));
 		given(memberRepository.findById(anyLong()))
 			.willReturn(Optional.empty());
@@ -255,9 +208,8 @@ class CrewServiceTest {
 		//given
 		Long crewId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
+		Member leader = createLeader();
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
@@ -268,13 +220,13 @@ class CrewServiceTest {
 			));
 
 		given(memberRepository.findById(anyLong()))
-			.willReturn(Optional.of(MEMBER));
+			.willReturn(Optional.of(leader));
 
 		//when
 		FindCrewResDto result = crewService.findCrew(crewId);
 
 		//then
-		final FindCrewResDto findCrewResDto = FindCrewResDto.of(crew, new CrewLeaderDto(1L, "닉네임"), List.of("성실"));
+		final FindCrewResDto findCrewResDto = FindCrewResDto.of(crew, new CrewLeaderDto(1L, "크루장"), List.of("성실"));
 
 		assertThat(result).isEqualTo(findCrewResDto);
 	}
@@ -300,9 +252,7 @@ class CrewServiceTest {
 		//given
 		Long crewId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
@@ -325,16 +275,15 @@ class CrewServiceTest {
 	@Test
 	void successApplyCrew() {
 		//given
-		ApplyCrewReqDto reqDto = new ApplyCrewReqDto("크루 신청서");
+		ApplyCrewReqDto reqDto = getApplyCrewReqDto();
 		Long crewId = 1L;
-		Long memberId = 1L;
+		Long memberId = 2L;
 
-		Crew crew = new Crew(1L, 2L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
+		Member member = createMember();
 
 		given(memberRepository.findById(anyLong()))
-			.willReturn(Optional.of(MEMBER));
+			.willReturn(Optional.of(member));
 		given(crewMemberRepository.findByMemberId(anyLong()))
 			.willReturn(Optional.empty());
 		given(crewApplicationRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
@@ -357,7 +306,7 @@ class CrewServiceTest {
 	@Test
 	void failApplyCrewByNotFoundMember() {
 		//given
-		ApplyCrewReqDto reqDto = new ApplyCrewReqDto("크루 신청서");
+		ApplyCrewReqDto reqDto = getApplyCrewReqDto();
 		Long crewId = 1L;
 		Long memberId = 1L;
 
@@ -374,12 +323,14 @@ class CrewServiceTest {
 	@Test
 	void failApplyCrewByExistCrew() {
 		//given
-		ApplyCrewReqDto reqDto = new ApplyCrewReqDto("크루 신청서");
+		ApplyCrewReqDto reqDto = getApplyCrewReqDto();
 		Long crewId = 1L;
-		Long memberId = 1L;
+		Long memberId = 2L;
+
+		Member member = createMember();
 
 		given(memberRepository.findById(anyLong()))
-			.willReturn(Optional.of(MEMBER));
+			.willReturn(Optional.of(member));
 		given(crewMemberRepository.findByMemberId(anyLong()))
 			.willReturn(Optional.of(new CrewMember(null, null, null, null)));
 
@@ -393,12 +344,14 @@ class CrewServiceTest {
 	@Test
 	void failApplyCrewByNotFoundCrew() {
 		//given
-		ApplyCrewReqDto reqDto = new ApplyCrewReqDto("크루 신청서");
+		ApplyCrewReqDto reqDto = getApplyCrewReqDto();
 		Long crewId = 1L;
-		Long memberId = 1L;
+		Long memberId = 2L;
+
+		Member member = createMember();
 
 		given(memberRepository.findById(anyLong()))
-			.willReturn(Optional.of(MEMBER));
+			.willReturn(Optional.of(member));
 		given(crewMemberRepository.findByMemberId(anyLong()))
 			.willReturn(Optional.empty());
 		given(crewApplicationRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
@@ -419,10 +372,9 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
 
 		Member member1 = Member.builder()
 			.id(2L)
@@ -445,8 +397,8 @@ class CrewServiceTest {
 			.runScore(70)
 			.build();
 
-		CrewApplication crewApplication1 = new CrewApplication(1L, "크루 신청글1", Approval.PENDING, crew, member1);
-		CrewApplication crewApplication2 = new CrewApplication(2L, "크루 신청글2", Approval.PENDING, crew, member2);
+		CrewApplication crewApplication1 = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
+		CrewApplication crewApplication2 = new CrewApplication(2L, "크루 신청글", Approval.PENDING, crew, member2);
 
 		given(crewMemberRepository.findByMemberId(anyLong()))
 			.willReturn(Optional.of(crewMember));
@@ -459,9 +411,9 @@ class CrewServiceTest {
 		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, memberId);
 
 		//then
-		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글1", 80, Gender.MALE, 30,
+		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글", 80, Gender.MALE, 30,
 			Approval.PENDING);
-		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글2", 70, Gender.FEMALE, 15,
+		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글", 70, Gender.FEMALE, 15,
 			Approval.PENDING);
 		ApprovalMemberResDto approvalMemberResDto = new ApprovalMemberResDto(
 			List.of(getApplyCrewResDto1, getApplyCrewResDto2));
@@ -476,10 +428,9 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
 
 		given(crewMemberRepository.findByMemberId(anyLong()))
 			.willReturn(Optional.of(crewMember));
@@ -518,10 +469,9 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
 
 		given(crewMemberRepository.findByMemberId(anyLong()))
 			.willReturn(Optional.of(crewMember));
@@ -542,22 +492,12 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-		Member member1 = Member.builder()
-			.id(2L)
-			.nickname("닉네임1")
-			.age(30)
-			.gender(Gender.MALE)
-			.profileImg("https://image-url1.com")
-			.avgDistance(50)
-			.totalDistance(2000)
-			.runScore(80)
-			.build();
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		Member member = createMember();
 
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
-		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member);
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
@@ -569,7 +509,7 @@ class CrewServiceTest {
 		given(crewMemberRepository.countByCrewId(anyLong()))
 			.willReturn(1);
 		given(memberRepository.findById(anyLong()))
-			.willReturn(Optional.of(member1));
+			.willReturn(Optional.of(member));
 		given(crewMemberRepository.save(any(CrewMember.class)))
 			.willReturn(crewMember);
 
@@ -586,22 +526,12 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-		Member member1 = Member.builder()
-			.id(2L)
-			.nickname("닉네임1")
-			.age(30)
-			.gender(Gender.MALE)
-			.profileImg("https://image-url1.com")
-			.avgDistance(50)
-			.totalDistance(2000)
-			.runScore(80)
-			.build();
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		Member member = createMember();
 
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
-		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member);
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
@@ -641,9 +571,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
@@ -664,11 +592,10 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
+		Member leader = createLeader();
 
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
@@ -691,28 +618,18 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-		Member member1 = Member.builder()
-			.id(2L)
-			.nickname("닉네임1")
-			.age(30)
-			.gender(Gender.MALE)
-			.profileImg("https://image-url1.com")
-			.avgDistance(50)
-			.totalDistance(2000)
-			.runScore(80)
-			.build();
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		Member member = createMember();
 
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
-		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member);
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
 		given(crewMemberRepository.findByMemberId(anyLong()))
 			.willReturn(Optional.of(crewMember))
-			.willReturn(Optional.of(CrewMember.createMember(crew, member1)));
+			.willReturn(Optional.of(CrewMember.createMember(crew, member)));
 		given(crewApplicationRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
 			.willReturn(Optional.of(crewApplication));
 
@@ -730,22 +647,12 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-		Member member1 = Member.builder()
-			.id(2L)
-			.nickname("닉네임1")
-			.age(30)
-			.gender(Gender.MALE)
-			.profileImg("https://image-url1.com")
-			.avgDistance(50)
-			.totalDistance(2000)
-			.runScore(80)
-			.build();
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		Member member = createMember();
 
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
-		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member);
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
@@ -773,22 +680,12 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-		Member member1 = Member.builder()
-			.id(2L)
-			.nickname("닉네임1")
-			.age(30)
-			.gender(Gender.MALE)
-			.profileImg("https://image-url1.com")
-			.avgDistance(50)
-			.totalDistance(2000)
-			.runScore(80)
-			.build();
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		Member member = createMember();
 
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
-		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member);
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
@@ -814,23 +711,12 @@ class CrewServiceTest {
 		Long memberId = 2L;
 		Long leaderId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		Member member = createMember();
 
-		Member member1 = Member.builder()
-			.id(2L)
-			.nickname("닉네임1")
-			.age(30)
-			.gender(Gender.MALE)
-			.profileImg("https://image-url1.com")
-			.avgDistance(50)
-			.totalDistance(2000)
-			.runScore(80)
-			.build();
-
-		CrewMember crewLeader = new CrewMember(1L, crew, MEMBER, Role.LEADER);
-		CrewMember crewMember = new CrewMember(2L, crew, member1, Role.MEMBER);
+		CrewMember crewLeader = new CrewMember(1L, crew, leader, Role.LEADER);
+		CrewMember crewMember = new CrewMember(2L, crew, member, Role.MEMBER);
 
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
@@ -893,11 +779,10 @@ class CrewServiceTest {
 		Long memberId = 2L;
 		Long leaderId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
+		Member leader = createLeader();
 
-		CrewMember crewLeader = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+		CrewMember crewLeader = new CrewMember(1L, crew, leader, Role.LEADER);
 
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
@@ -922,11 +807,10 @@ class CrewServiceTest {
 		Long memberId = 2L;
 		Long leaderId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
+		Member leader = createLeader();
 
-		CrewMember crewLeader = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+		CrewMember crewLeader = new CrewMember(1L, crew, leader, Role.LEADER);
 
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
@@ -948,11 +832,10 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 2L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
+		Member leader = createLeader();
 
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.MEMBER);
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.MEMBER);
 
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
@@ -1030,11 +913,10 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
+		Member leader = createLeader();
 
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
 
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
@@ -1064,11 +946,10 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
+		Member leader = createLeader();
 
-		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
 
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
@@ -1092,20 +973,8 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 2L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
-
-		Member member1 = Member.builder()
-			.id(2L)
-			.nickname("닉네임1")
-			.age(30)
-			.gender(Gender.MALE)
-			.profileImg("https://image-url1.com")
-			.avgDistance(50)
-			.totalDistance(2000)
-			.runScore(80)
-			.build();
+		Crew crew = createCrew();
+		Member member1 = createMember();
 
 		CrewApplication crewApplication = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
 
@@ -1180,5 +1049,31 @@ class CrewServiceTest {
 		//then
 		assertThatThrownBy(() -> crewService.cancelCrewApplication(crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
+	}
+
+	private CreateCrewReqDto getCreateCrewReqDto() {
+		RuleDto rule = new RuleDto(5, 100);
+		return new CreateCrewReqDto("구름 크루", RUNNING, List.of("성실"), MANUAL, "구름 크루는 성실한 크루", rule
+		);
+	}
+
+	private static ApplyCrewReqDto getApplyCrewReqDto() {
+		return new ApplyCrewReqDto("크루 신청글");
+	}
+
+	private Crew createCrew() {
+		return new Crew(1L, 1L, "구름 크루", 10, RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100, 0, 0);
+	}
+
+	private Crew createAutoCrew() {
+		return new Crew(2L, 2L, "클로피 크루", 8, RUNNING, AUTO, "클로피 크루는 최고의 크루", 7, 500, 1000, 3000);
+	}
+
+	private Member createLeader() {
+		return new Member(1L, "크루장", Gender.MALE, 20, 70, "https://image-url.com", 0, 10, 30, 100);
+	}
+
+	private Member createMember() {
+		return new Member(2L, "사용자", Gender.FEMALE, 30, 80, "https://image-url.com", 0, 0, 0, 0);
 	}
 }
