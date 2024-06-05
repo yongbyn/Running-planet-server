@@ -30,7 +30,7 @@ public class MemberController {
 
 	private final MemberService memberService;
 
-	@GetMapping("/api/kakaoLogin")
+	@GetMapping("/api/kakaologin")
 	public void kakaoLogin(HttpServletResponse response)throws IOException {
 		response.sendRedirect("/oauth2/authorization/kakao");
 	}
