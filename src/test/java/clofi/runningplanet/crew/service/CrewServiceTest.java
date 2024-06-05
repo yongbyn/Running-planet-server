@@ -87,7 +87,6 @@ class CrewServiceTest {
 
 		CreateCrewReqDto reqDto = new CreateCrewReqDto(
 			"크루명",
-			5,
 			RUNNING,
 			List.of("성실"),
 			AUTO,
@@ -99,8 +98,7 @@ class CrewServiceTest {
 			1L,
 			MEMBER.getId(),
 			"크루명",
-			5,
-			50,
+			10,
 			RUNNING,
 			AUTO,
 			"크루를 소개하는 글",
@@ -133,7 +131,6 @@ class CrewServiceTest {
 
 		CreateCrewReqDto reqDto = new CreateCrewReqDto(
 			"크루명",
-			5,
 			RUNNING,
 			List.of("성실"),
 			AUTO,
@@ -157,7 +154,6 @@ class CrewServiceTest {
 
 		CreateCrewReqDto reqDto = new CreateCrewReqDto(
 			"크루명",
-			5,
 			RUNNING,
 			List.of("성실"),
 			AUTO,
@@ -180,10 +176,10 @@ class CrewServiceTest {
 	@Test
 	void successFindAllCrew() {
 		//given
-		Crew crew1 = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew1 = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
-		Crew crew2 = new Crew(2L, 2L, "클로피 크루", 8, 90,
+		Crew crew2 = new Crew(2L, 2L, "클로피 크루", 8,
 			RUNNING, MANUAL, "클로피 크루는 최고의 크루", 7, 500,
 			1000, 3000);
 
@@ -233,7 +229,7 @@ class CrewServiceTest {
 	@Test
 	void failEmptyCrew() {
 		//given
-		Crew crew1 = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew1 = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -259,7 +255,7 @@ class CrewServiceTest {
 		//given
 		Long crewId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -304,7 +300,7 @@ class CrewServiceTest {
 		//given
 		Long crewId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, AUTO, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -333,7 +329,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 2L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 2L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -423,7 +419,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
@@ -480,7 +476,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
@@ -522,7 +518,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
@@ -546,7 +542,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		Member member1 = Member.builder()
@@ -590,7 +586,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		Member member1 = Member.builder()
@@ -645,7 +641,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -668,7 +664,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -695,7 +691,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		Member member1 = Member.builder()
@@ -734,7 +730,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		Member member1 = Member.builder()
@@ -777,7 +773,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		Member member1 = Member.builder()
@@ -818,7 +814,7 @@ class CrewServiceTest {
 		Long memberId = 2L;
 		Long leaderId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -897,7 +893,7 @@ class CrewServiceTest {
 		Long memberId = 2L;
 		Long leaderId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -926,7 +922,7 @@ class CrewServiceTest {
 		Long memberId = 2L;
 		Long leaderId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -952,7 +948,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 2L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -1034,7 +1030,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -1068,7 +1064,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 
@@ -1096,7 +1092,7 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 2L;
 
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 

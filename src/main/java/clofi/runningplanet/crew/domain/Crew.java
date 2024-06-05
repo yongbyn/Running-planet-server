@@ -35,9 +35,6 @@ public class Crew extends BaseSoftDeleteEntity {
 	@Column(name = "limit_member_cnt", nullable = false)
 	private int limitMemberCnt;
 
-	@Column(name = "limit_run_score", nullable = false)
-	private int limitRunScore;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category", nullable = false, length = 10)
 	private Category category;
@@ -61,21 +58,20 @@ public class Crew extends BaseSoftDeleteEntity {
 	@Column(name = "total_distance", nullable = false)
 	private int totalDistance;
 
-	public Crew(Long leaderId, String crewName, int limitMemberCnt, int limitRunScore, Category category,
+	public Crew(Long leaderId, String crewName, int limitMemberCnt, Category category,
 		ApprovalType approvalType,
 		String introduction, int ruleRunCnt, int ruleDistance) {
-		this(null, leaderId, crewName, limitMemberCnt, limitRunScore, category, approvalType, introduction, ruleRunCnt,
+		this(null, leaderId, crewName, limitMemberCnt, category, approvalType, introduction, ruleRunCnt,
 			ruleDistance, 0, 0);
 	}
 
-	public Crew(Long id, Long leaderId, String crewName, int limitMemberCnt, int limitRunScore, Category category,
+	public Crew(Long id, Long leaderId, String crewName, int limitMemberCnt, Category category,
 		ApprovalType approvalType, String introduction, int ruleRunCnt, int ruleDistance, int weeklyDistance,
 		int totalDistance) {
 		this.id = id;
 		this.leaderId = leaderId;
 		this.crewName = crewName;
 		this.limitMemberCnt = limitMemberCnt;
-		this.limitRunScore = limitRunScore;
 		this.category = category;
 		this.approvalType = approvalType;
 		this.introduction = introduction;
@@ -83,12 +79,6 @@ public class Crew extends BaseSoftDeleteEntity {
 		this.ruleDistance = ruleDistance;
 		this.weeklyDistance = weeklyDistance;
 		this.totalDistance = totalDistance;
-	}
-
-	public void checkRunScore(int runScore) {
-		if (this.limitRunScore > runScore) {
-			throw new IllegalArgumentException("운동 점수가 제한 운동 점수보다 낮아 지원할 수 없습니다.");
-		}
 	}
 
 	public boolean checkReachedMemberLimit(int currentMemberCnt) {

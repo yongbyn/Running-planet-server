@@ -50,7 +50,7 @@ class BoardReadServiceTest {
 		Member commentMember = new Member(null, "댓글 테스트", Gender.MALE, 10, 100, "테스트", 10, 10, 10, 10);
 		memberRepository.save(member);
 		memberRepository.save(commentMember);
-		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crewInstance = new Crew(1L, "테스트", 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
 		Board boardInstance = new Board("기존 게시글 제목", "기존 게시글 내용", crew, member);
 		Board board = boardRepository.save(boardInstance);

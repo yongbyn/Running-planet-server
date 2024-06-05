@@ -80,8 +80,6 @@ public class CrewService {
 
 		Crew findCrew = getCrewByCrewId(crewId);
 
-		findCrew.checkRunScore(findMember.getRunScore());
-
 		CrewApplication crewApplication = reqDto.toEntity(findCrew, findMember);
 		crewApplicationRepository.save(crewApplication);
 		return new ApplyCrewResDto(crewId, findMember.getId(), true);

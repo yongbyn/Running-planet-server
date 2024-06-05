@@ -80,7 +80,6 @@ class CrewControllerTest {
 
 		CreateCrewReqDto reqDto = new CreateCrewReqDto(
 			"크루명",
-			5,
 			RUNNING,
 			List.of("성실"),
 			AUTO,
@@ -107,12 +106,12 @@ class CrewControllerTest {
 		//given
 		List<FindAllCrewResDto> expected = List.of(
 			new FindAllCrewResDto(1L, "구름 크루", 1, 1,
-				10, AUTO, 50, List.of("성실"), RUNNING,
+				10, AUTO, List.of("성실"), RUNNING,
 				new RuleDto(3, 100),
 				"구름 크루는 성실한 크루",
 				new CrewLeaderDto(1L, "임시 닉네임")),
 			new FindAllCrewResDto(2L, "클로피 크루", 1, 1,
-				8, MANUAL, 80, List.of("최고"), RUNNING,
+				8, MANUAL, List.of("최고"), RUNNING,
 				new RuleDto(3, 100),
 				"클로피 크루는 최고의 크루",
 				new CrewLeaderDto(2L, "임시 닉네임"))
@@ -144,7 +143,7 @@ class CrewControllerTest {
 		Long crewId = 1L;
 		FindCrewResDto expected = new FindCrewResDto(1L, 1, "구름 크루",
 			new CrewLeaderDto(1L, "임시 닉네임"), 5, 10, AUTO,
-			50, "구름 크루는 성실한 크루", List.of("성실"), RUNNING,
+			"구름 크루는 성실한 크루", List.of("성실"), RUNNING,
 			new RuleDto(5, 100), 0, false);
 
 		given(crewService.findCrew(crewId))

@@ -89,7 +89,7 @@ class MemberServiceTest {
 		memberRepository.save(member1);
 
 		Crew crew1 = new Crew(
-			member1.getId(),"고구마크루" ,5,10, Category.RUNNING, ApprovalType.AUTO,"소개글",7,1);
+			member1.getId(), "고구마크루", 10, Category.RUNNING, ApprovalType.AUTO, "소개글", 7, 1);
 		crewRepository.save(crew1);
 
 		CrewMember crewMember1 = CrewMember.builder()
@@ -105,7 +105,6 @@ class MemberServiceTest {
 		//when
 		ProfileResponse profileResponseWithCrew = memberService.getProfile(member1.getId());
 		ProfileResponse profileResponseWithoutCrew = memberService.getProfile(member2.getId());
-
 
 		//then
 		assertThat(profileResponseWithCrew).isNotNull();
@@ -136,7 +135,7 @@ class MemberServiceTest {
 		memberRepository.save(member1);
 
 		Crew crew1 = new Crew(
-			member1.getId(),"고구마크루" ,5,10, Category.RUNNING, ApprovalType.AUTO,"소개글",7,1);
+			member1.getId(), "고구마크루", 10, Category.RUNNING, ApprovalType.AUTO, "소개글", 7, 1);
 		crewRepository.save(crew1);
 
 		CrewMember crewMember1 = CrewMember.builder()
@@ -177,16 +176,15 @@ class MemberServiceTest {
 		MemberService memberService = getMemberService();
 
 		//when
-		memberService.updateProfile(member.getId(),request,imageFile);
+		memberService.updateProfile(member.getId(), request, imageFile);
 		Member updatedMember = memberRepository.findById(savedMember.getId())
-			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));;
+			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+		;
 
 		//then
 		assertThat(updatedMember.getNickname()).isEqualTo(request.nickname());
 		assertThat(updatedMember.getProfileImg()).isEqualTo("fakeImageUrl1");
 	}
-
-
 
 	private Member createMember() {
 		return Member.builder()
@@ -203,11 +201,11 @@ class MemberServiceTest {
 	private MultipartFile getImageFile() {
 
 		return new MockMultipartFile(
-				"image1", // 파일 파라미터 이름
-				"image1.jpg", // 파일명
-				"image/jpeg", // 컨텐츠 타입
-				"이미지_콘텐츠1".getBytes() // 파일 콘텐츠
-				);
+			"image1", // 파일 파라미터 이름
+			"image1.jpg", // 파일명
+			"image/jpeg", // 컨텐츠 타입
+			"이미지_콘텐츠1".getBytes() // 파일 콘텐츠
+		);
 	}
 
 	// 테스트용 멤버서비스
