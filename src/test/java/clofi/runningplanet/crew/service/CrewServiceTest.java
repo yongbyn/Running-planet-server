@@ -18,12 +18,16 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
+import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.crew.domain.Approval;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.CrewApplication;
+import clofi.runningplanet.crew.domain.CrewImage;
 import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.crew.domain.Role;
 import clofi.runningplanet.crew.domain.Tag;
@@ -38,6 +42,7 @@ import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
 import clofi.runningplanet.crew.repository.CrewApplicationRepository;
+import clofi.runningplanet.crew.repository.CrewImageRepository;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
@@ -63,6 +68,12 @@ class CrewServiceTest {
 	@Mock
 	private CrewApplicationRepository crewApplicationRepository;
 
+	@Mock
+	private CrewImageRepository crewImageRepository;
+
+	@Mock
+	private S3StorageManagerUseCase storageManagerUseCase;
+
 	@InjectMocks
 	private CrewService crewService;
 
@@ -76,17 +87,22 @@ class CrewServiceTest {
 
 		Crew crew = createCrew();
 		Member leader = createLeader();
+		MockMultipartFile imageFile = createImage();
 
 		given(crewRepository.save(any(Crew.class))).willReturn(crew);
 		given(tagRepository.saveAll(anyList())).willReturn(Collections.emptyList());
 		given(crewMemberRepository.save(any(CrewMember.class))).willReturn(
 			new CrewMember(1L, crew, leader, Role.LEADER));
 		given(memberRepository.findById(anyLong())).willReturn(Optional.of(leader));
+		given(storageManagerUseCase.uploadImage(any(MockMultipartFile.class)))
+			.willReturn("https://imagepath.com");
+		given(crewImageRepository.save(any(CrewImage.class)))
+			.willReturn(null);
 		given(crewMemberRepository.existsByMemberId(anyLong()))
 			.willReturn(false);
 
 		// when
-		Long result = crewService.createCrew(reqDto, leaderId);
+		Long result = crewService.createCrew(reqDto, imageFile, leaderId);
 
 		// then
 		assertThat(result).isEqualTo(1L);
@@ -99,12 +115,13 @@ class CrewServiceTest {
 		CreateCrewReqDto reqDto = getCreateCrewReqDto();
 
 		Member leader = createLeader();
+		MockMultipartFile imageFile = createImage();
 
 		given(memberRepository.findById(anyLong())).willReturn(Optional.empty());
 
 		//when
 		//then
-		assertThatThrownBy(() -> crewService.createCrew(reqDto, leader.getId()))
+		assertThatThrownBy(() -> crewService.createCrew(reqDto, imageFile, leader.getId()))
 			.isInstanceOf(NotFoundException.class);
 	}
 
@@ -115,6 +132,7 @@ class CrewServiceTest {
 		CreateCrewReqDto reqDto = getCreateCrewReqDto();
 
 		Member leader = createLeader();
+		MockMultipartFile imageFile = createImage();
 
 		given(memberRepository.findById(anyLong()))
 			.willReturn(Optional.of(leader));
@@ -123,7 +141,7 @@ class CrewServiceTest {
 
 		//when
 		//then
-		assertThatThrownBy(() -> crewService.createCrew(reqDto, leader.getId()))
+		assertThatThrownBy(() -> crewService.createCrew(reqDto, imageFile, leader.getId()))
 			.isInstanceOf(ConflictException.class);
 	}
 
@@ -1059,6 +1077,10 @@ class CrewServiceTest {
 
 	private static ApplyCrewReqDto getApplyCrewReqDto() {
 		return new ApplyCrewReqDto("크루 신청글");
+	}
+
+	private MockMultipartFile createImage() {
+		return new MockMultipartFile("크루로고", "크루로고.png", MediaType.IMAGE_PNG_VALUE, "크루로고.png".getBytes());
 	}
 
 	private Crew createCrew() {

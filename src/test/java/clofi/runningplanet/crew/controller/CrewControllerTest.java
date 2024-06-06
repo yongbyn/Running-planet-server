@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -87,11 +88,14 @@ class CrewControllerTest {
 			rule
 		);
 
-		given(crewService.createCrew(any(CreateCrewReqDto.class), anyLong()))
+		MockMultipartFile imageFile = new MockMultipartFile("imgFile", "크루로고.png", IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+
+		given(crewService.createCrew(any(CreateCrewReqDto.class), any(MockMultipartFile.class), anyLong()))
 			.willReturn(1L);
 
 		//when
-		ResultActions resultAction = createCrew(reqDto);
+		ResultActions resultAction = createCrew(reqDto, imageFile);
 
 		//then
 		resultAction
@@ -322,9 +326,13 @@ class CrewControllerTest {
 		assertThat(expected).isEqualTo(resDto);
 	}
 
-	private ResultActions createCrew(CreateCrewReqDto reqDto) throws Exception {
-		return mockMvc.perform(post("/api/crew")
-			.contentType(APPLICATION_JSON)
+	private ResultActions createCrew(CreateCrewReqDto reqDto, MockMultipartFile imgFile) throws Exception {
+		MockMultipartFile jsonFile = new MockMultipartFile("crewInfo", "", "application/json",
+			objectMapper.writeValueAsBytes(reqDto));
+		return mockMvc.perform(multipart("/api/crew")
+			.file(imgFile)
+			.file(jsonFile)
+			.contentType(MULTIPART_FORM_DATA)
 			.header(AUTHORIZATION, "Bearer accessToken")
 			.content(objectMapper.writeValueAsString(reqDto)));
 	}
