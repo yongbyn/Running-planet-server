@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class S3StorageManagerService implements S3StorageManagerUseCase{
+public class S3StorageManagerService implements S3StorageManagerUseCase {
 	private final AmazonS3 amazonS3Client;
 
 	@Value("${cloud.aws.s3.bucket}")
@@ -29,6 +29,14 @@ public class S3StorageManagerService implements S3StorageManagerUseCase{
 			.filter(this::isValidImage)
 			.map(this::uploadImageToS3)
 			.collect(Collectors.toList());
+	}
+
+	@Override
+	public String uploadImage(MultipartFile image) {
+		if (!isValidImage(image)) {
+			return null;
+		}
+		return uploadImageToS3(image);
 	}
 
 	@Override
@@ -64,6 +72,5 @@ public class S3StorageManagerService implements S3StorageManagerUseCase{
 
 		return UUID.randomUUID() + "-" + originalFilename;
 	}
-
 
 }
