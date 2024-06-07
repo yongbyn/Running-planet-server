@@ -47,4 +47,9 @@ public class CrewImage extends BaseSoftDeleteEntity {
 		this.filepath = filepath;
 		this.crew = crew;
 	}
+
+	public void update(String filePath, String originalFilename) {
+		this.filepath = filepath;
+		this.originalFilename = originalFilename;
+	}
 }

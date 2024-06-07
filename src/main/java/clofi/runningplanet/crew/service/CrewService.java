@@ -168,6 +168,20 @@ public class CrewService {
 		findCrew.update(reqDto.approvalType(), reqDto.introduction(), reqDto.rule());
 
 		updateTags(reqDto, crewId);
+
+		if (!imgFile.isEmpty()) {
+			updateCrewImage(imgFile, crewId);
+		}
+	}
+
+	private void updateCrewImage(MultipartFile imgFile, Long crewId) {
+		CrewImage findCrewImage = crewImageRepository.findByCrewId(crewId).orElseThrow(
+			() -> new NotFoundException("크루 이미지를 찾을 수 없습니다.")
+		);
+
+		storageManagerUseCase.deleteImages(findCrewImage.getFilepath());
+		String filePath = storageManagerUseCase.uploadImage(imgFile);
+		findCrewImage.update(filePath, imgFile.getOriginalFilename());
 	}
 
 	private void updateTags(UpdateCrewReqDto reqDto, Long crewId) {
