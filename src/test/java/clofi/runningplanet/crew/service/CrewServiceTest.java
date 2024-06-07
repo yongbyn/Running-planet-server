@@ -1129,6 +1129,29 @@ class CrewServiceTest {
 			.isInstanceOf(NotFoundException.class);
 	}
 
+	@DisplayName("크루에 속하지 않은 인원이 크루 정보 수정 시 예외 발생")
+	@Test
+	void failUpdateCrewByNotInCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile image = createImage();
+
+		Crew crew = createCrew();
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.updateCrew(reqDto, image, crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
+
 	private CrewImage createCrewImage() {
 		Crew crew = createCrew();
 		return new CrewImage(1L, "크루이미지", "https://test.com", crew);
