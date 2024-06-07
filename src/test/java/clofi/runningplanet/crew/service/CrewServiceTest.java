@@ -1179,6 +1179,40 @@ class CrewServiceTest {
 			.isInstanceOf(NotFoundException.class);
 	}
 
+	@DisplayName("크루 이미지가 없는 경우 예외 발생")
+	@Test
+	void failUpdateCrewByNotFoundImage() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile image = createImage();
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		doNothing()
+			.when(tagRepository)
+			.deleteAllByCrewId(anyLong());
+		given(tagRepository.saveAll(anyList()))
+			.willReturn(null);
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.updateCrew(reqDto, image, crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
+
 	private CrewImage createCrewImage() {
 		Crew crew = createCrew();
 		return new CrewImage(1L, "크루이미지", "https://test.com", crew);
