@@ -36,6 +36,7 @@ import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
+import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
@@ -1067,6 +1068,51 @@ class CrewServiceTest {
 		//then
 		assertThatThrownBy(() -> crewService.cancelCrewApplication(crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("크루 정보 수정 성공")
+	@Test
+	void successUpdateCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile image = createImage();
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+
+		CrewImage crewImage = createCrewImage();
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		doNothing()
+			.when(tagRepository)
+			.deleteAllByCrewId(anyLong());
+		given(tagRepository.saveAll(anyList()))
+			.willReturn(null);
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.of(crewImage));
+		doNothing()
+			.when(storageManagerUseCase)
+			.deleteImages(anyString());
+		given(storageManagerUseCase.uploadImage(any(MockMultipartFile.class)))
+			.willReturn("https://update.com");
+
+		//when
+		//then
+		assertDoesNotThrow(() -> crewService.updateCrew(reqDto, image, crewId, memberId));
+	}
+
+	private CrewImage createCrewImage() {
+		Crew crew = createCrew();
+		return new CrewImage(1L, "크루이미지", "https://test.com", crew);
 	}
 
 	private CreateCrewReqDto getCreateCrewReqDto() {
