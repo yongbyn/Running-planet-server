@@ -30,7 +30,7 @@ class CrewMemberTest {
 	@Test
 	void successCheckLeaderPrivilege() {
 		//given
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
@@ -44,7 +44,7 @@ class CrewMemberTest {
 	@Test
 	void failCheckLeaderPrivilege() {
 		//given
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.MEMBER);
@@ -59,7 +59,7 @@ class CrewMemberTest {
 	@Test
 	void successValidateMembership() {
 		//given
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.MEMBER);
@@ -74,7 +74,7 @@ class CrewMemberTest {
 	@ValueSource(longs = {2L, 4L, 100L, 1832L})
 	void failValidateMembership(Long crewId) {
 		//given
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10, 50,
+		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
 			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
 			0, 0);
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.MEMBER);

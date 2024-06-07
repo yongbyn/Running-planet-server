@@ -15,7 +15,6 @@ public record FindAllCrewResDto(
 	int memberCnt,
 	int limitMemberCnt,
 	ApprovalType approvalType,
-	int limitRunScore,
 	List<String> tags,
 	Category category,
 	RuleDto rule,
@@ -33,7 +32,6 @@ public record FindAllCrewResDto(
 
 			crew.getLimitMemberCnt(),
 			crew.getApprovalType(),
-			crew.getLimitRunScore(),
 			tags,
 			crew.getCategory(),
 			new RuleDto(crew.getRuleRunCnt(), crew.getRuleDistance()),

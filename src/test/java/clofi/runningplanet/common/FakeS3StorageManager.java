@@ -14,6 +14,11 @@ public class FakeS3StorageManager implements S3StorageManagerUseCase {
 	}
 
 	@Override
+	public String uploadImage(MultipartFile image) {
+		return "https://fakeImageUrl";
+	}
+
+	@Override
 	public void deleteImages(String image) {
 
 	}

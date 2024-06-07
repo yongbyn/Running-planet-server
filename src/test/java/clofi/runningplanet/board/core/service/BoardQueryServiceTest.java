@@ -75,7 +75,7 @@ class BoardQueryServiceTest {
 		//given
 		Member memberInstance = new Member(null, "테스트", Gender.FEMALE, 10, 100, "테스트", 10, 10, 10, 10);
 		Member member = memberRepository.save(memberInstance);
-		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crewInstance = new Crew(1L, "테스트", 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
 		CreateBoardRequest createBoardRequest = new CreateBoardRequest("게시판 제목", "게시판 내용");
 		List<MultipartFile> imageFile = getImageFile();
@@ -102,7 +102,7 @@ class BoardQueryServiceTest {
 		//given
 		Member memberInstance = new Member(null, "테스트", Gender.FEMALE, 10, 100, "테스트", 10, 10, 10, 10);
 		Member member = memberRepository.save(memberInstance);
-		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crewInstance = new Crew(1L, "테스트", 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
 
 		Board board = new Board("기존 게시글 제목", "기존 게시글 내용", crew, member);
@@ -133,7 +133,7 @@ class BoardQueryServiceTest {
 		//given
 		Member member = new Member(null, "테스트", Gender.MALE, 10, 100, "테스트", 10, 10, 10, 10);
 		memberRepository.save(member);
-		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crewInstance = new Crew(1L, "테스트", 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
 		Board boardInstance = new Board("기존 게시글 제목", "기존 게시글 내용", crew, member);
 		Board board = boardRepository.save(boardInstance);

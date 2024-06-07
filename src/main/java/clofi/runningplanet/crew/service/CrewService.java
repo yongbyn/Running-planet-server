@@ -5,11 +5,14 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
+import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.CrewApplication;
+import clofi.runningplanet.crew.domain.CrewImage;
 import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.crew.domain.Tag;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
@@ -22,6 +25,7 @@ import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
 import clofi.runningplanet.crew.repository.CrewApplicationRepository;
+import clofi.runningplanet.crew.repository.CrewImageRepository;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
@@ -38,17 +42,30 @@ public class CrewService {
 	private final MemberRepository memberRepository;
 	private final CrewApplicationRepository crewApplicationRepository;
 	private final CrewMemberRepository crewMemberRepository;
+	private final S3StorageManagerUseCase storageManagerUseCase;
+	private final CrewImageRepository crewImageRepository;
 
 	@Transactional
-	public Long createCrew(CreateCrewReqDto reqDto, Long memberId) {
+	public Long createCrew(CreateCrewReqDto reqDto, MultipartFile imageFile, Long memberId) {
 		Member findMember = getMemberByMemberId(memberId);
 		checkSubscribedCrew(memberId);
 
 		Crew savedCrew = createAndSaveCrew(reqDto, memberId);
 		saveTags(reqDto.tags(), savedCrew);
-
+		saveCrewImage(imageFile, savedCrew);
 		createAndSaveCrewMember(savedCrew, findMember);
 		return savedCrew.getId();
+	}
+
+	private void saveCrewImage(MultipartFile imageFile, Crew crew) {
+		try {
+			String originalFilename = imageFile.getOriginalFilename();
+			String filepath = storageManagerUseCase.uploadImage(imageFile);
+			CrewImage crewImage = new CrewImage(originalFilename, filepath, crew);
+			crewImageRepository.save(crewImage);
+		} catch (Exception e) {
+			throw new IllegalArgumentException();
+		}
 	}
 
 	@Transactional(readOnly = true)
@@ -79,8 +96,6 @@ public class CrewService {
 		validateDuplicateApply(crewId, findMember.getId());
 
 		Crew findCrew = getCrewByCrewId(crewId);
-
-		findCrew.checkRunScore(findMember.getRunScore());
 
 		CrewApplication crewApplication = reqDto.toEntity(findCrew, findMember);
 		crewApplicationRepository.save(crewApplication);

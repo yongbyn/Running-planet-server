@@ -47,7 +47,7 @@ class ThumbsUpServiceTest {
 		//given
 		Member member = new Member(null, "테스트", Gender.FEMALE, 10, 100, "테스트", 10, 10, 10, 10);
 		Member memberId = memberRepository.save(member);
-		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crewInstance = new Crew(1L, "테스트", 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
 		Board boardInstance = new Board("테스트", "테스트", crew, memberId);
 		Board board = boardRepository.save(boardInstance);
@@ -64,7 +64,7 @@ class ThumbsUpServiceTest {
 		//given
 		Member member = new Member(null, "테스트", Gender.FEMALE, 10, 100, "테스트", 10, 10, 10, 10);
 		Member memberId = memberRepository.save(member);
-		Crew crewInstance = new Crew(1L, "테스트", 10, 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
+		Crew crewInstance = new Crew(1L, "테스트", 10, Category.RUNNING, ApprovalType.AUTO, "테스트", 10, 10);
 		Crew crew = crewRepository.save(crewInstance);
 		Board boardInstance = new Board("테스트", "테스트", crew, memberId);
 		Board board = boardRepository.save(boardInstance);

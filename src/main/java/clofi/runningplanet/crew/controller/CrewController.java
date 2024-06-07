@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
@@ -32,9 +34,10 @@ public class CrewController {
 	private final CrewService crewService;
 
 	@PostMapping("/api/crew")
-	public ResponseEntity<Void> createCrew(@RequestBody @Valid CreateCrewReqDto reqDto,
+	public ResponseEntity<Void> createCrew(@RequestPart("crewInfo") @Valid CreateCrewReqDto reqDto,
+		@RequestPart(value = "imgFile") MultipartFile imageFile,
 		@AuthenticationPrincipal CustomOAuth2User principal) {
-		Long crewId = crewService.createCrew(reqDto, principal.getId());
+		Long crewId = crewService.createCrew(reqDto, imageFile, principal.getId());
 		return ResponseEntity.created(URI.create("/api/crew/" + crewId)).build();
 	}
 
