@@ -1110,6 +1110,25 @@ class CrewServiceTest {
 		assertDoesNotThrow(() -> crewService.updateCrew(reqDto, image, crewId, memberId));
 	}
 
+	@DisplayName("수정하려는 크루가 없는 경우 예외 발생")
+	@Test
+	void failUpdateCrewByNotFoundCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile image = createImage();
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.updateCrew(reqDto, image, crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
+
 	private CrewImage createCrewImage() {
 		Crew crew = createCrew();
 		return new CrewImage(1L, "크루이미지", "https://test.com", crew);
