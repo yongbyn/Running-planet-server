@@ -19,6 +19,7 @@ import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
+import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
@@ -155,6 +156,16 @@ public class CrewService {
 		CrewApplication crewApplication = getCrewApplicationByCrewIdAndMemberId(crewId, memberId);
 		processCancelApplication(crewApplication);
 		return new ApplyCrewResDto(crewId, memberId, false);
+	}
+
+	@Transactional
+	public void updateCrew(UpdateCrewReqDto reqDto, MultipartFile imgFile, Long crewId, Long memberId) {
+		Crew findCrew = getCrewByCrewId(crewId);
+		validateLeaderPrivilege(crewId, memberId);
+		checkMemberExist(memberId);
+
+		findCrew.update(reqDto.approvalType(), reqDto.introduction(), reqDto.rule());
+
 	}
 
 	private void processCancelApplication(CrewApplication crewApplication) {
