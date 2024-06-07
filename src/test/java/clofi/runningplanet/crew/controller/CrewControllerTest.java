@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -37,6 +38,7 @@ import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
+import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
@@ -326,6 +328,30 @@ class CrewControllerTest {
 		assertThat(expected).isEqualTo(resDto);
 	}
 
+	@DisplayName("크루 정보 수정 성공")
+	@WithMockCustomMember
+	@Test
+	void successUpdateCrew() throws Exception {
+		//given
+		Long crewId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile imageFile = new MockMultipartFile("imgFile", "크루로고.png", IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+
+		doNothing()
+			.when(crewService)
+			.updateCrew(any(UpdateCrewReqDto.class), any(MockMultipartFile.class), anyLong(), anyLong());
+
+		//when
+		ResultActions resultActions = updateCrew(reqDto, imageFile, crewId);
+
+		//then
+		resultActions
+			.andExpect(status().isNoContent());
+
+	}
+
 	private ResultActions createCrew(CreateCrewReqDto reqDto, MockMultipartFile imgFile) throws Exception {
 		MockMultipartFile jsonFile = new MockMultipartFile("crewInfo", "", "application/json",
 			objectMapper.writeValueAsBytes(reqDto));
@@ -376,5 +402,16 @@ class CrewControllerTest {
 	private ResultActions cancelCrewApplication(Long crewId) throws Exception {
 		return mockMvc.perform(delete("/api/crew/{crewId}/request", crewId)
 			.contentType(APPLICATION_JSON));
+	}
+
+	private ResultActions updateCrew(UpdateCrewReqDto reqDto, MockMultipartFile imgFile, Long crewId) throws Exception {
+		MockMultipartFile jsonFile = new MockMultipartFile("modifyInfo", "", "application/json",
+			objectMapper.writeValueAsBytes(reqDto));
+		return mockMvc.perform(multipart(HttpMethod.PATCH, "/api/crew/{crewId}", crewId)
+			.file(imgFile)
+			.file(jsonFile)
+			.contentType(MULTIPART_FORM_DATA)
+			.header(AUTHORIZATION, "Bearer accessToken")
+			.content(objectMapper.writeValueAsString(reqDto)));
 	}
 }
