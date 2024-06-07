@@ -2,7 +2,6 @@ package clofi.runningplanet.crew.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,7 +166,7 @@ public class CrewService {
 
 		findCrew.update(reqDto.approvalType(), reqDto.introduction(), reqDto.rule());
 
-		updateTags(reqDto, crewId);
+		updateTags(reqDto, findCrew);
 
 		if (!imgFile.isEmpty()) {
 			updateCrewImage(imgFile, crewId);
@@ -184,10 +183,9 @@ public class CrewService {
 		findCrewImage.update(filePath, imgFile.getOriginalFilename());
 	}
 
-	private void updateTags(UpdateCrewReqDto reqDto, Long crewId) {
-		List<Tag> tagList = tagRepository.findAllByCrewId(crewId);
-		IntStream.range(0, reqDto.tags().size())
-			.forEachOrdered(i -> tagList.get(i).update(reqDto.tags().get(i)));
+	private void updateTags(UpdateCrewReqDto reqDto, Crew crew) {
+		tagRepository.deleteAllByCrewId(crew.getId());
+		saveTags(reqDto.tags(), crew);
 	}
 
 	private void processCancelApplication(CrewApplication crewApplication) {
