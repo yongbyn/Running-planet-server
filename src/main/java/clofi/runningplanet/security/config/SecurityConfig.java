@@ -76,23 +76,21 @@ public class SecurityConfig {
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		//CORS
-		// http
-		// 	.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
-		//
-		// 		CorsConfiguration configuration = new CorsConfiguration();
-		//
-		// 		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "https://runple.site"));
-		// 		configuration.setAllowedMethods(Collections.singletonList("*"));
-		// 		configuration.setAllowCredentials(true);
-		// 		configuration.setAllowedHeaders(Collections.singletonList("*"));
-		// 		configuration.setMaxAge(3600L);
-		//
-		// 		configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-		//
-		// 		return configuration;
-		// 	}));
 		http
-			.cors(AbstractHttpConfigurer::disable);
+			.cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+
+				CorsConfiguration configuration = new CorsConfiguration();
+
+				configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "https://runple.site"));
+				configuration.setAllowedMethods(Collections.singletonList("*"));
+				configuration.setAllowCredentials(true);
+				configuration.setAllowedHeaders(Collections.singletonList("*"));
+				configuration.setMaxAge(3600L);
+
+				configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+
+				return configuration;
+			}));
 
 		return http.build();
 	}
