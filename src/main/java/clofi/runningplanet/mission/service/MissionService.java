@@ -14,7 +14,9 @@ import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.mission.domain.CrewMission;
+import clofi.runningplanet.mission.domain.MissionType;
 import clofi.runningplanet.mission.dto.response.CrewMissionListDto;
+import clofi.runningplanet.mission.dto.response.GetCrewMissionResDto;
 import clofi.runningplanet.mission.repository.CrewMissionRepository;
 import clofi.runningplanet.running.domain.Record;
 import clofi.runningplanet.running.repository.RecordRepository;
@@ -39,6 +41,11 @@ public class MissionService {
 
 		List<CrewMission> crewMissionList = crewMissionRepository.findAllByCrewIdAndMemberId(crewId, memberId);
 		TodayRecords todayRecords = getTodayRecords(memberId);
+
+		List<GetCrewMissionResDto> resDtoList = crewMissionList.stream()
+			.map(crewMission -> convertToDto(crewMission, todayRecords))
+			.toList();
+		return new CrewMissionListDto(resDtoList);
 	}
 
 	private void checkMemberExist(Long memberId) {
@@ -57,6 +64,14 @@ public class MissionService {
 		if (!crewMemberRepository.existsByCrewIdAndMemberId(crewId, memberId)) {
 			throw new ForbiddenException("소속된 크루가 아닙니다.");
 		}
+	}
+
+	private GetCrewMissionResDto convertToDto(CrewMission crewMission, TodayRecords todayRecords) {
+		double result = crewMission.getType() == MissionType.DISTANCE ?
+			(double)(todayRecords.getTotalDistance() / 1000) :
+			(double)(todayRecords.getTotalDuration() / 3600);
+
+		return new GetCrewMissionResDto(crewMission.getId(), crewMission.getType(), result, crewMission.isCompleted());
 	}
 
 	private TodayRecords getTodayRecords(Long memberId) {
