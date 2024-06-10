@@ -134,4 +134,22 @@ class MissionServiceTest {
 		assertThatThrownBy(() -> missionService.getCrewMission(crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
 	}
+
+	@DisplayName("미션 조회 시 사용자가 존재하지 않는 경우 예외 발생")
+	@Test
+	void failGetAllCrewMissionByNotFoundMember() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(false);
+
+		//when
+		//then
+		assertThatThrownBy(() -> missionService.getCrewMission(crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
 }
