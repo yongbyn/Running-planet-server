@@ -240,12 +240,15 @@ class CrewServiceTest {
 
 		given(memberRepository.findById(anyLong()))
 			.willReturn(Optional.of(leader));
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.of(createCrewImage()));
 
 		//when
 		FindCrewResDto result = crewService.findCrew(crewId);
 
 		//then
-		final FindCrewResDto findCrewResDto = FindCrewResDto.of(crew, new CrewLeaderDto(1L, "크루장"), List.of("성실"));
+		final FindCrewResDto findCrewResDto = FindCrewResDto.of(crew, new CrewLeaderDto(1L, "크루장"), List.of("성실"),
+			"https://test.com");
 
 		assertThat(result).isEqualTo(findCrewResDto);
 	}
