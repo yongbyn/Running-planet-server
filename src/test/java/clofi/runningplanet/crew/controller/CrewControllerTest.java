@@ -149,7 +149,7 @@ class CrewControllerTest {
 		Long crewId = 1L;
 		FindCrewResDto expected = new FindCrewResDto(1L, 1, "구름 크루",
 			new CrewLeaderDto(1L, "임시 닉네임"), 5, 10, AUTO,
-			"구름 크루는 성실한 크루", List.of("성실"), RUNNING,
+			"구름 크루는 성실한 크루", "https://test.com", List.of("성실"), RUNNING,
 			new RuleDto(5, 100), 0, false);
 
 		given(crewService.findCrew(crewId))
