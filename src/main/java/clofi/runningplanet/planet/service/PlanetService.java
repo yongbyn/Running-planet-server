@@ -31,7 +31,6 @@ public class PlanetService {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
 		List<Planet> planetList = planetRepository.findAll();
-		//TODO: 나중에 경험치로 수정
 		calculateMemberPlanetSize(planetList, member);
 		List<MemberPlanet> memberPlanetList = memberPlanetRepository.findByMemberId(member);
 		List<PlanetResponse> planetResponseList = new ArrayList<>();
