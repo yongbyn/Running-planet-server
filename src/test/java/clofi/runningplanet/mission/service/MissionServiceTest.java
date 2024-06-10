@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.repository.MemberRepository;
@@ -116,5 +117,21 @@ class MissionServiceTest {
 		CrewMissionListDto expected = new CrewMissionListDto(getCrewMissionResDtos);
 
 		assertThat(result).isEqualTo(expected);
+	}
+
+	@DisplayName("미션 조회 시 크루가 존재하지 않는 경우 예외 발생")
+	@Test
+	void failGetAllCrewMissionByNotFoundCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(false);
+
+		//when
+		//then
+		assertThatThrownBy(() -> missionService.getCrewMission(crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
 	}
 }
