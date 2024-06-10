@@ -84,8 +84,9 @@ public class CrewService {
 
 		List<String> tags = findTagsToStrings(findCrew.getId());
 		CrewLeaderDto crewLeader = convertCrewLeaderDto(findCrew.getLeaderId());
+		CrewImage crewImage = findImage(crewId);
 
-		return FindCrewResDto.of(findCrew, crewLeader, tags);
+		return FindCrewResDto.of(findCrew, crewLeader, tags, crewImage.getFilepath());
 	}
 
 	@Transactional
@@ -173,10 +174,14 @@ public class CrewService {
 		}
 	}
 
-	private void updateCrewImage(MultipartFile imgFile, Long crewId) {
-		CrewImage findCrewImage = crewImageRepository.findByCrewId(crewId).orElseThrow(
+	private CrewImage findImage(Long crewId) {
+		return crewImageRepository.findByCrewId(crewId).orElseThrow(
 			() -> new NotFoundException("크루 이미지를 찾을 수 없습니다.")
 		);
+	}
+
+	private void updateCrewImage(MultipartFile imgFile, Long crewId) {
+		CrewImage findCrewImage = findImage(crewId);
 
 		storageManagerUseCase.deleteImages(findCrewImage.getFilepath());
 		String filePath = storageManagerUseCase.uploadImage(imgFile);
