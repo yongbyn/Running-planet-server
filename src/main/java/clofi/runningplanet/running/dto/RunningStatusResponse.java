@@ -7,7 +7,7 @@ public record RunningStatusResponse(
 	Long memberId,
 	String nickname,
 	int runTime,
-	int runDistance,
+	double runDistance,
 	boolean isEnd
 ) {
 	public RunningStatusResponse(Member member, Record savedRecord) {
