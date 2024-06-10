@@ -36,6 +36,7 @@ import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
+import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
@@ -1067,6 +1068,154 @@ class CrewServiceTest {
 		//then
 		assertThatThrownBy(() -> crewService.cancelCrewApplication(crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("크루 정보 수정 성공")
+	@Test
+	void successUpdateCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile image = createImage();
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+
+		CrewImage crewImage = createCrewImage();
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		doNothing()
+			.when(tagRepository)
+			.deleteAllByCrewId(anyLong());
+		given(tagRepository.saveAll(anyList()))
+			.willReturn(null);
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.of(crewImage));
+		doNothing()
+			.when(storageManagerUseCase)
+			.deleteImages(anyString());
+		given(storageManagerUseCase.uploadImage(any(MockMultipartFile.class)))
+			.willReturn("https://update.com");
+
+		//when
+		//then
+		assertDoesNotThrow(() -> crewService.updateCrew(reqDto, image, crewId, memberId));
+	}
+
+	@DisplayName("수정하려는 크루가 없는 경우 예외 발생")
+	@Test
+	void failUpdateCrewByNotFoundCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile image = createImage();
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.updateCrew(reqDto, image, crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("크루에 속하지 않은 인원이 크루 정보 수정 시 예외 발생")
+	@Test
+	void failUpdateCrewByNotInCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile image = createImage();
+
+		Crew crew = createCrew();
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.updateCrew(reqDto, image, crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("인증되지 않은 사용자가 크루 정보 수정 시 예외 발생")
+	@Test
+	void failUpdateCrewByNotFoundMember() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile image = createImage();
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(false);
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.updateCrew(reqDto, image, crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("크루 이미지가 없는 경우 예외 발생")
+	@Test
+	void failUpdateCrewByNotFoundImage() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		UpdateCrewReqDto reqDto = new UpdateCrewReqDto(List.of("수정1", "수정2"), AUTO, "크루 소개 수정",
+			new RuleDto(3, 10));
+		MockMultipartFile image = createImage();
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		doNothing()
+			.when(tagRepository)
+			.deleteAllByCrewId(anyLong());
+		given(tagRepository.saveAll(anyList()))
+			.willReturn(null);
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.updateCrew(reqDto, image, crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
+
+	private CrewImage createCrewImage() {
+		Crew crew = createCrew();
+		return new CrewImage(1L, "크루이미지", "https://test.com", crew);
 	}
 
 	private CreateCrewReqDto getCreateCrewReqDto() {

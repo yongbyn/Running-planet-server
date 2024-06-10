@@ -8,4 +8,6 @@ import clofi.runningplanet.crew.domain.Tag;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 	List<Tag> findAllByCrewId(Long id);
+
+	void deleteAllByCrewId(Long crewId);
 }

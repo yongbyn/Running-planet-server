@@ -44,4 +44,8 @@ public class Tag extends BaseSoftDeleteEntity {
 		this.crew = crew;
 		this.content = content;
 	}
+
+	public void update(String tagString) {
+		this.content = tagString;
+	}
 }

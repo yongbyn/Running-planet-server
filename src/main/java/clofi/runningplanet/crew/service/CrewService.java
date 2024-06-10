@@ -19,6 +19,7 @@ import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
+import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
@@ -155,6 +156,36 @@ public class CrewService {
 		CrewApplication crewApplication = getCrewApplicationByCrewIdAndMemberId(crewId, memberId);
 		processCancelApplication(crewApplication);
 		return new ApplyCrewResDto(crewId, memberId, false);
+	}
+
+	@Transactional
+	public void updateCrew(UpdateCrewReqDto reqDto, MultipartFile imgFile, Long crewId, Long memberId) {
+		Crew findCrew = getCrewByCrewId(crewId);
+		validateLeaderPrivilege(crewId, memberId);
+		checkMemberExist(memberId);
+
+		findCrew.update(reqDto.approvalType(), reqDto.introduction(), reqDto.rule());
+
+		updateTags(reqDto, findCrew);
+
+		if (!imgFile.isEmpty()) {
+			updateCrewImage(imgFile, crewId);
+		}
+	}
+
+	private void updateCrewImage(MultipartFile imgFile, Long crewId) {
+		CrewImage findCrewImage = crewImageRepository.findByCrewId(crewId).orElseThrow(
+			() -> new NotFoundException("크루 이미지를 찾을 수 없습니다.")
+		);
+
+		storageManagerUseCase.deleteImages(findCrewImage.getFilepath());
+		String filePath = storageManagerUseCase.uploadImage(imgFile);
+		findCrewImage.update(filePath, imgFile.getOriginalFilename());
+	}
+
+	private void updateTags(UpdateCrewReqDto reqDto, Crew crew) {
+		tagRepository.deleteAllByCrewId(crew.getId());
+		saveTags(reqDto.tags(), crew);
 	}
 
 	private void processCancelApplication(CrewApplication crewApplication) {

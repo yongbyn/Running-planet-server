@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
+import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
@@ -89,5 +91,13 @@ public class CrewController {
 	public ResponseEntity<ApplyCrewResDto> cancelCrewApplication(@PathVariable("crewId") Long crewId,
 		@AuthenticationPrincipal CustomOAuth2User principal) {
 		return ResponseEntity.ok(crewService.cancelCrewApplication(crewId, principal.getId()));
+	}
+
+	@PatchMapping("/api/crew/{crewId}")
+	public ResponseEntity<Void> updateCrew(@RequestPart("modifyInfo") @Valid UpdateCrewReqDto reqDto,
+		@RequestPart(value = "imgFile", required = false) MultipartFile imgFile, @PathVariable("crewId") Long crewId,
+		@AuthenticationPrincipal CustomOAuth2User principal) {
+		crewService.updateCrew(reqDto, imgFile, crewId, principal.getId());
+		return ResponseEntity.noContent().build();
 	}
 }

@@ -4,6 +4,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import clofi.runningplanet.common.domain.BaseSoftDeleteEntity;
+import clofi.runningplanet.crew.dto.RuleDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -83,5 +84,12 @@ public class Crew extends BaseSoftDeleteEntity {
 
 	public boolean checkReachedMemberLimit(int currentMemberCnt) {
 		return currentMemberCnt >= limitMemberCnt;
+	}
+
+	public void update(ApprovalType approvalType, String introduction, RuleDto rule) {
+		this.approvalType = approvalType;
+		this.introduction = introduction;
+		this.ruleDistance = rule.distance();
+		this.ruleRunCnt = rule.weeklyRun();
 	}
 }
