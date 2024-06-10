@@ -41,7 +41,7 @@ public class Record extends BaseSoftDeleteEntity {
 	private int runTime;
 
 	@Column(name = "run_distance", nullable = false)
-	private double runDistance;
+	private int runDistance;
 
 	@Column(name = "calories", nullable = false)
 	private int calories;
@@ -56,7 +56,7 @@ public class Record extends BaseSoftDeleteEntity {
 	private boolean isEnd;
 
 	@Builder
-	private Record(Member member, int runTime, double runDistance, int calories, int avgPace, LocalDateTime endTime) {
+	private Record(Member member, int runTime, int runDistance, int calories, int avgPace, LocalDateTime endTime) {
 		this.member = member;
 		this.runTime = runTime;
 		this.runDistance = runDistance;
@@ -65,7 +65,7 @@ public class Record extends BaseSoftDeleteEntity {
 		this.endTime = endTime;
 	}
 
-	public void update(int runTime, double runDistance, int calories, int min, int sec, boolean isEnd) {
+	public void update(int runTime, int runDistance, int calories, int min, int sec, boolean isEnd) {
 		this.runTime = runTime;
 		this.runDistance = runDistance;
 		this.calories = calories;

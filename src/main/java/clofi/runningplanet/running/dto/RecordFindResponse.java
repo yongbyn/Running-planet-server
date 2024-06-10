@@ -10,7 +10,7 @@ public record RecordFindResponse(
 	Long id,
 	AvgPaceResponse avgPace,
 	RunTimeResponse runTime,
-	double runDistance,
+	int runDistance,
 	List<CoordinateResponse> coordinateResponses,
 	int calories,
 	LocalDateTime startTime,
