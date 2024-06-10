@@ -17,13 +17,14 @@ public record FindCrewResDto(
 	int limitMemberCnt,
 	ApprovalType approvalType,
 	String introduction,
+	String imgFile,
 	List<String> tags,
 	Category category,
 	RuleDto rule,
 	int crewTotalDistance,
 	boolean isRequest
 ) {
-	public static FindCrewResDto of(Crew crew, CrewLeaderDto crewLeader, List<String> tags) {
+	public static FindCrewResDto of(Crew crew, CrewLeaderDto crewLeader, List<String> tags, String filePath) {
 		return new FindCrewResDto(
 			crew.getId(),
 			1,
@@ -33,6 +34,7 @@ public record FindCrewResDto(
 			crew.getLimitMemberCnt(),
 			crew.getApprovalType(),
 			crew.getIntroduction(),
+			filePath,
 			tags,
 			crew.getCategory(),
 			new RuleDto(crew.getRuleRunCnt(), crew.getRuleDistance()),
