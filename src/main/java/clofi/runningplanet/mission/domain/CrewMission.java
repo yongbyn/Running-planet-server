@@ -37,4 +37,12 @@ public class CrewMission extends BaseEntity {
 
 	@Column(name = "is_complete", nullable = false)
 	private boolean isCompleted = false;
+
+	public CrewMission(Long id, Member member, Crew crew, MissionType type, boolean isCompleted) {
+		this.id = id;
+		this.member = member;
+		this.crew = crew;
+		this.type = type;
+		this.isCompleted = isCompleted;
+	}
 }

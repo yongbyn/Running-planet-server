@@ -3,6 +3,7 @@ package clofi.runningplanet.common;
 import static clofi.runningplanet.crew.domain.ApprovalType.*;
 import static clofi.runningplanet.crew.domain.Category.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.MediaType;
@@ -14,6 +15,9 @@ import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.member.domain.Gender;
 import clofi.runningplanet.member.domain.Member;
+import clofi.runningplanet.mission.domain.CrewMission;
+import clofi.runningplanet.mission.domain.MissionType;
+import clofi.runningplanet.running.domain.Record;
 
 public class TestHelper {
 
@@ -49,4 +53,25 @@ public class TestHelper {
 	public static Member createMember() {
 		return new Member(2L, "사용자", Gender.FEMALE, 30, 80, "https://image-url.com", 0, 0, 0, 0);
 	}
+
+	public static List<CrewMission> crewMissionList() {
+		return List.of(
+			new CrewMission(1L, createLeader(), createCrew(), MissionType.DISTANCE, true),
+			new CrewMission(2L, createLeader(), createCrew(), MissionType.DURATION, false)
+		);
+	}
+
+	public static List<Record> createTodayRecordList() {
+		return List.of(
+			Record.builder()
+				.member(createLeader())
+				.runTime(1800)
+				.runDistance(1000)
+				.avgPace(100)
+				.calories(100)
+				.endTime(LocalDateTime.now())
+				.build()
+		);
+	}
+
 }
