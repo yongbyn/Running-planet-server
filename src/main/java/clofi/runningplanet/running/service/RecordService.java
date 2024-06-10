@@ -5,9 +5,11 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.running.domain.Coordinate;
@@ -16,6 +18,7 @@ import clofi.runningplanet.running.dto.RecordFindAllResponse;
 import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
+import clofi.runningplanet.running.dto.RunningStatusResponse;
 import clofi.runningplanet.running.repository.CoordinateRepository;
 import clofi.runningplanet.running.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,8 @@ public class RecordService {
 	private final RecordRepository recordRepository;
 	private final CoordinateRepository coordinateRepository;
 	private final MemberRepository memberRepository;
+	private final CrewMemberRepository crewMemberRepository;
+	private final SimpMessagingTemplate messagingTemplate;
 
 	@Transactional
 	public Record save(RecordSaveRequest request, Long memberId) {
@@ -41,6 +46,8 @@ public class RecordService {
 		Coordinate coordinate = request.toCoordinate(savedRecord);
 		coordinateRepository.save(coordinate);
 
+		sendRunningStatus(member, savedRecord);
+
 		return savedRecord;
 	}
 
@@ -52,6 +59,13 @@ public class RecordService {
 	private Record getCurrentRecordOrElseNew(Member member) {
 		return recordRepository.findOneByMemberAndEndTimeIsNull(member)
 			.orElse(Record.builder().member(member).build());
+	}
+
+	private void sendRunningStatus(Member member, Record savedRecord) {
+		crewMemberRepository.findByMemberId(member.getId())
+			.ifPresent(crewMember -> messagingTemplate.convertAndSend(
+				String.format("/sub/crew/%s/running", crewMember.getCrew().getId()),
+				new RunningStatusResponse(member, savedRecord)));
 	}
 
 	public List<RecordFindAllResponse> findAll(Integer year, Integer month, Long memberId) {
