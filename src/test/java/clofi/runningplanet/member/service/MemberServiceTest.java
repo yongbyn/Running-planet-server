@@ -81,7 +81,6 @@ class MemberServiceTest {
 				"https://pbs.twimg.com/media/E86TJH1VkAQ0BGV.png")
 			.age(34)
 			.gender(Gender.MALE)
-			.runScore(20)
 			.avgPace(2400)
 			.avgDistance(5000)
 			.totalDistance(30000)
@@ -127,7 +126,6 @@ class MemberServiceTest {
 				"https://pbs.twimg.com/media/E86TJH1VkAQ0BGV.png")
 			.age(34)
 			.gender(Gender.MALE)
-			.runScore(20)
 			.avgPace(2400)
 			.avgDistance(5000)
 			.totalDistance(30000)
@@ -193,7 +191,6 @@ class MemberServiceTest {
 			.nickname("고구마")
 			.profileImg(
 				"https://pbs.twimg.com/media/E86TJH1VkAQ0BGV.png")
-			.runScore(20)
 			.avgPace(2400)
 			.avgDistance(5000)
 			.totalDistance(30000)

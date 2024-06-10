@@ -317,7 +317,6 @@ class RecordServiceTest {
 				"https://d2u3dcdbebyaiu.cloudfront.net/uploads/atch_img/321/d4c6b40843af7f4f1d8000cafef4a2e7.jpeg")
 			.age(3)
 			.gender(Gender.MALE)
-			.runScore(10)
 			.avgPace(600)
 			.totalDistance(3000)
 			.build();

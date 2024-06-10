@@ -38,19 +38,19 @@ public class PlanetService {
 		String planetStage = "";
 
 		if (memberPlanetList.size() == 1) {
-			if (member.getRunScore() >= 0 && member.getRunScore() < 2) {
+			if (member.getExp() >= 0 && member.getExp() < 2) {
 				planetStage = memberPlanetList.get(0).getPlanetId().getFirstPlanet();
-			} else if (member.getRunScore() >= 2 && member.getRunScore() < 4) {
+			} else if (member.getExp() >= 2 && member.getExp() < 4) {
 				planetStage = memberPlanetList.get(0).getPlanetId().getSecondPlanet();
-			} else if (member.getRunScore() >= 4 && member.getRunScore() < 6) {
+			} else if (member.getExp() >= 4 && member.getExp() < 6) {
 				planetStage = memberPlanetList.get(0).getPlanetId().getThirdPlanet();
-			} else if (member.getRunScore() >= 6 && member.getRunScore() < 8) {
+			} else if (member.getExp() >= 6 && member.getExp() < 8) {
 				planetStage = memberPlanetList.get(0).getPlanetId().getFourthPlanet();
 			} else {
 				planetStage = memberPlanetList.get(0).getPlanetId().getFifthPlanet();
 			}
 			planetResponseList.add(new PlanetResponse(memberPlanetList.getFirst().getMemberPlanetId(),
-				memberPlanetList.getFirst().getMemberPlanetName(), planetStage, 10, member.getRunScore()));
+				memberPlanetList.getFirst().getMemberPlanetName(), planetStage, 10, member.getExp()));
 
 		} else {
 			for (int i = 0; i < memberPlanetList.size(); i++) {
@@ -59,7 +59,7 @@ public class PlanetService {
 						createPlanetResponse(memberPlanetList.get(i), planetStage, 10, 10));
 				} else {
 					int distance = (i == memberPlanetList.size() - 1)
-						? member.getRunScore() - 10 - (50 * (memberPlanetList.size() - 2))
+						? member.getExp() - 10 - (50 * (memberPlanetList.size() - 2))
 						: 50;
 					planetStage = getPlanetStage(distance, planetStage, memberPlanetList);
 					planetResponseList.add(createPlanetResponse(memberPlanetList.get(i), planetStage, 50, distance));
@@ -76,14 +76,14 @@ public class PlanetService {
 			createMemberPlanet(planetList, member);
 		}
 		//첫 행성 10km 조건을 달성하고 50km 요구 거리 행성 만들 때
-		else if (memberPlanetList.size() == 1 && member.getRunScore() - 10 > 0) {
+		else if (memberPlanetList.size() == 1 && member.getExp() - 10 > 0) {
 			createMemberPlanet(planetList, member);
 		}
 		//행성이 2개 이상 있고 새로운 행성을 만들어야 할 때
 		else if (
 			memberPlanetList.size() > 1 &&
-				memberPlanetList.size() != (member.getRunScore() - 10) / 50 &&
-				(member.getRunScore() - 10) - (50 * (memberPlanetList.size() - 1)) > 0) {
+				memberPlanetList.size() != (member.getExp() - 10) / 50 &&
+				(member.getExp() - 10) - (50 * (memberPlanetList.size() - 1)) > 0) {
 			createMemberPlanet(planetList, member);
 		}
 	}

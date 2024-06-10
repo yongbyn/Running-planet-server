@@ -8,7 +8,6 @@ public record GetApplyCrewResDto(
 	Long memberId,
 	String nickname,
 	String introduction,
-	int runScore,
 	Gender gender,
 	int age,
 	Approval approveStatus
@@ -18,7 +17,6 @@ public record GetApplyCrewResDto(
 			crewApplication.getMember().getId(),
 			crewApplication.getMember().getNickname(),
 			crewApplication.getIntroduction(),
-			crewApplication.getMember().getRunScore(),
 			crewApplication.getMember().getGender(),
 			crewApplication.getMember().getAge(),
 			crewApplication.getApproval()
