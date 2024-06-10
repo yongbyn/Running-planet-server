@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import clofi.runningplanet.common.exception.ForbiddenException;
 import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
@@ -151,5 +152,25 @@ class MissionServiceTest {
 		//then
 		assertThatThrownBy(() -> missionService.getCrewMission(crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("미션 조회 시 소속 크루가 아닌 경우 예외 발생")
+	@Test
+	void failGetAllCrewMissionByNotInCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(false);
+
+		//when
+		//then
+		assertThatThrownBy(() -> missionService.getCrewMission(crewId, memberId))
+			.isInstanceOf(ForbiddenException.class);
 	}
 }
