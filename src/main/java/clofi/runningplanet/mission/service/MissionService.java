@@ -72,11 +72,16 @@ public class MissionService {
 	}
 
 	private GetCrewMissionResDto convertToDto(CrewMission crewMission, TodayRecords todayRecords) {
-		double result = crewMission.getType() == MissionType.DISTANCE ?
-			(double)(todayRecords.getTotalDistance() / 1000) :
-			(double)(todayRecords.getTotalDuration() / 3600);
+		double result = calculateProgressInPercent(crewMission, todayRecords);
 
 		return new GetCrewMissionResDto(crewMission.getId(), crewMission.getType(), result, crewMission.isCompleted());
+	}
+
+	private double calculateProgressInPercent(CrewMission crewMission, TodayRecords todayRecords) {
+		double result = crewMission.getType() == MissionType.DISTANCE ?
+			(todayRecords.getTotalDistance() / 1000) :
+			((double)(todayRecords.getTotalDuration() / 3600));
+		return Math.min(result * 100, 100);
 	}
 
 	private TodayRecords getTodayRecords(Long memberId) {
@@ -84,7 +89,7 @@ public class MissionService {
 		LocalDateTime end = LocalDate.now().atTime(LocalTime.MAX);
 		List<Record> todayRecordList = recordRepository.findAllByMemberIdAndCreatedAtBetween(memberId, start, end);
 
-		int todayTotalDistance = todayRecordList.stream().mapToInt(Record::getRunDistance).sum();
+		double todayTotalDistance = todayRecordList.stream().mapToDouble(Record::getRunDistance).sum();
 		int todayTotalDuration = todayRecordList.stream().mapToInt(Record::getRunTime).sum();
 
 		return new TodayRecords(todayTotalDistance, todayTotalDuration);
@@ -92,10 +97,10 @@ public class MissionService {
 
 	@Getter
 	private static class TodayRecords {
-		private final int totalDistance;
+		private final double totalDistance;
 		private final int totalDuration;
 
-		private TodayRecords(int totalDistance, int totalDuration) {
+		private TodayRecords(double totalDistance, int totalDuration) {
 			this.totalDistance = totalDistance;
 			this.totalDuration = totalDuration;
 		}
