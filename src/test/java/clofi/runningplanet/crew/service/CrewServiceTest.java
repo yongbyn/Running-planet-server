@@ -169,16 +169,18 @@ class CrewServiceTest {
 		given(memberRepository.findById(anyLong()))
 			.willReturn(Optional.of(leader))
 			.willReturn(Optional.of(leader2));
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.of(createCrewImage()));
 
 		//when
 		List<FindAllCrewResDto> result = crewService.findAllCrew();
 
 		//then
 		final FindAllCrewResDto firstFindAllCrewResDto = FindAllCrewResDto.of(crew1, List.of("성실"),
-			new CrewLeaderDto(1L, "크루장"));
+			new CrewLeaderDto(1L, "크루장"), "https://test.com");
 
 		final FindAllCrewResDto secondFindAllCrewResDto = FindAllCrewResDto.of(crew2, List.of("최고"),
-			new CrewLeaderDto(2L, "사용자"));
+			new CrewLeaderDto(2L, "사용자"), "https://test.com");
 
 		final List<FindAllCrewResDto> expect = List.of(firstFindAllCrewResDto, secondFindAllCrewResDto);
 

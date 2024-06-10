@@ -112,12 +112,12 @@ class CrewControllerTest {
 		//given
 		List<FindAllCrewResDto> expected = List.of(
 			new FindAllCrewResDto(1L, "구름 크루", 1, 1,
-				10, AUTO, List.of("성실"), RUNNING,
+				10, AUTO, "https://test.com", List.of("성실"), RUNNING,
 				new RuleDto(3, 100),
 				"구름 크루는 성실한 크루",
 				new CrewLeaderDto(1L, "임시 닉네임")),
 			new FindAllCrewResDto(2L, "클로피 크루", 1, 1,
-				8, MANUAL, List.of("최고"), RUNNING,
+				8, MANUAL, "https://test.com", List.of("최고"), RUNNING,
 				new RuleDto(3, 100),
 				"클로피 크루는 최고의 크루",
 				new CrewLeaderDto(2L, "임시 닉네임"))
