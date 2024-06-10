@@ -332,7 +332,8 @@ public class CrewService {
 	private FindAllCrewResDto convertToFindAllCrewResDto(Crew crew) {
 		List<String> tags = findTagsToStrings(crew.getId());
 		CrewLeaderDto crewLeaderDto = convertCrewLeaderDto(crew.getLeaderId());
-		return FindAllCrewResDto.of(crew, tags, crewLeaderDto);
+		CrewImage crewImage = findImage(crew.getId());
+		return FindAllCrewResDto.of(crew, tags, crewLeaderDto, crewImage.getFilepath());
 	}
 
 	private CrewLeaderDto convertCrewLeaderDto(Long leaderId) {
