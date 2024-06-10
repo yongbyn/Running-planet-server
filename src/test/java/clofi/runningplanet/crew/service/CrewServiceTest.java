@@ -855,7 +855,7 @@ class CrewServiceTest {
 		Long memberId = 2L;
 
 		Crew crew = createCrew();
-		Member leader = createLeader();
+		Member leader = createMember();
 
 		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.MEMBER);
 
@@ -865,9 +865,6 @@ class CrewServiceTest {
 			.willReturn(true);
 		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
 			.willReturn(Optional.of(crewMember));
-		doNothing()
-			.when(crewMemberRepository)
-			.deleteById(anyLong());
 
 		//when
 		//then

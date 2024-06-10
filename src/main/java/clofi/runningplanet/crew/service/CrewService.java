@@ -146,7 +146,6 @@ public class CrewService {
 
 		CrewMember crewMember = findCrewMember(crewId, memberId);
 		validateLeaderLeaveCrew(crewId, crewMember);
-		deleteCrewMember(crewMember);
 	}
 
 	@Transactional
@@ -207,6 +206,7 @@ public class CrewService {
 		if (memberCnt > 1) {
 			throw new ConflictException("크루장은 크루원 수가 1인 일 경우에 탈퇴할 수 있습니다.");
 		}
+		deleteCrewMember(crewMember);
 		deleteCrew(crewId);
 	}
 
