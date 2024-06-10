@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,6 +37,14 @@ public class Chat extends BaseSoftDeleteEntity {
 	@JoinColumn(name = "crew_id", nullable = false)
 	private Crew crew;
 
-	@Column(name = "content", nullable = false, length = 20)
+	@Column(name = "content", nullable = false, length = 255)
 	private String content;
+
+	@Builder
+	public Chat(Long id, Member member, Crew crew, String content) {
+		this.id = id;
+		this.member = member;
+		this.crew = crew;
+		this.content = content;
+	}
 }
