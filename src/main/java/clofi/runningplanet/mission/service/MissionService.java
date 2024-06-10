@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import clofi.runningplanet.common.exception.ForbiddenException;
+import clofi.runningplanet.common.exception.InternalServerException;
 import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
@@ -40,6 +41,10 @@ public class MissionService {
 		validateCrewMemberShip(crewId, memberId);
 
 		List<CrewMission> crewMissionList = crewMissionRepository.findAllByCrewIdAndMemberId(crewId, memberId);
+		if (crewMissionList.size() != 2) {
+			throw new InternalServerException();
+		}
+
 		TodayRecords todayRecords = getTodayRecords(memberId);
 
 		List<GetCrewMissionResDto> resDtoList = crewMissionList.stream()
