@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -75,6 +76,41 @@ class MissionServiceTest {
 		List<GetCrewMissionResDto> getCrewMissionResDtos = List.of(
 			new GetCrewMissionResDto(1L, MissionType.DISTANCE, 1, true),
 			new GetCrewMissionResDto(2L, MissionType.DURATION, (double)(1800 / 3600), false)
+		);
+
+		CrewMissionListDto expected = new CrewMissionListDto(getCrewMissionResDtos);
+
+		assertThat(result).isEqualTo(expected);
+	}
+
+	@DisplayName("일일 운동 기록이 없을 경우 progress 0 반환")
+	@Test
+	void successGetAllCrewMissionNotRecord() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		List<CrewMission> crewMissionList = crewMissionListNotComplete();
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(true);
+		given(crewMissionRepository.findAllByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(crewMissionList);
+		given(recordRepository.findAllByMemberIdAndCreatedAtBetween(anyLong(), any(LocalDateTime.class), any(
+			LocalDateTime.class)))
+			.willReturn(Collections.emptyList());
+
+		//when
+		CrewMissionListDto result = missionService.getCrewMission(crewId, memberId);
+
+		//then
+		List<GetCrewMissionResDto> getCrewMissionResDtos = List.of(
+			new GetCrewMissionResDto(1L, MissionType.DISTANCE, 0, false),
+			new GetCrewMissionResDto(2L, MissionType.DURATION, 0, false)
 		);
 
 		CrewMissionListDto expected = new CrewMissionListDto(getCrewMissionResDtos);

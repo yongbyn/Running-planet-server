@@ -61,6 +61,13 @@ public class TestHelper {
 		);
 	}
 
+	public static List<CrewMission> crewMissionListNotComplete() {
+		return List.of(
+			new CrewMission(1L, createLeader(), createCrew(), MissionType.DISTANCE, false),
+			new CrewMission(2L, createLeader(), createCrew(), MissionType.DURATION, false)
+		);
+	}
+
 	public static List<Record> createTodayRecordList() {
 		return List.of(
 			Record.builder()
