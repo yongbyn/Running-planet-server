@@ -7,7 +7,7 @@ public record RecordFindCurrentResponse(
 	Long id,
 	AvgPaceResponse avgPace,
 	RunTimeResponse runTime,
-	int runDistance,
+	double runDistance,
 	int calories,
 	double latitude,
 	double longitude

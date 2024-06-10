@@ -4,7 +4,7 @@ import clofi.runningplanet.running.domain.Record;
 
 public record RecordFindAllResponse(
 	Long id,
-	int runDistance,
+	double runDistance,
 	int day
 ) {
 	public RecordFindAllResponse(Record record) {

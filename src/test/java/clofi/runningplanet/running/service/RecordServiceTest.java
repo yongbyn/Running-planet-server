@@ -61,7 +61,7 @@ class RecordServiceTest {
 			100.23,
 			200.23,
 			630,
-			100,
+			1.23,
 			300,
 			new RecordSaveRequest.AvgPace(
 				8,
@@ -78,7 +78,7 @@ class RecordServiceTest {
 		assertThat(savedRecord.getId()).isNotNull();
 		assertThat(savedRecord)
 			.extracting("runTime", "runDistance", "calories", "avgPace", "endTime")
-			.contains(630, 100, 300, 500, null);
+			.contains(630, 1.23, 300, 500, null);
 
 		Optional<Coordinate> savedCoordinate = coordinateRepository.findByRecord(savedRecord);
 		assertThat(savedCoordinate).isPresent();
@@ -95,7 +95,7 @@ class RecordServiceTest {
 			100.23,
 			200.23,
 			630,
-			100,
+			1.23,
 			300,
 			new RecordSaveRequest.AvgPace(
 				8,
@@ -111,7 +111,7 @@ class RecordServiceTest {
 			200.23,
 			300.23,
 			900,
-			100,
+			2.0,
 			400,
 			new RecordSaveRequest.AvgPace(
 				10,
@@ -127,7 +127,7 @@ class RecordServiceTest {
 		assertThat(updatedRecord.getId()).isNotNull();
 		assertThat(updatedRecord)
 			.extracting("runTime", "runDistance", "calories", "avgPace")
-			.contains(900, 100, 400, 630);
+			.contains(900, 2.0, 400, 630);
 		assertThat(updatedRecord.getEndTime()).isNotNull();
 
 		List<Coordinate> savedCoordinates = coordinateRepository.findAllByRecord(updatedRecord);
@@ -147,25 +147,25 @@ class RecordServiceTest {
 
 		LocalDateTime createdDateTime1 = createLocalDateTime("2024-01-31 23:59:59");
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime1));
-		Record record1 = createRecord(member, 65, 1000, 1000, 100,
+		Record record1 = createRecord(member, 65, 1.00, 1000, 100,
 			createdDateTime1.plus(Duration.of(1000, ChronoUnit.SECONDS)));
 		recordRepository.save(record1);
 
 		LocalDateTime createdDateTime2 = createLocalDateTime("2024-02-01 00:00:00");
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime2));
-		Record record2 = createRecord(member, 65, 2000, 2000, 200,
+		Record record2 = createRecord(member, 65, 2.00, 2000, 200,
 			createdDateTime2.plus(Duration.of(2000, ChronoUnit.SECONDS)));
 		recordRepository.save(record2);
 
 		LocalDateTime createdDateTime3 = createLocalDateTime("2024-02-29 23:59:59");
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime3));
-		Record record3 = createRecord(member, 65, 3000, 3000, 300,
+		Record record3 = createRecord(member, 65, 3.00, 3000, 300,
 			createdDateTime3.plus(Duration.of(3000, ChronoUnit.SECONDS)));
 		recordRepository.save(record3);
 
 		LocalDateTime createdDateTime4 = createLocalDateTime("2024-03-01 00:00:00");
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime4));
-		Record record4 = createRecord(member, 65, 4000, 4000, 400,
+		Record record4 = createRecord(member, 65, 4.00, 4000, 400,
 			createdDateTime4.plus(Duration.of(4000, ChronoUnit.SECONDS)));
 		recordRepository.save(record4);
 
@@ -178,8 +178,8 @@ class RecordServiceTest {
 		assertThat(response).hasSize(2)
 			.extracting("id", "runDistance", "day")
 			.containsExactlyInAnyOrder(
-				tuple(record2.getId(), 2000, 1),
-				tuple(record3.getId(), 3000, 29)
+				tuple(record2.getId(), 2.00, 1),
+				tuple(record3.getId(), 3.00, 29)
 			);
 	}
 
@@ -190,7 +190,7 @@ class RecordServiceTest {
 		Member member = memberRepository.save(createMember());
 
 		LocalDateTime endTime = LocalDateTime.now().withNano(0);
-		Record record = createRecord(member, 65, 1000, 3665, 300, endTime);
+		Record record = createRecord(member, 65, 1.00, 3665, 300, endTime);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
 		Record savedRecord = recordRepository.save(record);
@@ -212,7 +212,7 @@ class RecordServiceTest {
 			.contains(1, 1, 5);
 		assertThat(response)
 			.extracting("runDistance", "calories", "endTime")
-			.contains(1000, 300, endTime);
+			.contains(1.00, 300, endTime);
 		assertThat(response.coordinateResponses()).hasSize(2)
 			.extracting("latitude", "longitude")
 			.containsExactlyInAnyOrder(
@@ -227,7 +227,7 @@ class RecordServiceTest {
 		// given
 		Member member = memberRepository.save(createMember());
 
-		Record record = createRecord(member, 65, 1000, 3665, 300, null);
+		Record record = createRecord(member, 65, 1.00, 3665, 300, null);
 		Record saved = recordRepository.save(record);
 		Long recordId = saved.getId();
 
@@ -245,7 +245,7 @@ class RecordServiceTest {
 		Member member2 = memberRepository.save(createMember());
 
 		LocalDateTime endTime = LocalDateTime.now().withNano(0);
-		Record record = createRecord(member, 65, 1000, 3665, 300, endTime);
+		Record record = createRecord(member, 65, 1.00, 3665, 300, endTime);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
 		Record savedRecord = recordRepository.save(record);
@@ -269,7 +269,7 @@ class RecordServiceTest {
 		// given
 		Member member = memberRepository.save(createMember());
 
-		Record record = createRecord(member, 65, 1000, 3665, 300, null);
+		Record record = createRecord(member, 65, 1.00, 3665, 300, null);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
 		recordRepository.save(record);
@@ -289,7 +289,7 @@ class RecordServiceTest {
 			.contains(1, 1, 5);
 		assertThat(response)
 			.extracting("runDistance", "calories", "latitude", "longitude")
-			.contains(1000, 300, 20.00, 30.00);
+			.contains(1.00, 300, 20.00, 30.00);
 	}
 
 	@DisplayName("현재 운동 조회 시 종료되지 않은 운동 기록이 없으면 null이 반환된다.")
@@ -298,7 +298,7 @@ class RecordServiceTest {
 		// given
 		Member member = memberRepository.save(createMember());
 
-		Record record = createRecord(member, 65, 1000, 3665, 300, LocalDateTime.now());
+		Record record = createRecord(member, 65, 1.00, 3665, 300, LocalDateTime.now());
 		Coordinate coordinate = createCoordinate(record, 10.00, 20.00);
 		recordRepository.save(record);
 		coordinateRepository.save(coordinate);
@@ -323,7 +323,7 @@ class RecordServiceTest {
 			.build();
 	}
 
-	private Record createRecord(Member member, int avgPace, int runDistance, int runTime, int calories,
+	private Record createRecord(Member member, int avgPace, double runDistance, int runTime, int calories,
 		LocalDateTime endTime) {
 		return Record.builder()
 			.member(member)

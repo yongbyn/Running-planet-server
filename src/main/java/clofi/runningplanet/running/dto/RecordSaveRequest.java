@@ -14,8 +14,8 @@ public record RecordSaveRequest(
 	@Min(0)
 	int runTime,
 
-	@Min(0)
-	int runDistance,
+	@DecimalMin("0")
+	double runDistance,
 
 	@Min(0)
 	int calories,
