@@ -18,10 +18,13 @@ import clofi.runningplanet.common.dto.ExceptionResult;
 import clofi.runningplanet.common.exception.BadRequestException;
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.ForbiddenException;
+import clofi.runningplanet.common.exception.InternalServerException;
 import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.common.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @RequiredArgsConstructor
@@ -69,5 +72,11 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 	public ResponseEntity<ExceptionResult> handleForbiddenException(ForbiddenException exception) {
 		ExceptionResult exceptionResult = new ExceptionResult(exception.getMessage());
 		return ResponseEntity.status(FORBIDDEN).body(exceptionResult);
+	}
+
+	@ExceptionHandler(InternalServerException.class)
+	public ResponseEntity<ExceptionResult> handleInternalServerException(InternalServerException exception) {
+		ExceptionResult exceptionResult = new ExceptionResult(exception.getMessage());
+		return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(exceptionResult);
 	}
 }
