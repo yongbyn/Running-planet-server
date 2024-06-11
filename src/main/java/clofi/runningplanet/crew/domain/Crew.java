@@ -5,6 +5,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 import clofi.runningplanet.common.domain.BaseSoftDeleteEntity;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.mission.domain.MissionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,6 +23,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Crew extends BaseSoftDeleteEntity {
+
+	private static final int EXP_MULTIPLIER = 10;
+	private static final int MEMBER_INCREMENT = 5;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "crew_id", nullable = false)
@@ -62,16 +67,19 @@ public class Crew extends BaseSoftDeleteEntity {
 	@Column(name = "crew_exp", nullable = false)
 	private int crewExp;
 
+	@Column(name = "crew_level", nullable = false)
+	private int crewLevel;
+
 	public Crew(Long leaderId, String crewName, int limitMemberCnt, Category category,
 		ApprovalType approvalType,
 		String introduction, int ruleRunCnt, int ruleDistance) {
 		this(null, leaderId, crewName, limitMemberCnt, category, approvalType, introduction, ruleRunCnt,
-			ruleDistance, 0, 0);
+			ruleDistance, 0, 0, 0, 1);
 	}
 
 	public Crew(Long id, Long leaderId, String crewName, int limitMemberCnt, Category category,
 		ApprovalType approvalType, String introduction, int ruleRunCnt, int ruleDistance, int weeklyDistance,
-		int totalDistance) {
+		int totalDistance, int crewExp, int crewLevel) {
 		this.id = id;
 		this.leaderId = leaderId;
 		this.crewName = crewName;
@@ -83,6 +91,8 @@ public class Crew extends BaseSoftDeleteEntity {
 		this.ruleDistance = ruleDistance;
 		this.weeklyDistance = weeklyDistance;
 		this.totalDistance = totalDistance;
+		this.crewExp = crewExp;
+		this.crewLevel = crewLevel;
 	}
 
 	public boolean checkReachedMemberLimit(int currentMemberCnt) {
@@ -98,5 +108,18 @@ public class Crew extends BaseSoftDeleteEntity {
 
 	public void gainExp(int exp) {
 		this.crewExp += exp;
+		while (this.crewExp >= getRequiredExp()) {
+			levelUp();
+		}
+	}
+
+	public int getRequiredExp() {
+		return limitMemberCnt * MissionType.values().length * EXP_MULTIPLIER * crewLevel;
+	}
+
+	private void levelUp() {
+		this.crewExp -= getRequiredExp();
+		this.crewLevel++;
+		this.limitMemberCnt += MEMBER_INCREMENT;
 	}
 }
