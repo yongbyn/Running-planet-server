@@ -1,9 +1,10 @@
-package clofi.runningplanet.crew.domain;
+package clofi.runningplanet.chat.domain;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import clofi.runningplanet.common.domain.BaseSoftDeleteEntity;
+import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
