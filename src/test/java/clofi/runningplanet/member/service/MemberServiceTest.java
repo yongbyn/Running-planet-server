@@ -172,18 +172,20 @@ class MemberServiceTest {
 		Member savedMember = memberRepository.save(member);
 
 		MultipartFile imageFile = getImageFile();
-		UpdateProfileRequest request = new UpdateProfileRequest("스위트포테이토");
+		UpdateProfileRequest request = new UpdateProfileRequest("스위트포테이토",80,Gender.FEMALE,20);
 		MemberService memberService = getMemberService();
 
 		//when
 		memberService.updateProfile(member.getId(), request, imageFile);
 		Member updatedMember = memberRepository.findById(savedMember.getId())
 			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-		;
 
 		//then
 		assertThat(updatedMember.getNickname()).isEqualTo(request.nickname());
 		assertThat(updatedMember.getProfileImg()).isEqualTo("fakeImageUrl1");
+		assertThat(updatedMember.getWeight()).isEqualTo(request.weight());
+		assertThat(updatedMember.getGender()).isEqualTo(request.gender());
+		assertThat(updatedMember.getAge()).isEqualTo(request.age());
 	}
 
 	private Member createMember() {

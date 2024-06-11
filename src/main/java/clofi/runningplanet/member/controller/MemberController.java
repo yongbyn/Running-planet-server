@@ -65,10 +65,10 @@ public class MemberController {
 	public ResponseEntity<UpdateProfileResponse> updateProfile(
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
 		@RequestPart(value = "updateProfile") UpdateProfileRequest updateProfileRequest,
-		@RequestPart(value = "imageFile") MultipartFile imageFile) {
+		@RequestPart(value = "imgFile", required = false) MultipartFile imgFile) {
 
 		Long memberId = customOAuth2User.getId();
 
-		return ResponseEntity.ok(memberService.updateProfile(memberId, updateProfileRequest, imageFile));
+		return ResponseEntity.ok(memberService.updateProfile(memberId, updateProfileRequest, imgFile));
 	}
 }

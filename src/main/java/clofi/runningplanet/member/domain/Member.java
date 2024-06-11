@@ -72,8 +72,11 @@ public class Member extends BaseSoftDeleteEntity {
 		this.totalDistance = totalDistance;
 	}
 
-	public void update(String nickname, String profileImg) {
+	public void update(String nickname, int weight, Gender gender, int age, String profileImg) {
 		this.nickname = nickname;
+		this.weight = weight;
+		this.gender = gender;
+		this.age = age;
 		this.profileImg = profileImg;
 	}
 

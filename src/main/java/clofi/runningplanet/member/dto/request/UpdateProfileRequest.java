@@ -1,10 +1,11 @@
 package clofi.runningplanet.member.dto.request;
 
-import java.util.List;
-
-import org.springframework.web.multipart.MultipartFile;
+import clofi.runningplanet.member.domain.Gender;
 
 public record UpdateProfileRequest(
-	String nickname
+	String nickname,
+	int weight,
+	Gender gender,
+	int age
 ) {
 }

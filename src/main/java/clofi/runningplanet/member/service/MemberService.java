@@ -159,14 +159,16 @@ public class MemberService extends DefaultOAuth2UserService {
 
 		s3StorageManagerUseCase.deleteImages(member.getProfileImg());
 
-		List<String> updatedProfileImageUrl = s3StorageManagerUseCase.uploadImages(Collections.singletonList(imageFile));
+		List<String> updatedProfileImageUrl = s3StorageManagerUseCase.uploadImages(
+			Collections.singletonList(imageFile));
 
-		member.update(request.nickname(), updatedProfileImageUrl.getFirst());
+		member.update(request.nickname(), request.weight(), request.gender(), request.age(),
+			updatedProfileImageUrl.getFirst());
 
 		memberRepository.save(member);
 
-		return new UpdateProfileResponse(member.getNickname(), updatedProfileImageUrl.getFirst());
-
+		return new UpdateProfileResponse(member.getNickname(), member.getWeight(), member.getGender(), member.getAge(),
+			updatedProfileImageUrl.getFirst());
 	}
 
 	private void validateOAuth2Response(OAuth2Response oAuth2Response) {
