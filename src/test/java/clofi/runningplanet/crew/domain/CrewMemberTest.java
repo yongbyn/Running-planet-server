@@ -1,7 +1,6 @@
 package clofi.runningplanet.crew.domain;
 
-import static clofi.runningplanet.crew.domain.ApprovalType.*;
-import static clofi.runningplanet.crew.domain.Category.*;
+import static clofi.runningplanet.common.TestHelper.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,9 +28,7 @@ class CrewMemberTest {
 	@Test
 	void successCheckLeaderPrivilege() {
 		//given
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.LEADER);
 
 		//when
@@ -43,9 +40,7 @@ class CrewMemberTest {
 	@Test
 	void failCheckLeaderPrivilege() {
 		//given
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.MEMBER);
 
 		//when
@@ -58,9 +53,7 @@ class CrewMemberTest {
 	@Test
 	void successValidateMembership() {
 		//given
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.MEMBER);
 
 		//when
@@ -73,9 +66,7 @@ class CrewMemberTest {
 	@ValueSource(longs = {2L, 4L, 100L, 1832L})
 	void failValidateMembership(Long crewId) {
 		//given
-		Crew crew = new Crew(1L, 1L, "구름 크루", 10,
-			RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100,
-			0, 0);
+		Crew crew = createCrew();
 		CrewMember crewMember = new CrewMember(1L, crew, MEMBER, Role.MEMBER);
 
 		//when
