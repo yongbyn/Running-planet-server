@@ -56,13 +56,14 @@ public class Record extends BaseSoftDeleteEntity {
 	private boolean isEnd;
 
 	@Builder
-	private Record(Member member, int runTime, double runDistance, int calories, int avgPace, LocalDateTime endTime) {
+	private Record(Member member, int runTime, double runDistance, int calories, int avgPace, LocalDateTime endTime, boolean isEnd) {
 		this.member = member;
 		this.runTime = runTime;
 		this.runDistance = runDistance;
 		this.calories = calories;
 		this.avgPace = avgPace;
 		this.endTime = endTime;
+		this.isEnd = isEnd;
 	}
 
 	public void update(int runTime, double runDistance, int calories, int min, int sec, boolean isEnd) {
