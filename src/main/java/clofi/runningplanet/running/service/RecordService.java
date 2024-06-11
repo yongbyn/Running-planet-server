@@ -91,7 +91,7 @@ public class RecordService {
 	}
 
 	private static LocalDateTime getEndDateTime(YearMonth yearMonth) {
-		return yearMonth.atEndOfMonth().atTime(23, 59, 59);
+		return yearMonth.atEndOfMonth().atTime(23, 59, 59, 999999000);
 	}
 
 	public RecordFindResponse find(Long recordId, Long memberId) {

@@ -167,25 +167,26 @@ class RecordServiceTest {
 		// given
 		Member member = memberRepository.save(createMember("감자"));
 
-		LocalDateTime createdDateTime1 = createLocalDateTime("2024-01-31 23:59:59");
+
+		LocalDateTime createdDateTime1 = LocalDateTime.of(LocalDate.of(2024, 1, 31), LocalTime.MAX.withNano(999999000));
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime1));
 		Record record1 = createRecord(member, 65, 1.00, 1000, 100,
 			createdDateTime1.plus(Duration.of(1000, ChronoUnit.SECONDS)));
 		recordRepository.save(record1);
 
-		LocalDateTime createdDateTime2 = createLocalDateTime("2024-02-01 00:00:00");
+		LocalDateTime createdDateTime2 = LocalDateTime.of(LocalDate.of(2024, 2, 1), LocalTime.MIN);
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime2));
 		Record record2 = createRecord(member, 65, 2.00, 2000, 200,
 			createdDateTime2.plus(Duration.of(2000, ChronoUnit.SECONDS)));
 		recordRepository.save(record2);
 
-		LocalDateTime createdDateTime3 = createLocalDateTime("2024-02-29 23:59:59");
+		LocalDateTime createdDateTime3 = LocalDateTime.of(LocalDate.of(2024, 2, 29), LocalTime.MAX.withNano(999999000));
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime3));
 		Record record3 = createRecord(member, 65, 3.00, 3000, 300,
 			createdDateTime3.plus(Duration.of(3000, ChronoUnit.SECONDS)));
 		recordRepository.save(record3);
 
-		LocalDateTime createdDateTime4 = createLocalDateTime("2024-03-01 00:00:00");
+		LocalDateTime createdDateTime4 = LocalDateTime.of(LocalDate.of(2024, 3, 1), LocalTime.MIN);
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime4));
 		Record record4 = createRecord(member, 65, 4.00, 4000, 400,
 			createdDateTime4.plus(Duration.of(4000, ChronoUnit.SECONDS)));
@@ -211,7 +212,7 @@ class RecordServiceTest {
 		// given
 		Member member = memberRepository.save(createMember("감자"));
 
-		LocalDateTime endTime = LocalDateTime.now().withNano(0);
+		LocalDateTime endTime = LocalDateTime.now().withNano(999999000);
 		Record record = createRecord(member, 65, 1.00, 3665, 300, endTime);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
@@ -266,7 +267,7 @@ class RecordServiceTest {
 		Member member = memberRepository.save(createMember("감자"));
 		Member member2 = memberRepository.save(createMember("감자"));
 
-		LocalDateTime endTime = LocalDateTime.now().withNano(0);
+		LocalDateTime endTime = LocalDateTime.now().withNano(999999000);
 		Record record = createRecord(member, 65, 1.00, 3665, 300, endTime);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
@@ -410,7 +411,4 @@ class RecordServiceTest {
 			.build();
 	}
 
-	private LocalDateTime createLocalDateTime(String date) {
-		return LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-	}
 }
