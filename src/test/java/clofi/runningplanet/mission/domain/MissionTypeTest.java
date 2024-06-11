@@ -54,4 +54,19 @@ class MissionTypeTest {
 		//then
 		assertThat(result).isTrue();
 	}
+
+	@DisplayName("1000미터 미만 운동했을 시 false 반환")
+	@ParameterizedTest
+	@ValueSource(ints = {0, 1, 500, 999})
+	void distanceIsCompleteReturnFalse(int value) {
+		//given
+		MissionType type = MissionType.DISTANCE;
+		TodayRecords records = new TodayRecords(value, 500);
+
+		//when
+		boolean result = type.isComplete(records);
+
+		//then
+		assertThat(result).isFalse();
+	}
 }
