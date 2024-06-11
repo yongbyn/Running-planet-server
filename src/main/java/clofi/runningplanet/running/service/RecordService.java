@@ -4,7 +4,6 @@ import static clofi.runningplanet.common.utils.TimeUtils.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
@@ -53,10 +52,10 @@ public class RecordService {
 		coordinateRepository.save(coordinate);
 
 		LocalDate now = LocalDate.now();
-		LocalDateTime startOfDay = getStartOfDay(now);
-		LocalDateTime endOfDay = getEndOfDay(now);
-		List<Record> records = recordRepository.findRunningRecordsByMemberAndDateRange(
-			member, startOfDay, endOfDay);
+		LocalDateTime start = getStartOfDay(now);
+		LocalDateTime end = getEndOfDay(now);
+		List<Record> records = recordRepository.findAllByMemberIdAndCreatedAtBetween(
+			member.getId(), start, end);
 
 		RunningStatusResponse runningStatusResponse = createRunningStatusResponse(records);
 		sendRunningStatus(member, runningStatusResponse);
@@ -83,24 +82,16 @@ public class RecordService {
 
 	public List<RecordFindAllResponse> findAll(Integer year, Integer month, Long memberId) {
 		Member member = getMember(memberId);
-		YearMonth yearMonth = YearMonth.of(year, month);
 
-		LocalDateTime startDateTime = getStartDateTime(yearMonth);
-		LocalDateTime endDateTime = getEndDateTime(yearMonth);
-		List<Record> records = recordRepository.findAllByMemberAndCreatedAtBetweenAndEndTimeIsNotNull(member,
-			startDateTime, endDateTime);
+		YearMonth yearMonth = YearMonth.of(year, month);
+		LocalDateTime start = getStartOfDay(yearMonth.atDay(1));
+		LocalDateTime end = getEndOfDay(yearMonth.atEndOfMonth());
+		List<Record> records = recordRepository.findAllByMemberAndCreatedAtBetweenAndEndTimeIsNotNull(member, start,
+			end);
 
 		return records.stream()
 			.map(RecordFindAllResponse::new)
 			.toList();
-	}
-
-	private LocalDateTime getStartDateTime(YearMonth yearMonth) {
-		return yearMonth.atDay(1).atStartOfDay();
-	}
-
-	private static LocalDateTime getEndDateTime(YearMonth yearMonth) {
-		return yearMonth.atEndOfMonth().atTime(23, 59, 59, 999999000);
 	}
 
 	public RecordFindResponse find(Long recordId, Long memberId) {
@@ -140,11 +131,11 @@ public class RecordService {
 		}
 
 		List<Member> members = crewMemberRepository.findMembersByCrewId(crewId);
-		LocalDateTime startOfToday = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-		LocalDateTime startOfTomorrow = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIN);
 
-		List<Record> records = recordRepository.findRunningRecordsByMembersAndDateRange(members, startOfToday,
-			startOfTomorrow);
+		LocalDate now = LocalDate.now();
+		LocalDateTime start = getStartOfDay(now);
+		LocalDateTime end = getEndOfDay(now);
+		List<Record> records = recordRepository.findAllByMemberInAndCreatedAtBetween(members, start, end);
 
 		List<RunningStatusResponse> runningStatusResponses = convertToRunningStatusResponses(records);
 		sortByIsEndAndRunTime(runningStatusResponses);
