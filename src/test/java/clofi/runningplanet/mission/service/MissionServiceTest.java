@@ -248,7 +248,7 @@ class MissionServiceTest {
 
 	@DisplayName("크루에 속해있지 않은 크루원이 미션 성공 시 예외 발생")
 	@Test
-	void failCrewMission() {
+	void failCrewMissionNotInCrew() {
 		//given
 		Long crewId = 1L;
 		Long memberId = 1L;
@@ -263,5 +263,26 @@ class MissionServiceTest {
 		//then
 		assertThatThrownBy(() -> missionService.successMission(crewId, missionId, memberId))
 			.isInstanceOf(ForbiddenException.class);
+	}
+
+	@DisplayName("미션 성공 시 해당 미션이 없는 경우 예외 발생")
+	@Test
+	void failCrewMissionNotFoundMission() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		Long missionId = 1L;
+
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(true);
+		given(crewMissionRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		//when
+		//then
+		assertThatThrownBy(() -> missionService.successMission(crewId, missionId, memberId))
+			.isInstanceOf(NotFoundException.class);
 	}
 }
