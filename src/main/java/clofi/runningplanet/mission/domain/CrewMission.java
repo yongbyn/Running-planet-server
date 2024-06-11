@@ -3,6 +3,7 @@ package clofi.runningplanet.mission.domain;
 import clofi.runningplanet.common.domain.BaseEntity;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.member.domain.Member;
+import clofi.runningplanet.mission.domain.vo.TodayRecords;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -44,5 +45,23 @@ public class CrewMission extends BaseEntity {
 		this.crew = crew;
 		this.type = type;
 		this.isCompleted = isCompleted;
+	}
+
+	public void completeMission() {
+		this.isCompleted = true;
+	}
+
+	public void validateComplete() {
+		if (this.isCompleted()) {
+			throw new IllegalArgumentException("이미 완료한 미션입니다.");
+		}
+	}
+
+	public boolean isMissionComplete(TodayRecords todayRecords) {
+		return type.isComplete(todayRecords);
+	}
+
+	public double calculateProgress(TodayRecords todayRecords) {
+		return Math.min(type.calculateProgress(todayRecords), 1) * 100;
 	}
 }
