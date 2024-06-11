@@ -1,9 +1,13 @@
 package clofi.runningplanet.running.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -120,4 +124,48 @@ public class RecordService {
 			.orElseThrow(() -> new IllegalArgumentException("좌표 정보를 찾을 수 없습니다."));
 	}
 
+	@Transactional
+	public List<RunningStatusResponse> findAllRunningStatus(Long memberId, Long crewId) {
+		if (!crewMemberRepository.existsByCrewIdAndMemberId(crewId, memberId)) {
+			throw new IllegalArgumentException("크루에 소속된 회원이 아닙니다.");
+		}
+
+		List<Member> members = crewMemberRepository.findMembersByCrewId(crewId);
+		LocalDateTime startOfToday = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
+		LocalDateTime startOfTomorrow = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIN);
+
+		List<Record> records = recordRepository.findRunningRecordsByMembersAndDateRange(members, startOfToday,
+			startOfTomorrow);
+
+		List<RunningStatusResponse> runningStatusResponses = convertToRunningStatusResponses(records);
+		sortByIsEndAndRunTime(runningStatusResponses);
+
+		return runningStatusResponses;
+	}
+
+	private List<RunningStatusResponse> convertToRunningStatusResponses(List<Record> records) {
+		Map<Long, List<Record>> groupedByMemberId = records.stream()
+			.collect(Collectors.groupingBy(record -> record.getMember().getId()));
+
+		return groupedByMemberId.values().stream()
+			.map(recordList ->
+				new RunningStatusResponse(
+					recordList.getFirst().getMember().getId(),
+					recordList.getFirst().getMember().getNickname(),
+					recordList.stream().mapToInt(Record::getRunTime).sum(),
+					recordList.stream().mapToDouble(Record::getRunDistance).sum(),
+					recordList.stream().allMatch(r -> r.getEndTime() != null)
+				)
+			)
+			.collect(Collectors.toList());
+	}
+
+	private void sortByIsEndAndRunTime(List<RunningStatusResponse> runningStatusResponses) {
+		runningStatusResponses.sort((r1, r2) -> {
+			if (r1.isEnd() != r2.isEnd()) {
+				return Boolean.compare(r1.isEnd(), r2.isEnd());
+			}
+			return Integer.compare(r2.runTime(), r1.runTime());
+		});
+	}
 }

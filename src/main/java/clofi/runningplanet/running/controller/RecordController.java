@@ -18,6 +18,7 @@ import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
 import clofi.runningplanet.running.dto.RecordSaveResponse;
+import clofi.runningplanet.running.dto.RunningStatusResponse;
 import clofi.runningplanet.running.service.RecordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,4 +59,12 @@ public class RecordController {
 	public RecordFindCurrentResponse getCurrentRecord(@AuthenticationPrincipal CustomOAuth2User user) {
 		return recordService.findCurrentRecord(user.getId());
 	}
+
+	@GetMapping("/crew/{crewId}/running")
+	public List<RunningStatusResponse> findAllRunningStatus(
+		@PathVariable("crewId") Long crewId, @AuthenticationPrincipal CustomOAuth2User user
+	) {
+		return recordService.findAllRunningStatus(user.getId(), crewId);
+	}
+
 }
