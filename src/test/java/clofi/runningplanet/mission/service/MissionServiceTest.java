@@ -228,4 +228,21 @@ class MissionServiceTest {
 		//then
 		assertDoesNotThrow(() -> missionService.successMission(crewId, missionId, memberId));
 	}
+
+	@DisplayName("사용자 정보가 없는 사용자가 미션 성공 시 예외 발생")
+	@Test
+	void failCrewMissionByNotFoundMember() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		Long missionId = 1L;
+
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(false);
+
+		//when
+		//then
+		assertThatThrownBy(() -> missionService.successMission(crewId, missionId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
 }
