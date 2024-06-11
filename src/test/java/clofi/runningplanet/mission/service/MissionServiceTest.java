@@ -314,4 +314,27 @@ class MissionServiceTest {
 		assertThatThrownBy(() -> missionService.successMission(crewId, missionId, memberId))
 			.isInstanceOf(NotFoundException.class);
 	}
+
+	@DisplayName("이미 성공한 미션을 다시 성공 요청 시 예외 발생")
+	@Test
+	void failCrewMissionReSuccess() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		Long missionId = 1L;
+
+		CrewMission mission = createCompleteDistanceCrewMission();
+
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(true);
+		given(crewMissionRepository.findById(anyLong()))
+			.willReturn(Optional.of(mission));
+
+		//when
+		//then
+		assertThatThrownBy(() -> missionService.successMission(crewId, missionId, memberId))
+			.isInstanceOf(IllegalArgumentException.class);
+	}
 }
