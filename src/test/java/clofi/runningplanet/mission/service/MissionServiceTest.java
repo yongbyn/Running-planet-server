@@ -245,4 +245,23 @@ class MissionServiceTest {
 		assertThatThrownBy(() -> missionService.successMission(crewId, missionId, memberId))
 			.isInstanceOf(NotFoundException.class);
 	}
+
+	@DisplayName("크루에 속해있지 않은 크루원이 미션 성공 시 예외 발생")
+	@Test
+	void failCrewMission() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		Long missionId = 1L;
+
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(false);
+
+		//when
+		//then
+		assertThatThrownBy(() -> missionService.successMission(crewId, missionId, memberId))
+			.isInstanceOf(ForbiddenException.class);
+	}
 }
