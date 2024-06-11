@@ -39,5 +39,9 @@ public class MemberPlanet extends BaseEntity {
 		this.planetId = planetId;
 		this.memberPlanetName = memberPlanetName;
 	}
+
+	public void updatePlanetName(String memberPlanetName) {
+		this.memberPlanetName = memberPlanetName;
+	}
 }
 
