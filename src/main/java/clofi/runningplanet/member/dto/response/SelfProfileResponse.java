@@ -15,8 +15,6 @@ public record SelfProfileResponse(
 
 	String profileImg,
 
-	int runScore,
-
 	AvgPace avgPace,
 
 	int avgDistance,
@@ -29,7 +27,6 @@ public record SelfProfileResponse(
 ) {
 	public SelfProfileResponse(Member member, CrewMember crewMember) {
 		this(member.getNickname(), member.getGender(), member.getAge(), member.getWeight(), member.getProfileImg(),
-			member.getRunScore(),
 			calculateAvgPace(member.getAvgPace())
 			, member.getAvgDistance(), member.getTotalDistance(),
 			crewMember != null ? crewMember.getCrew().getCrewName() : null,

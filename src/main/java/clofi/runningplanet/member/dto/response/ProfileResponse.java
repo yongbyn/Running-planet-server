@@ -13,8 +13,6 @@ public record ProfileResponse(
 
 	String profileImg,
 
-	int runScore,
-
 	AvgPace avgPace,
 
 	int avgDistance,
@@ -24,9 +22,10 @@ public record ProfileResponse(
 	String myCrew
 ) {
 	public ProfileResponse(Member member, CrewMember crewMember) {
-		this(member.getNickname(), member.getGender(), member.getAge(), member.getProfileImg(), member.getRunScore(),
+		this(member.getNickname(), member.getGender(), member.getAge(), member.getProfileImg(),
 			calculateAvgPace(member.getAvgPace())
-			, member.getAvgDistance(), member.getTotalDistance(), crewMember != null? crewMember.getCrew().getCrewName() : null);
+			, member.getAvgDistance(), member.getTotalDistance(),
+			crewMember != null ? crewMember.getCrew().getCrewName() : null);
 	}
 
 	public record AvgPace(

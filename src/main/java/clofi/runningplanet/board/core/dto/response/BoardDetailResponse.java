@@ -10,10 +10,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BoardDetailResponse {
 	private BoardResponse boardResponse;
+	private Long authorId;
+	private Boolean isThumbsUp;
 	private List<CommentResponse> comments;
 
-	public BoardDetailResponse(BoardResponse boardResponses, List<CommentResponse> commentResponseList) {
+	public BoardDetailResponse(BoardResponse boardResponses, Long authorId, Boolean isThumbsUp,
+		List<CommentResponse> commentResponseList) {
 		this.boardResponse = boardResponses;
+		this.authorId = authorId;
+		this.isThumbsUp = isThumbsUp;
 		this.comments = commentResponseList;
 	}
 }

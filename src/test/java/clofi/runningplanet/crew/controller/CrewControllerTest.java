@@ -209,9 +209,9 @@ class CrewControllerTest {
 		//given
 		Long crewId = 1L;
 
-		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글1", 80, Gender.MALE, 30,
+		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글1", Gender.MALE, 30,
 			Approval.PENDING);
-		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글2", 70, Gender.FEMALE, 15,
+		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글2", Gender.FEMALE, 15,
 			Approval.PENDING);
 		ApprovalMemberResDto expected = new ApprovalMemberResDto(
 			List.of(getApplyCrewResDto1, getApplyCrewResDto2));

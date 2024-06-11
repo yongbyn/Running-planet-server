@@ -403,7 +403,6 @@ class CrewServiceTest {
 			.profileImg("https://image-url1.com")
 			.avgDistance(50)
 			.totalDistance(2000)
-			.runScore(80)
 			.build();
 		Member member2 = Member.builder()
 			.id(3L)
@@ -413,7 +412,6 @@ class CrewServiceTest {
 			.profileImg("https://image-url2.com")
 			.avgDistance(5)
 			.totalDistance(20)
-			.runScore(70)
 			.build();
 
 		CrewApplication crewApplication1 = new CrewApplication(1L, "크루 신청글", Approval.PENDING, crew, member1);
@@ -430,9 +428,9 @@ class CrewServiceTest {
 		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, memberId);
 
 		//then
-		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글", 80, Gender.MALE, 30,
+		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글", Gender.MALE, 30,
 			Approval.PENDING);
-		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글", 70, Gender.FEMALE, 15,
+		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글", Gender.FEMALE, 15,
 			Approval.PENDING);
 		ApprovalMemberResDto approvalMemberResDto = new ApprovalMemberResDto(
 			List.of(getApplyCrewResDto1, getApplyCrewResDto2));

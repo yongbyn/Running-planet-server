@@ -23,7 +23,6 @@ class CrewMemberTest {
 		.profileImg("https://image-url.com")
 		.avgDistance(10)
 		.totalDistance(100)
-		.runScore(50)
 		.build();
 
 	@DisplayName("리더 검증 로직 성공")
