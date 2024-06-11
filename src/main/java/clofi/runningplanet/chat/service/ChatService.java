@@ -44,7 +44,7 @@ public class ChatService {
 	}
 
 	private Member getMember(Long memberId, ChatMessage chatMessage) {
-		return memberRepository.findByNicknameAndMemberId(chatMessage.from(), memberId)
+		return memberRepository.findByIdAndNickname(memberId, chatMessage.from())
 			.orElseThrow(() -> new RuntimeException("일치하는 사용자가 없습니다."));
 	}
 
