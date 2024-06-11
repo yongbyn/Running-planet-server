@@ -81,4 +81,12 @@ public class TestHelper {
 		);
 	}
 
+	public static CrewMission createDistanceCrewMission() {
+		return new CrewMission(1L, createLeader(), createCrew(), MissionType.DISTANCE, false);
+	}
+
+	public static CrewMission createDurationCrewMission() {
+		return new CrewMission(1L, createLeader(), createCrew(), MissionType.DURATION, false);
+	}
+
 }
