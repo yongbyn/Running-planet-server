@@ -1,6 +1,6 @@
 package clofi.runningplanet.running.service;
 
-import static clofi.runningplanet.common.TimeUtils.*;
+import static clofi.runningplanet.common.utils.TimeUtils.*;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalDate;

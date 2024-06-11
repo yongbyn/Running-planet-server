@@ -22,6 +22,10 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 	List<Record> findAllByMemberAndCreatedAtBetweenAndEndTimeIsNotNull(Member member, LocalDateTime startDateTime,
 		LocalDateTime endDateTime);
 
+	@Query("SELECT r FROM Record r WHERE r.member = :member AND r.createdAt >= :startOfToday AND r.createdAt < :startOfTomorrow")
+	List<Record> findRunningRecordsByMemberAndDateRange(@Param("member") Member member,
+		@Param("startOfToday") LocalDateTime startOfToday, @Param("startOfTomorrow") LocalDateTime startOfTomorrow);
+
 	@Query("SELECT r FROM Record r WHERE r.member IN :members AND r.createdAt >= :startOfToday AND r.createdAt < :startOfTomorrow")
 	List<Record> findRunningRecordsByMembersAndDateRange(@Param("members") List<Member> members,
 		@Param("startOfToday") LocalDateTime startOfToday, @Param("startOfTomorrow") LocalDateTime startOfTomorrow);

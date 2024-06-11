@@ -1,5 +1,7 @@
 package clofi.runningplanet.running.service;
 
+import static clofi.runningplanet.common.utils.TimeUtils.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -50,7 +52,14 @@ public class RecordService {
 		Coordinate coordinate = request.toCoordinate(savedRecord);
 		coordinateRepository.save(coordinate);
 
-		sendRunningStatus(member, savedRecord);
+		LocalDate now = LocalDate.now();
+		LocalDateTime startOfDay = getStartOfDay(now);
+		LocalDateTime endOfDay = getEndOfDay(now);
+		List<Record> records = recordRepository.findRunningRecordsByMemberAndDateRange(
+			member, startOfDay, endOfDay);
+
+		RunningStatusResponse runningStatusResponse = createRunningStatusResponse(records);
+		sendRunningStatus(member, runningStatusResponse);
 
 		return savedRecord;
 	}
@@ -65,11 +74,11 @@ public class RecordService {
 			.orElse(Record.builder().member(member).build());
 	}
 
-	private void sendRunningStatus(Member member, Record savedRecord) {
+	private void sendRunningStatus(Member member, RunningStatusResponse runningStatusResponse) {
 		crewMemberRepository.findByMemberId(member.getId())
 			.ifPresent(crewMember -> messagingTemplate.convertAndSend(
 				String.format("/sub/crew/%s/running", crewMember.getCrew().getId()),
-				new RunningStatusResponse(member, savedRecord)));
+				runningStatusResponse));
 	}
 
 	public List<RecordFindAllResponse> findAll(Integer year, Integer month, Long memberId) {
@@ -148,16 +157,18 @@ public class RecordService {
 			.collect(Collectors.groupingBy(record -> record.getMember().getId()));
 
 		return groupedByMemberId.values().stream()
-			.map(recordList ->
-				new RunningStatusResponse(
-					recordList.getFirst().getMember().getId(),
-					recordList.getFirst().getMember().getNickname(),
-					recordList.stream().mapToInt(Record::getRunTime).sum(),
-					recordList.stream().mapToDouble(Record::getRunDistance).sum(),
-					recordList.stream().allMatch(r -> r.getEndTime() != null)
-				)
-			)
+			.map(RecordService::createRunningStatusResponse)
 			.collect(Collectors.toList());
+	}
+
+	private static RunningStatusResponse createRunningStatusResponse(List<Record> recordList) {
+		return new RunningStatusResponse(
+			recordList.getFirst().getMember().getId(),
+			recordList.getFirst().getMember().getNickname(),
+			recordList.stream().mapToInt(Record::getRunTime).sum(),
+			recordList.stream().mapToDouble(Record::getRunDistance).sum(),
+			recordList.stream().allMatch(r -> r.getEndTime() != null)
+		);
 	}
 
 	private void sortByIsEndAndRunTime(List<RunningStatusResponse> runningStatusResponses) {
