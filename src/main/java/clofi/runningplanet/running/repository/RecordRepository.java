@@ -13,7 +13,10 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 
 	Optional<Record> findByIdAndMemberAndEndTimeIsNotNull(Long id, Member member);
 
-	List<Record> findAllByMemberAndCreatedAtBetweenAndEndTimeIsNotNull(Member member, LocalDateTime start, LocalDateTime end);
-
 	Optional<Record> findOneByMemberAndEndTimeIsNull(Member member);
+
+	List<Record> findAllByMemberIdAndCreatedAtBetween(Long memberId, LocalDateTime start, LocalDateTime end);
+
+	List<Record> findAllByMemberAndCreatedAtBetweenAndEndTimeIsNotNull(Member member, LocalDateTime startDateTime,
+		LocalDateTime endDateTime);
 }
