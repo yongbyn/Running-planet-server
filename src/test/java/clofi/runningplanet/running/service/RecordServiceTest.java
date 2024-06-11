@@ -1,12 +1,11 @@
 package clofi.runningplanet.running.service;
 
+import static clofi.runningplanet.common.TimeUtils.*;
 import static org.assertj.core.api.Assertions.*;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -167,26 +166,25 @@ class RecordServiceTest {
 		// given
 		Member member = memberRepository.save(createMember("감자"));
 
-
-		LocalDateTime createdDateTime1 = LocalDateTime.of(LocalDate.of(2024, 1, 31), LocalTime.MAX.withNano(999999000));
+		LocalDateTime createdDateTime1 = getEndOfDay(LocalDate.of(2024, 1, 31));
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime1));
 		Record record1 = createRecord(member, 65, 1.00, 1000, 100,
 			createdDateTime1.plus(Duration.of(1000, ChronoUnit.SECONDS)));
 		recordRepository.save(record1);
 
-		LocalDateTime createdDateTime2 = LocalDateTime.of(LocalDate.of(2024, 2, 1), LocalTime.MIN);
+		LocalDateTime createdDateTime2 = getStartOfDay(LocalDate.of(2024, 2, 1));
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime2));
 		Record record2 = createRecord(member, 65, 2.00, 2000, 200,
 			createdDateTime2.plus(Duration.of(2000, ChronoUnit.SECONDS)));
 		recordRepository.save(record2);
 
-		LocalDateTime createdDateTime3 = LocalDateTime.of(LocalDate.of(2024, 2, 29), LocalTime.MAX.withNano(999999000));
+		LocalDateTime createdDateTime3 = getEndOfDay(LocalDate.of(2024, 2, 29));
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime3));
 		Record record3 = createRecord(member, 65, 3.00, 3000, 300,
 			createdDateTime3.plus(Duration.of(3000, ChronoUnit.SECONDS)));
 		recordRepository.save(record3);
 
-		LocalDateTime createdDateTime4 = LocalDateTime.of(LocalDate.of(2024, 3, 1), LocalTime.MIN);
+		LocalDateTime createdDateTime4 = getStartOfDay(LocalDate.of(2024, 3, 1));
 		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime4));
 		Record record4 = createRecord(member, 65, 4.00, 4000, 400,
 			createdDateTime4.plus(Duration.of(4000, ChronoUnit.SECONDS)));
@@ -212,7 +210,7 @@ class RecordServiceTest {
 		// given
 		Member member = memberRepository.save(createMember("감자"));
 
-		LocalDateTime endTime = LocalDateTime.now().withNano(999999000);
+		LocalDateTime endTime = getEndOfDay(LocalDate.now());
 		Record record = createRecord(member, 65, 1.00, 3665, 300, endTime);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
@@ -267,7 +265,7 @@ class RecordServiceTest {
 		Member member = memberRepository.save(createMember("감자"));
 		Member member2 = memberRepository.save(createMember("감자"));
 
-		LocalDateTime endTime = LocalDateTime.now().withNano(999999000);
+		LocalDateTime endTime = getEndOfDay(LocalDate.now());
 		Record record = createRecord(member, 65, 1.00, 3665, 300, endTime);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
@@ -347,24 +345,29 @@ class RecordServiceTest {
 
 		LocalDate today = LocalDate.now();
 
-		LocalDateTime endOfYesterday = LocalDateTime.of(today.minusDays(1), LocalTime.MAX).withNano(999999000);
+		LocalDateTime endOfYesterday = getEndOfDay(today.minusDays(1));
 		auditingHandler.setDateTimeProvider(() -> Optional.of(endOfYesterday));
 		recordService.save(
 			new RecordSaveRequest(1, 1, 100, 1.00, 1, new RecordSaveRequest.AvgPace(1, 1), true), member1.getId());
 
-		LocalDateTime startOfToday = LocalDateTime.of(today, LocalTime.MIN);
+		LocalDateTime startOfToday = getStartOfDay(today);
 		auditingHandler.setDateTimeProvider(() -> Optional.of(startOfToday));
-		recordService.save(new RecordSaveRequest(1, 1, 200, 2.00, 1, new RecordSaveRequest.AvgPace(1, 1), true), member2.getId());
-		recordService.save(new RecordSaveRequest(1, 1, 200, 2.00, 1, new RecordSaveRequest.AvgPace(1, 1), true), member1.getId());
+		recordService.save(new RecordSaveRequest(1, 1, 200, 2.00, 1, new RecordSaveRequest.AvgPace(1, 1), true),
+			member2.getId());
+		recordService.save(new RecordSaveRequest(1, 1, 200, 2.00, 1, new RecordSaveRequest.AvgPace(1, 1), true),
+			member1.getId());
 
-		LocalDateTime endOfToday = LocalDateTime.of(today, LocalTime.MAX).withNano(999999000);
+		LocalDateTime endOfToday = getEndOfDay(today);
 		auditingHandler.setDateTimeProvider(() -> Optional.of(endOfToday));
-		recordService.save(new RecordSaveRequest(3, 3, 300, 3.00, 3, new RecordSaveRequest.AvgPace(1, 1), true), member1.getId());
-		recordService.save(new RecordSaveRequest(3, 3, 100, 3.00, 3, new RecordSaveRequest.AvgPace(1, 1), false), member3.getId());
+		recordService.save(new RecordSaveRequest(3, 3, 300, 3.00, 3, new RecordSaveRequest.AvgPace(1, 1), true),
+			member1.getId());
+		recordService.save(new RecordSaveRequest(3, 3, 100, 3.00, 3, new RecordSaveRequest.AvgPace(1, 1), false),
+			member3.getId());
 
-		LocalDateTime startOfTomorrow = LocalDateTime.of(today.plusDays(1), LocalTime.MIN);
+		LocalDateTime startOfTomorrow = getStartOfDay(today.plusDays(1));
 		auditingHandler.setDateTimeProvider(() -> Optional.of(startOfTomorrow));
-		recordService.save(new RecordSaveRequest(3, 3, 4000, 4.00, 3, new RecordSaveRequest.AvgPace(1, 1), true), member1.getId());
+		recordService.save(new RecordSaveRequest(3, 3, 4000, 4.00, 3, new RecordSaveRequest.AvgPace(1, 1), true),
+			member1.getId());
 
 		// when
 		List<RunningStatusResponse> response = recordService.findAllRunningStatus(member1.getId(), crew.getId());
