@@ -1,4 +1,4 @@
-package clofi.runningplanet.common;
+package clofi.runningplanet.common.utils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
