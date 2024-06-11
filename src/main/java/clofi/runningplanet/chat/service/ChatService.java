@@ -27,9 +27,9 @@ public class ChatService {
 	private final MemberRepository memberRepository;
 	private final CrewRepository crewRepository;
 
-	public ChatMessage saveChatMessage(Long crewId, ChatMessage chatMessage) {
+	public ChatMessage saveChatMessage(Long memberId, Long crewId, ChatMessage chatMessage) {
 
-		Member member = getMember(chatMessage);
+		Member member = getMember(memberId, chatMessage);
 		Crew crew = getCrew(crewId);
 
 		Chat chat = Chat.builder()
@@ -43,8 +43,8 @@ public class ChatService {
 		return new ChatMessage(chatMessage.from(), chatMessage.message(), chat.getCreatedAt());
 	}
 
-	private Member getMember(ChatMessage chatMessage) {
-		return memberRepository.findByNickname(chatMessage.from())
+	private Member getMember(Long memberId, ChatMessage chatMessage) {
+		return memberRepository.findByNicknameAndMemberId(chatMessage.from(), memberId)
 			.orElseThrow(() -> new RuntimeException("일치하는 사용자가 없습니다."));
 	}
 
