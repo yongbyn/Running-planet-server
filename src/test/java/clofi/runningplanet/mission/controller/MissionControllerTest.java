@@ -90,8 +90,34 @@ class MissionControllerTest {
 		assertThat(expected).isEqualTo(resDto);
 	}
 
+	@DisplayName("크루 미션 성공")
+	@WithMockCustomMember
+	@Test
+	void test() throws Exception {
+		//given
+		Long crewId = 1L;
+		Long missionId = 1L;
+
+		doNothing()
+			.when(missionService)
+			.successMission(anyLong(), anyLong(), anyLong());
+
+		//when
+		ResultActions resultActions = successCrewMission(crewId, missionId);
+
+		//then
+		resultActions
+			.andExpect(status().isOk());
+
+	}
+
 	private ResultActions getCrewMissionList(Long crewId) throws Exception {
 		return mockMvc.perform(get("/api/crew/{crewId}/mission", crewId)
+			.contentType(APPLICATION_JSON));
+	}
+
+	private ResultActions successCrewMission(Long crewId, Long missionId) throws Exception {
+		return mockMvc.perform(post("/api/crew/{crewId}/mission/{missionId}", crewId, missionId)
 			.contentType(APPLICATION_JSON));
 	}
 }
