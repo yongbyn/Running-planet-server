@@ -22,15 +22,13 @@ public record FindAllCrewResDto(
 	String introduction,
 	CrewLeaderDto crewLeader
 ) {
-	public static FindAllCrewResDto of(Crew crew, List<String> tags, CrewLeaderDto crewLeader, String filePath) {
+	public static FindAllCrewResDto of(Crew crew, int memberCnt, List<String> tags, CrewLeaderDto crewLeader,
+		String filePath) {
 		return new FindAllCrewResDto(
 			crew.getId(),
 			crew.getCrewName(),
-
-			// todo member, mission 기능 구현 후 로직 개선
-			1,
-			1,
-
+			crew.getCrewLevel(),
+			memberCnt,
 			crew.getLimitMemberCnt(),
 			crew.getApprovalType(),
 			filePath,
