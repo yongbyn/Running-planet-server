@@ -69,4 +69,36 @@ class MissionTypeTest {
 		//then
 		assertThat(result).isFalse();
 	}
+
+	@DisplayName("목표치까지 1이하의 미션 진행률 반환")
+	@ParameterizedTest
+	@ValueSource(ints = {0, 1, 500, 999, 1000})
+	void distanceCalculateProgressLessThanEqual1(int value) {
+		//given
+		MissionType type = MissionType.DISTANCE;
+		TodayRecords records = new TodayRecords(value, 500);
+
+		//when
+		double result = type.calculateProgress(records);
+
+		//then
+		assertThat(result).isEqualTo((double)value / type.getRequiredScore());
+		assertThat(result).isLessThanOrEqualTo(1);
+	}
+
+	@DisplayName("목표치 초과 달성 시 진행률 1 초과 반환")
+	@ParameterizedTest
+	@ValueSource(ints = {1001, 1002, 1100, 3000, 9000})
+	void distanceCalculateProgressOver1(int value) {
+		//given
+		MissionType type = MissionType.DISTANCE;
+		TodayRecords records = new TodayRecords(value, 500);
+
+		//when
+		double result = type.calculateProgress(records);
+
+		//then
+		assertThat(result).isEqualTo((double)value / type.getRequiredScore());
+		assertThat(result).isGreaterThan(1);
+	}
 }
