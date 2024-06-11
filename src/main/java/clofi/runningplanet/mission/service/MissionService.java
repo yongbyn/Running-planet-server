@@ -8,20 +8,21 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.ForbiddenException;
 import clofi.runningplanet.common.exception.InternalServerException;
 import clofi.runningplanet.common.exception.NotFoundException;
+import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.mission.domain.CrewMission;
-import clofi.runningplanet.mission.domain.MissionType;
+import clofi.runningplanet.mission.domain.vo.TodayRecords;
 import clofi.runningplanet.mission.dto.response.CrewMissionListDto;
 import clofi.runningplanet.mission.dto.response.GetCrewMissionResDto;
 import clofi.runningplanet.mission.repository.CrewMissionRepository;
 import clofi.runningplanet.running.domain.Record;
 import clofi.runningplanet.running.repository.RecordRepository;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -53,6 +54,43 @@ public class MissionService {
 		return new CrewMissionListDto(resDtoList);
 	}
 
+	@Transactional
+	public void successMission(Long crewId, Long missionId, Long memberId) {
+		checkMemberExist(memberId);
+		validateCrewMemberShip(crewId, memberId);
+
+		CrewMission findMission = getFindMission(missionId);
+		findMission.validateComplete();
+
+		TodayRecords todayRecords = getTodayRecords(memberId);
+		validateRecords(findMission, todayRecords);
+
+		findMission.completeMission();
+		
+		Crew findCrew = getFindCrew(crewId);
+		findCrew.gainExp(10);
+	}
+
+	private void validateRecords(CrewMission mission, TodayRecords todayRecords) {
+		boolean isMissionCompleted = mission.isMissionComplete(todayRecords);
+
+		if (!isMissionCompleted) {
+			throw new ConflictException("미션 완료 조건을 달성하지 못했습니다.");
+		}
+	}
+
+	private CrewMission getFindMission(Long missionId) {
+		return crewMissionRepository.findById(missionId).orElseThrow(
+			() -> new NotFoundException("해당 미션이 존재하지 않습니다.")
+		);
+	}
+
+	private Crew getFindCrew(Long crewId) {
+		return crewRepository.findById(crewId).orElseThrow(
+			() -> new NotFoundException("해당 크루를 찾을 수 없습니다.")
+		);
+	}
+
 	private void checkMemberExist(Long memberId) {
 		if (!memberRepository.existsById(memberId)) {
 			throw new NotFoundException("인증된 사용자가 아닙니다.");
@@ -78,10 +116,7 @@ public class MissionService {
 	}
 
 	private double calculateProgressInPercent(CrewMission crewMission, TodayRecords todayRecords) {
-		double result = crewMission.getType() == MissionType.DISTANCE ?
-			(todayRecords.getTotalDistance() / 1000) :
-			((double)(todayRecords.getTotalDuration() / 3600));
-		return Math.min(result * 100, 100);
+		return crewMission.calculateProgress(todayRecords);
 	}
 
 	private TodayRecords getTodayRecords(Long memberId) {
@@ -89,21 +124,6 @@ public class MissionService {
 		LocalDateTime end = LocalDate.now().atTime(LocalTime.MAX);
 		List<Record> todayRecordList = recordRepository.findAllByMemberIdAndCreatedAtBetween(memberId, start, end);
 
-		double todayTotalDistance = todayRecordList.stream().mapToDouble(Record::getRunDistance).sum();
-		int todayTotalDuration = todayRecordList.stream().mapToInt(Record::getRunTime).sum();
-
-		return new TodayRecords(todayTotalDistance, todayTotalDuration);
-	}
-
-	@Getter
-	private static class TodayRecords {
-		private final double totalDistance;
-		private final int totalDuration;
-
-		private TodayRecords(double totalDistance, int totalDuration) {
-			this.totalDistance = totalDistance;
-			this.totalDuration = totalDuration;
-		}
-
+		return new TodayRecords(todayRecordList);
 	}
 }

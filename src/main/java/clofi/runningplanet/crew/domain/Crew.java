@@ -59,6 +59,9 @@ public class Crew extends BaseSoftDeleteEntity {
 	@Column(name = "total_distance", nullable = false)
 	private int totalDistance;
 
+	@Column(name = "crew_exp", nullable = false)
+	private int crewExp;
+
 	public Crew(Long leaderId, String crewName, int limitMemberCnt, Category category,
 		ApprovalType approvalType,
 		String introduction, int ruleRunCnt, int ruleDistance) {
@@ -91,5 +94,9 @@ public class Crew extends BaseSoftDeleteEntity {
 		this.introduction = introduction;
 		this.ruleDistance = rule.distance();
 		this.ruleRunCnt = rule.weeklyRun();
+	}
+
+	public void gainExp(int exp) {
+		this.crewExp += exp;
 	}
 }
