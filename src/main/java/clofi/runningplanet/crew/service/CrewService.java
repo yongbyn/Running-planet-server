@@ -81,12 +81,13 @@ public class CrewService {
 	@Transactional(readOnly = true)
 	public FindCrewResDto findCrew(Long crewId) {
 		Crew findCrew = getCrewByCrewId(crewId);
+		int memberCnt = getCrewMemberCnt(crewId);
 
 		List<String> tags = findTagsToStrings(findCrew.getId());
 		CrewLeaderDto crewLeader = convertCrewLeaderDto(findCrew.getLeaderId());
 		CrewImage crewImage = findImage(crewId);
 
-		return FindCrewResDto.of(findCrew, crewLeader, tags, crewImage.getFilepath());
+		return FindCrewResDto.of(findCrew, memberCnt, crewLeader, tags, crewImage.getFilepath());
 	}
 
 	@Transactional
@@ -330,10 +331,11 @@ public class CrewService {
 	}
 
 	private FindAllCrewResDto convertToFindAllCrewResDto(Crew crew) {
+		int memberCnt = getCrewMemberCnt(crew.getId());
 		List<String> tags = findTagsToStrings(crew.getId());
 		CrewLeaderDto crewLeaderDto = convertCrewLeaderDto(crew.getLeaderId());
 		CrewImage crewImage = findImage(crew.getId());
-		return FindAllCrewResDto.of(crew, tags, crewLeaderDto, crewImage.getFilepath());
+		return FindAllCrewResDto.of(crew, memberCnt, tags, crewLeaderDto, crewImage.getFilepath());
 	}
 
 	private CrewLeaderDto convertCrewLeaderDto(Long leaderId) {
