@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
 import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.domain.CrewImage;
 import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
@@ -39,11 +40,11 @@ public class TestHelper {
 	}
 
 	public static Crew createCrew() {
-		return new Crew(1L, 1L, "구름 크루", 10, RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100, 0, 0);
+		return new Crew(1L, 1L, "구름 크루", 10, RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100, 0, 0, 0, 1);
 	}
 
 	public static Crew createAutoCrew() {
-		return new Crew(2L, 2L, "클로피 크루", 8, RUNNING, AUTO, "클로피 크루는 최고의 크루", 7, 500, 1000, 3000);
+		return new Crew(2L, 2L, "클로피 크루", 8, RUNNING, AUTO, "클로피 크루는 최고의 크루", 7, 500, 1000, 3000, 0, 1);
 	}
 
 	public static Member createLeader() {
@@ -91,6 +92,10 @@ public class TestHelper {
 
 	public static CrewMission createDurationCrewMission() {
 		return new CrewMission(1L, createLeader(), createCrew(), MissionType.DURATION, false);
+	}
+
+	public static CrewImage createCrewImage() {
+		return new CrewImage(1L, "크루 로고", "https://test.com", createCrew());
 	}
 
 }
