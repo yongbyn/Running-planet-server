@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.ForbiddenException;
 import clofi.runningplanet.common.exception.InternalServerException;
 import clofi.runningplanet.common.exception.NotFoundException;
@@ -336,5 +337,32 @@ class MissionServiceTest {
 		//then
 		assertThatThrownBy(() -> missionService.successMission(crewId, missionId, memberId))
 			.isInstanceOf(IllegalArgumentException.class);
+	}
+
+	@DisplayName("성공 조건 미 충족 시 예외 발생")
+	@Test
+	void failCrewMission() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		Long missionId = 1L;
+
+		CrewMission mission = createDurationCrewMission();
+		List<Record> todayRecordList = createTodayRecordList();
+
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(true);
+		given(crewMissionRepository.findById(anyLong()))
+			.willReturn(Optional.of(mission));
+		given(recordRepository.findAllByMemberIdAndCreatedAtBetween(anyLong(), any(LocalDateTime.class),
+			any(LocalDateTime.class)))
+			.willReturn(todayRecordList);
+
+		//when
+		//then
+		assertThatThrownBy(() -> missionService.successMission(crewId, missionId, memberId))
+			.isInstanceOf(ConflictException.class);
 	}
 }
