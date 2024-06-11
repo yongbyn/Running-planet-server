@@ -84,8 +84,9 @@ public class CrewService {
 
 		List<String> tags = findTagsToStrings(findCrew.getId());
 		CrewLeaderDto crewLeader = convertCrewLeaderDto(findCrew.getLeaderId());
+		CrewImage crewImage = findImage(crewId);
 
-		return FindCrewResDto.of(findCrew, crewLeader, tags);
+		return FindCrewResDto.of(findCrew, crewLeader, tags, crewImage.getFilepath());
 	}
 
 	@Transactional
@@ -145,7 +146,6 @@ public class CrewService {
 
 		CrewMember crewMember = findCrewMember(crewId, memberId);
 		validateLeaderLeaveCrew(crewId, crewMember);
-		deleteCrewMember(crewMember);
 	}
 
 	@Transactional
@@ -173,10 +173,14 @@ public class CrewService {
 		}
 	}
 
-	private void updateCrewImage(MultipartFile imgFile, Long crewId) {
-		CrewImage findCrewImage = crewImageRepository.findByCrewId(crewId).orElseThrow(
+	private CrewImage findImage(Long crewId) {
+		return crewImageRepository.findByCrewId(crewId).orElseThrow(
 			() -> new NotFoundException("크루 이미지를 찾을 수 없습니다.")
 		);
+	}
+
+	private void updateCrewImage(MultipartFile imgFile, Long crewId) {
+		CrewImage findCrewImage = findImage(crewId);
 
 		storageManagerUseCase.deleteImages(findCrewImage.getFilepath());
 		String filePath = storageManagerUseCase.uploadImage(imgFile);
@@ -202,6 +206,7 @@ public class CrewService {
 		if (memberCnt > 1) {
 			throw new ConflictException("크루장은 크루원 수가 1인 일 경우에 탈퇴할 수 있습니다.");
 		}
+		deleteCrewMember(crewMember);
 		deleteCrew(crewId);
 	}
 
@@ -327,7 +332,8 @@ public class CrewService {
 	private FindAllCrewResDto convertToFindAllCrewResDto(Crew crew) {
 		List<String> tags = findTagsToStrings(crew.getId());
 		CrewLeaderDto crewLeaderDto = convertCrewLeaderDto(crew.getLeaderId());
-		return FindAllCrewResDto.of(crew, tags, crewLeaderDto);
+		CrewImage crewImage = findImage(crew.getId());
+		return FindAllCrewResDto.of(crew, tags, crewLeaderDto, crewImage.getFilepath());
 	}
 
 	private CrewLeaderDto convertCrewLeaderDto(Long leaderId) {

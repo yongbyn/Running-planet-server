@@ -169,16 +169,18 @@ class CrewServiceTest {
 		given(memberRepository.findById(anyLong()))
 			.willReturn(Optional.of(leader))
 			.willReturn(Optional.of(leader2));
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.of(createCrewImage()));
 
 		//when
 		List<FindAllCrewResDto> result = crewService.findAllCrew();
 
 		//then
 		final FindAllCrewResDto firstFindAllCrewResDto = FindAllCrewResDto.of(crew1, List.of("성실"),
-			new CrewLeaderDto(1L, "크루장"));
+			new CrewLeaderDto(1L, "크루장"), "https://test.com");
 
 		final FindAllCrewResDto secondFindAllCrewResDto = FindAllCrewResDto.of(crew2, List.of("최고"),
-			new CrewLeaderDto(2L, "사용자"));
+			new CrewLeaderDto(2L, "사용자"), "https://test.com");
 
 		final List<FindAllCrewResDto> expect = List.of(firstFindAllCrewResDto, secondFindAllCrewResDto);
 
@@ -240,12 +242,15 @@ class CrewServiceTest {
 
 		given(memberRepository.findById(anyLong()))
 			.willReturn(Optional.of(leader));
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.of(createCrewImage()));
 
 		//when
 		FindCrewResDto result = crewService.findCrew(crewId);
 
 		//then
-		final FindCrewResDto findCrewResDto = FindCrewResDto.of(crew, new CrewLeaderDto(1L, "크루장"), List.of("성실"));
+		final FindCrewResDto findCrewResDto = FindCrewResDto.of(crew, new CrewLeaderDto(1L, "크루장"), List.of("성실"),
+			"https://test.com");
 
 		assertThat(result).isEqualTo(findCrewResDto);
 	}
@@ -850,7 +855,7 @@ class CrewServiceTest {
 		Long memberId = 2L;
 
 		Crew crew = createCrew();
-		Member leader = createLeader();
+		Member leader = createMember();
 
 		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.MEMBER);
 
@@ -860,9 +865,6 @@ class CrewServiceTest {
 			.willReturn(true);
 		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
 			.willReturn(Optional.of(crewMember));
-		doNothing()
-			.when(crewMemberRepository)
-			.deleteById(anyLong());
 
 		//when
 		//then
