@@ -14,4 +14,9 @@ public class TodayRecords {
 		this.totalDistance = records.stream().mapToDouble(Record::getRunDistance).sum();
 		this.totalDuration = records.stream().mapToInt(Record::getRunTime).sum();
 	}
+
+	public TodayRecords(double totalDistance, int totalDuration) {
+		this.totalDistance = totalDistance;
+		this.totalDuration = totalDuration;
+	}
 }

@@ -2,11 +2,13 @@ package clofi.runningplanet.mission.service;
 
 import static clofi.runningplanet.common.TestHelper.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import clofi.runningplanet.common.exception.ForbiddenException;
 import clofi.runningplanet.common.exception.InternalServerException;
 import clofi.runningplanet.common.exception.NotFoundException;
+import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.repository.MemberRepository;
@@ -195,5 +198,34 @@ class MissionServiceTest {
 		//then
 		assertThatThrownBy(() -> missionService.getCrewMission(crewId, memberId))
 			.isInstanceOf(InternalServerException.class);
+	}
+
+	@DisplayName("크루 미션 성공")
+	@Test
+	void successCrewMission() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+		Long missionId = 1L;
+
+		Crew crew = createCrew();
+		CrewMission mission = createDistanceCrewMission();
+		List<Record> todayRecordList = createTodayRecordList();
+
+		given(memberRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(true);
+		given(crewMissionRepository.findById(anyLong()))
+			.willReturn(Optional.of(mission));
+		given(recordRepository.findAllByMemberIdAndCreatedAtBetween(anyLong(), any(LocalDateTime.class),
+			any(LocalDateTime.class)))
+			.willReturn(todayRecordList);
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+
+		//when
+		//then
+		assertDoesNotThrow(() -> missionService.successMission(crewId, missionId, memberId));
 	}
 }
