@@ -24,6 +24,7 @@ import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.service.CrewService;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
 import jakarta.validation.Valid;
@@ -99,5 +100,11 @@ public class CrewController {
 		@AuthenticationPrincipal CustomOAuth2User principal) {
 		crewService.updateCrew(reqDto, imgFile, crewId, principal.getId());
 		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping("/api/crew/{crewId}/page")
+	public ResponseEntity<FindCrewWithMissionResDto> findCrewWithMission(@PathVariable("crewId") Long crewId,
+		@AuthenticationPrincipal CustomOAuth2User principal) {
+		return ResponseEntity.ok(crewService.findCrewWithMission(crewId, principal.getId()));
 	}
 }
