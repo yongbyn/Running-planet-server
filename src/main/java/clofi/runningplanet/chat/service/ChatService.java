@@ -52,7 +52,7 @@ public class ChatService {
 		validateMemberIsInCrew(memberId, crewId);
 		validateSizeIsPositive(size);
 
-		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 		Page<Chat> chatPage = chatRepository.findByCrewId(crewId, pageable);
 
 		List<ChatMessage> chatList = getChatList(chatPage);
