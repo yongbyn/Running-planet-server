@@ -10,6 +10,7 @@ import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.planet.domain.MemberPlanet;
 import clofi.runningplanet.planet.domain.Planet;
+import clofi.runningplanet.planet.dto.request.UpdatePlanetNameRequest;
 import clofi.runningplanet.planet.dto.response.PlanetResponse;
 import clofi.runningplanet.planet.repository.MemberPlanetRepository;
 import clofi.runningplanet.planet.repository.PlanetRepository;
@@ -66,6 +67,17 @@ public class PlanetService {
 			}
 		}
 		return planetResponseList;
+	}
+
+	public Long updatePlanet(Long planetId, UpdatePlanetNameRequest updatePlanetNameRequest,
+		Long ownerId) {
+		memberRepository.findById(ownerId)
+			.orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
+
+		MemberPlanet memberPlanet = memberPlanetRepository.findById(planetId)
+			.orElseThrow(() -> new IllegalArgumentException("행성이 존재하지 않습니다."));
+		memberPlanet.updatePlanetName(updatePlanetNameRequest.planetName());
+		return memberPlanet.getMemberPlanetId();
 	}
 
 	private void calculateMemberPlanetSize(List<Planet> planetList, Member member) {
