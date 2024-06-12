@@ -547,6 +547,8 @@ class CrewServiceTest {
 			.willReturn(Optional.of(member));
 		given(crewMemberRepository.save(any(CrewMember.class)))
 			.willReturn(crewMember);
+		given(crewMissionRepository.saveAll(anyList()))
+			.willReturn(null);
 
 		//when
 		//then

@@ -42,6 +42,7 @@ import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.mission.domain.CrewMission;
 import clofi.runningplanet.mission.repository.CrewMissionRepository;
+import clofi.runningplanet.mission.domain.MissionType;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -315,6 +316,12 @@ public class CrewService {
 		crewApplication.approve();
 		CrewMember crewMember = CrewMember.createMember(findCrew, applyMember);
 		crewMemberRepository.save(crewMember);
+
+		List<CrewMission> firstCrewMissionList = Arrays.stream(MissionType.values())
+			.map(value -> new CrewMission(applyMember, findCrew, value))
+			.collect(Collectors.toList());
+
+		crewMissionRepository.saveAll(firstCrewMissionList);
 	}
 
 	private void validateLeaderPrivilege(Long crewId, Long memberId) {
