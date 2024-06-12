@@ -50,7 +50,6 @@ class ChatServiceTest {
 	}
 
 	@DisplayName("등록된 채팅을 불러올 수 있다.")
-	@Transactional
 	@Test
 	void getChatMessagesTest() {
 		//given
