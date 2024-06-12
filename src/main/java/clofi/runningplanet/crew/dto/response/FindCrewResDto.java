@@ -24,13 +24,14 @@ public record FindCrewResDto(
 	int crewTotalDistance,
 	boolean isRequest
 ) {
-	public static FindCrewResDto of(Crew crew, CrewLeaderDto crewLeader, List<String> tags, String filePath) {
+	public static FindCrewResDto of(Crew crew, int memberCnt, CrewLeaderDto crewLeader, List<String> tags,
+		String filePath) {
 		return new FindCrewResDto(
 			crew.getId(),
-			1,
+			crew.getCrewLevel(),
 			crew.getCrewName(),
 			crewLeader,
-			1,
+			memberCnt,
 			crew.getLimitMemberCnt(),
 			crew.getApprovalType(),
 			crew.getIntroduction(),

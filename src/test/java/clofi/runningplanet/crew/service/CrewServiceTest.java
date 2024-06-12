@@ -1,7 +1,7 @@
 package clofi.runningplanet.crew.service;
 
+import static clofi.runningplanet.common.TestHelper.*;
 import static clofi.runningplanet.crew.domain.ApprovalType.*;
-import static clofi.runningplanet.crew.domain.Category.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
@@ -18,7 +18,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
 import clofi.runningplanet.common.exception.ConflictException;
@@ -158,6 +157,9 @@ class CrewServiceTest {
 
 		given(crewRepository.findAll())
 			.willReturn(List.of(crew1, crew2));
+		given(crewMemberRepository.countByCrewId(anyLong()))
+			.willReturn(1)
+			.willReturn(1);
 
 		given(tagRepository.findAllByCrewId(anyLong()))
 			.willReturn(List.of(
@@ -176,10 +178,10 @@ class CrewServiceTest {
 		List<FindAllCrewResDto> result = crewService.findAllCrew();
 
 		//then
-		final FindAllCrewResDto firstFindAllCrewResDto = FindAllCrewResDto.of(crew1, List.of("성실"),
+		final FindAllCrewResDto firstFindAllCrewResDto = FindAllCrewResDto.of(crew1, 1, List.of("성실"),
 			new CrewLeaderDto(1L, "크루장"), "https://test.com");
 
-		final FindAllCrewResDto secondFindAllCrewResDto = FindAllCrewResDto.of(crew2, List.of("최고"),
+		final FindAllCrewResDto secondFindAllCrewResDto = FindAllCrewResDto.of(crew2, 1, List.of("최고"),
 			new CrewLeaderDto(2L, "사용자"), "https://test.com");
 
 		final List<FindAllCrewResDto> expect = List.of(firstFindAllCrewResDto, secondFindAllCrewResDto);
@@ -234,6 +236,8 @@ class CrewServiceTest {
 
 		given(crewRepository.findById(anyLong()))
 			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.countByCrewId(anyLong()))
+			.willReturn(1);
 
 		given(tagRepository.findAllByCrewId(anyLong()))
 			.willReturn(List.of(
@@ -249,7 +253,7 @@ class CrewServiceTest {
 		FindCrewResDto result = crewService.findCrew(crewId);
 
 		//then
-		final FindCrewResDto findCrewResDto = FindCrewResDto.of(crew, new CrewLeaderDto(1L, "크루장"), List.of("성실"),
+		final FindCrewResDto findCrewResDto = FindCrewResDto.of(crew, 1, new CrewLeaderDto(1L, "크루장"), List.of("성실"),
 			"https://test.com");
 
 		assertThat(result).isEqualTo(findCrewResDto);
@@ -1211,40 +1215,5 @@ class CrewServiceTest {
 		//then
 		assertThatThrownBy(() -> crewService.updateCrew(reqDto, image, crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
-	}
-
-	private CrewImage createCrewImage() {
-		Crew crew = createCrew();
-		return new CrewImage(1L, "크루이미지", "https://test.com", crew);
-	}
-
-	private CreateCrewReqDto getCreateCrewReqDto() {
-		RuleDto rule = new RuleDto(5, 100);
-		return new CreateCrewReqDto("구름 크루", RUNNING, List.of("성실"), MANUAL, "구름 크루는 성실한 크루", rule
-		);
-	}
-
-	private static ApplyCrewReqDto getApplyCrewReqDto() {
-		return new ApplyCrewReqDto("크루 신청글");
-	}
-
-	private MockMultipartFile createImage() {
-		return new MockMultipartFile("크루로고", "크루로고.png", MediaType.IMAGE_PNG_VALUE, "크루로고.png".getBytes());
-	}
-
-	private Crew createCrew() {
-		return new Crew(1L, 1L, "구름 크루", 10, RUNNING, MANUAL, "구름 크루는 성실한 크루", 5, 100, 0, 0);
-	}
-
-	private Crew createAutoCrew() {
-		return new Crew(2L, 2L, "클로피 크루", 8, RUNNING, AUTO, "클로피 크루는 최고의 크루", 7, 500, 1000, 3000);
-	}
-
-	private Member createLeader() {
-		return new Member(1L, "크루장", Gender.MALE, 20, 70, "https://image-url.com", 0, 10, 30, 100);
-	}
-
-	private Member createMember() {
-		return new Member(2L, "사용자", Gender.FEMALE, 30, 80, "https://image-url.com", 0, 0, 0, 0);
 	}
 }
