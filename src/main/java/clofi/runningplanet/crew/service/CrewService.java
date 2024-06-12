@@ -226,7 +226,7 @@ public class CrewService {
 						.filter(mission -> mission.getCreatedAt().getDayOfWeek() == day && mission.isCompleted())
 						.count();
 					double totalPossible = memberCnt * 2;
-					return totalPossible == 0 ? 0.0 : completedCount / totalPossible;
+					return totalPossible == 0 ? 0.0 : (completedCount / totalPossible) * 100;
 				}
 			));
 	}

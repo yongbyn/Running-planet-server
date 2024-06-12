@@ -1263,7 +1263,7 @@ class CrewServiceTest {
 		FindCrewWithMissionResDto result = crewService.findCrewWithMission(crewId, memberId);
 
 		//then
-		assertThat(result.missionProgress()).containsExactly(0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+		assertThat(result.missionProgress()).containsExactly(0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0);
 
 	}
 
@@ -1306,7 +1306,7 @@ class CrewServiceTest {
 		FindCrewWithMissionResDto result = crewService.findCrewWithMission(crewId, memberId);
 
 		//then
-		assertThat(result.missionProgress()).containsExactly(0.0, 0.0, ((double)1 / 2), 0.0, 0.0, 0.0, 0.0);
+		assertThat(result.missionProgress()).containsExactly(0.0, 0.0, ((double)1 / 2) * 100, 0.0, 0.0, 0.0, 0.0);
 
 	}
 
