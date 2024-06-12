@@ -349,7 +349,7 @@ class CrewControllerTest {
 
 		//then
 		resultActions
-			.andExpect(status().isNoContent());
+			.andExpect(status().isOk());
 
 	}
 

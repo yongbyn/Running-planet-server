@@ -99,7 +99,7 @@ public class CrewController {
 		@RequestPart(value = "imgFile", required = false) MultipartFile imgFile, @PathVariable("crewId") Long crewId,
 		@AuthenticationPrincipal CustomOAuth2User principal) {
 		crewService.updateCrew(reqDto, imgFile, crewId, principal.getId());
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok().build();
 	}
 
 	@GetMapping("/api/crew/{crewId}/page")

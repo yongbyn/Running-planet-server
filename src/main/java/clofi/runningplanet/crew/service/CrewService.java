@@ -180,7 +180,7 @@ public class CrewService {
 
 		updateTags(reqDto, findCrew);
 
-		if (!imgFile.isEmpty()) {
+		if (imgFile != null && !imgFile.isEmpty()) {
 			updateCrewImage(imgFile, crewId);
 		}
 	}
