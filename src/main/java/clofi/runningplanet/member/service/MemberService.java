@@ -157,19 +157,13 @@ public class MemberService extends DefaultOAuth2UserService {
 	public UpdateProfileResponse updateProfile(Long memberId, UpdateProfileRequest request, MultipartFile imageFile) {
 		Member member = getMember(memberId);
 
-		s3StorageManagerUseCase.deleteImages(member.getProfileImg());
-
-		List<String> updatedProfileImageUrl = s3StorageManagerUseCase.uploadImages(
-			Collections.singletonList(imageFile));
-
-		member.update(request.nickname(), request.weight(), request.gender(), request.age(),
-			updatedProfileImageUrl.getFirst());
-
-		memberRepository.save(member);
+		String updatedProfileImgUrl = imageFile != null ? updateProfileWithImage(member, request, imageFile)
+			: updateProfileWithoutImage(member, request);
 
 		return new UpdateProfileResponse(member.getNickname(), member.getWeight(), member.getGender(), member.getAge(),
-			updatedProfileImageUrl.getFirst());
+			updatedProfileImgUrl);
 	}
+
 
 	private void validateOAuth2Response(OAuth2Response oAuth2Response) {
 		if (oAuth2Response.getName() == null) {
@@ -188,5 +182,21 @@ public class MemberService extends DefaultOAuth2UserService {
 			.orElse(null);
 	}
 
+	private String updateProfileWithImage(Member member, UpdateProfileRequest request, MultipartFile imageFile) {
+		s3StorageManagerUseCase.deleteImages(member.getProfileImg());
 
+		List<String> updatedProfileImageUrl = s3StorageManagerUseCase.uploadImages(Collections.singletonList(imageFile));
+
+		member.update(request.nickname(), request.weight(), request.gender(), request.age(), updatedProfileImageUrl.get(0));
+		memberRepository.save(member);
+
+		return updatedProfileImageUrl.get(0);
+	}
+
+	private String updateProfileWithoutImage(Member member, UpdateProfileRequest request) {
+		member.update(request.nickname(), request.weight(), request.gender(), request.age(), member.getProfileImg());
+		memberRepository.save(member);
+
+		return member.getProfileImg();
+	}
 }
