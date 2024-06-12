@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
@@ -40,6 +42,7 @@ import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
 import clofi.runningplanet.crew.repository.CrewApplicationRepository;
 import clofi.runningplanet.crew.repository.CrewImageRepository;
@@ -49,6 +52,9 @@ import clofi.runningplanet.crew.repository.TagRepository;
 import clofi.runningplanet.member.domain.Gender;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
+import clofi.runningplanet.mission.domain.CrewMission;
+import clofi.runningplanet.mission.domain.MissionType;
+import clofi.runningplanet.mission.repository.CrewMissionRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CrewServiceTest {
@@ -73,6 +79,9 @@ class CrewServiceTest {
 
 	@Mock
 	private S3StorageManagerUseCase storageManagerUseCase;
+
+	@Mock
+	private CrewMissionRepository crewMissionRepository;
 
 	@InjectMocks
 	private CrewService crewService;
@@ -1215,5 +1224,122 @@ class CrewServiceTest {
 		//then
 		assertThatThrownBy(() -> crewService.updateCrew(reqDto, image, crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
+	}
+
+	@DisplayName("크루 페이지 조회 시 미션 성공률을 조회 할 수 있다.")
+	@Test
+	void successFindCrewPage() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+
+		LocalDateTime testTime = LocalDateTime.of(2024, 6, 12, 12, 0);
+
+		CrewMission mission1 = new CrewMission(1L, leader, crew, MissionType.DISTANCE, true);
+		CrewMission mission2 = new CrewMission(1L, leader, crew, MissionType.DURATION, true);
+
+		ReflectionTestUtils.setField(mission1, "createdAt", testTime);
+		ReflectionTestUtils.setField(mission2, "createdAt", testTime);
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.countByCrewId(anyLong()))
+			.willReturn(1);
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(tagRepository.findAllByCrewId(anyLong()))
+			.willReturn(Collections.emptyList());
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.of(createCrewImage()));
+		given(
+			crewMissionRepository.findAllByCrewIdAndWeek(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+			.willReturn(List.of(mission1, mission2));
+
+		//when
+		FindCrewWithMissionResDto result = crewService.findCrewWithMission(crewId, memberId);
+
+		//then
+		assertThat(result.missionProgress()).containsExactly(0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+
+	}
+
+	@DisplayName("크루 페이지 조회 시 크루원들의 미션 성공률을 알수 있다.")
+	@Test
+	void successFindCrewPageWithMember() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+
+		LocalDateTime testTime = LocalDateTime.of(2024, 6, 12, 12, 0);
+
+		CrewMission mission1 = new CrewMission(1L, leader, crew, MissionType.DISTANCE, true);
+		CrewMission mission2 = new CrewMission(2L, leader, crew, MissionType.DURATION, true);
+		CrewMission mission3 = new CrewMission(3L, leader, crew, MissionType.DURATION, true);
+
+		ReflectionTestUtils.setField(mission1, "createdAt", testTime);
+		ReflectionTestUtils.setField(mission2, "createdAt", testTime);
+		ReflectionTestUtils.setField(mission3, "createdAt", testTime);
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.countByCrewId(anyLong()))
+			.willReturn(3);
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(tagRepository.findAllByCrewId(anyLong()))
+			.willReturn(Collections.emptyList());
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.of(createCrewImage()));
+		given(
+			crewMissionRepository.findAllByCrewIdAndWeek(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+			.willReturn(List.of(mission1, mission2, mission3));
+
+		//when
+		FindCrewWithMissionResDto result = crewService.findCrewWithMission(crewId, memberId);
+
+		//then
+		assertThat(result.missionProgress()).containsExactly(0.0, 0.0, ((double)1 / 2), 0.0, 0.0, 0.0, 0.0);
+
+	}
+
+	@DisplayName("아무도 미션을 하지 않은 경우 [0,0,0,0,0,0,0]이 반환된다.")
+	@Test
+	void successFindCrewPageNotMission() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		CrewMember crewMember = new CrewMember(1L, crew, leader, Role.LEADER);
+
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+		given(crewMemberRepository.countByCrewId(anyLong()))
+			.willReturn(1);
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewMember));
+		given(tagRepository.findAllByCrewId(anyLong()))
+			.willReturn(Collections.emptyList());
+		given(crewImageRepository.findByCrewId(anyLong()))
+			.willReturn(Optional.of(createCrewImage()));
+		given(
+			crewMissionRepository.findAllByCrewIdAndWeek(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+			.willReturn(Collections.emptyList());
+
+		//when
+		FindCrewWithMissionResDto result = crewService.findCrewWithMission(crewId, memberId);
+
+		//then
+		assertThat(result.missionProgress()).containsExactly(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
 	}
 }
