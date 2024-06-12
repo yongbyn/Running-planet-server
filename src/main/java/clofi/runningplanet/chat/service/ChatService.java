@@ -47,6 +47,20 @@ public class ChatService {
 		return new ChatMessage(chatMessage.from(), chatMessage.message(), chat.getCreatedAt());
 	}
 
+	public ChatListResponse getChatMessages(Long memberId, Long crewId, int page, int size) {
+
+		validateMemberIsInCrew(memberId, crewId);
+		validateSizeIsPositive(size);
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+		Page<Chat> chatPage = chatRepository.findByCrewId(crewId, pageable);
+
+		List<ChatMessage> chatList = getChatList(chatPage);
+
+		boolean existsNextPage = chatPage.hasNext();
+
+		return new ChatListResponse(chatList, existsNextPage);
+	}
 
 
 	private Member getMember(Long memberId, ChatMessage chatMessage) {
@@ -64,20 +78,6 @@ public class ChatService {
 		if(!memberInCrew) {
 			throw new RuntimeException("해당 사용자는 크루에 속해 있지 않습니다.");
 		}
-	}
-
-	public ChatListResponse getChatMessages(Long crewId, int page, int size) {
-
-		validateSizeIsPositive(size);
-
-		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
-		Page<Chat> chatPage = chatRepository.findByCrewId(crewId, pageable);
-
-		List<ChatMessage> chatList = getChatList(chatPage);
-
-		boolean existsNextPage = chatPage.hasNext();
-
-		return new ChatListResponse(chatList, existsNextPage);
 	}
 
 	private static void validateSizeIsPositive(int size) {

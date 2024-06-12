@@ -46,9 +46,13 @@ public class ChatController {
 	public ResponseEntity<ChatListResponse> getChatMessages(
 		@PathVariable Long crewId,
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "30") int size
+		@RequestParam(defaultValue = "30") int size,
+		@Header("Authorization") String token
 	) {
-		ChatListResponse chatList = chatService.getChatMessages(crewId, page, size);
+		String jwtToken = jwtutil.extractToken(token);
+		Long memberId = jwtutil.getUserId(jwtToken);
+
+		ChatListResponse chatList = chatService.getChatMessages(memberId, crewId, page, size);
 
 		return ResponseEntity.ok(chatList);
 	}
