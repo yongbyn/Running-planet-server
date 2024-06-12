@@ -35,7 +35,7 @@ public class ChatController {
 		@Payload ChatMessage chatMessage,
 		@Header("Authorization") String token
 	) {
-		String jwtToken = extractToken(token);
+		String jwtToken = jwtutil.extractToken(token);
 		Long memberId = jwtutil.getUserId(jwtToken);
 
 		ChatMessage savedChat = chatService.saveChatMessage(memberId, crewId, chatMessage);
@@ -51,12 +51,5 @@ public class ChatController {
 		ChatListResponse chatList = chatService.getChatMessages(crewId, page, size);
 
 		return ResponseEntity.ok(chatList);
-	}
-
-	public String extractToken(String bearerToken) {
-		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
-			return bearerToken.substring(7);
-		}
-		return null;
 	}
 }
