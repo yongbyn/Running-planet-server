@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,13 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
+import clofi.runningplanet.running.domain.Cheer;
 import clofi.runningplanet.running.domain.Coordinate;
 import clofi.runningplanet.running.domain.Record;
+import clofi.runningplanet.running.dto.CheerResponse;
 import clofi.runningplanet.running.dto.RecordFindAllResponse;
 import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
 import clofi.runningplanet.running.dto.RunningStatusResponse;
+import clofi.runningplanet.running.repository.CheerRepository;
 import clofi.runningplanet.running.repository.CoordinateRepository;
 import clofi.runningplanet.running.repository.RecordRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +42,7 @@ public class RecordService {
 	private final MemberRepository memberRepository;
 	private final CrewMemberRepository crewMemberRepository;
 	private final SimpMessagingTemplate messagingTemplate;
+	private final CheerRepository cheerRepository;
 
 	@Transactional
 	public Record save(RecordSaveRequest request, Long memberId) {
@@ -191,5 +196,36 @@ public class RecordService {
 			}
 			return Integer.compare(r2.runTime(), r1.runTime());
 		});
+	}
+
+	@Transactional
+	public void sendCheering(Long crewId, Long fromMemberId, Set<Long> toMemberIds) {
+		Member fromMember = getMember(fromMemberId);
+		if (!crewMemberRepository.existsByCrewIdAndMemberId(crewId, fromMemberId)) {
+			throw new IllegalArgumentException("크루에 소속된 회원이 아닙니다.");
+		}
+
+		List<Member> toMembers = crewMemberRepository.findMembersByMemberIds(toMemberIds);
+		if (toMembers.isEmpty()) {
+			return;
+		}
+
+		LocalDate now = LocalDate.now();
+		LocalDateTime start = getStartOfDay(now);
+		LocalDateTime end = getEndOfDay(now);
+
+		List<Record> records = recordRepository
+			.findAllByEndTimeIsNullAndCreatedAtBetweenAndMemberIn(start, end, toMembers);
+
+		records.stream()
+			.filter(record -> cheerRepository.findAllByFromMemberAndToMemberAndCreatedAtIsBetween(fromMember,
+				record.getMember(), start, end).isEmpty())
+			.forEach(record -> saveAndSend(fromMember, record.getMember(), crewId));
+	}
+
+	private void saveAndSend(Member fromMember, Member toMember, Long crewId) {
+		cheerRepository.save(new Cheer(fromMember, toMember));
+		messagingTemplate.convertAndSendToUser(String.valueOf(toMember), String.format("/sub/crew/%s/cheer", crewId),
+			new CheerResponse(fromMember.getId(), fromMember.getNickname()));
 	}
 }

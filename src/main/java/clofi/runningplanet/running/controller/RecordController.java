@@ -1,6 +1,7 @@
 package clofi.runningplanet.running.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,6 +66,13 @@ public class RecordController {
 		@PathVariable("crewId") Long crewId, @AuthenticationPrincipal CustomOAuth2User user
 	) {
 		return recordService.findAllRunningStatus(user.getId(), crewId);
+	}
+
+	@PostMapping("/crew/{crewId}/cheer")
+	public void cheering(@PathVariable("crewId") Long crewId, @RequestBody Set<Long> toMemberIds,
+		@AuthenticationPrincipal CustomOAuth2User user
+	) {
+		recordService.sendCheering(crewId, user.getId(), toMemberIds);
 	}
 
 }
