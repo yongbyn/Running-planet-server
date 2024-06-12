@@ -15,6 +15,7 @@ import clofi.runningplanet.member.dto.CustomOAuth2User;
 import clofi.runningplanet.planet.dto.request.UpdatePlanetNameRequest;
 import clofi.runningplanet.planet.dto.response.PlanetResponse;
 import clofi.runningplanet.planet.service.PlanetService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -30,15 +31,14 @@ public class PlanetController {
 		return ResponseEntity.ok(planetService.getPlanetList(memberId));
 	}
 
-	@PatchMapping("/api/profile/{memberId}/planet/{planetId}")
+	@PatchMapping("/api/profile/planet/{planetId}")
 	public ResponseEntity<Long> updatePlanet(
-		@PathVariable(value = "memberId") Long memberId,
 		@PathVariable(value = "planetId") Long planetId,
-		@RequestBody UpdatePlanetNameRequest updatePlanetNameRequest,
+		@RequestBody @Valid UpdatePlanetNameRequest updatePlanetNameRequest,
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
 		Long ownerId = customOAuth2User.getId();
 		return ResponseEntity.status(HttpStatus.OK)
-			.body(planetService.updatePlanet(memberId, planetId, updatePlanetNameRequest, ownerId));
+			.body(planetService.updatePlanet(planetId, updatePlanetNameRequest, ownerId));
 	}
 }

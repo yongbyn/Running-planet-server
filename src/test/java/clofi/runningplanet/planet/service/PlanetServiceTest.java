@@ -110,7 +110,7 @@ class PlanetServiceTest {
 		memberPlanetRepository.save(memberPlanet);
 		UpdatePlanetNameRequest updatePlanetNameRequest = new UpdatePlanetNameRequest("수정된 행성 이름");
 		//when
-		Long planetId = planetService.updatePlanet(member.getId(), memberPlanet.getMemberPlanetId(),
+		Long planetId = planetService.updatePlanet(memberPlanet.getMemberPlanetId(),
 			updatePlanetNameRequest,
 			member.getId());
 		MemberPlanet updatedPlanet = memberPlanetRepository.findById(planetId)
@@ -119,27 +119,4 @@ class PlanetServiceTest {
 		assertThat(updatedPlanet.getMemberPlanetName()).isEqualTo("수정된 행성 이름");
 
 	}
-
-	@DisplayName("사용자 행성이 아닌 타인의 행성의 이름을 수정할 경우 예외가 발생한다.")
-	@Test
-	void updatePlanetNameException() {
-		//given
-		Member member = new Member(null, "테스트", Gender.MALE, 10, 100, "테스트", 45, 10, 10, 10);
-		memberRepository.save(member);
-		Member notOwner = new Member(null, "테스트", Gender.MALE, 10, 100, "테스트", 45, 10, 10, 10);
-		memberRepository.save(notOwner);
-		Planet planet = new Planet("이미지1", "이미지2", "이미지3", "이미지4", "이미지5", "두번째 이미지");
-		planetRepository.save(planet);
-		MemberPlanet memberPlanet = new MemberPlanet(member, planet, "테스트 이미지");
-		memberPlanetRepository.save(memberPlanet);
-		UpdatePlanetNameRequest updatePlanetNameRequest = new UpdatePlanetNameRequest("수정된 행성 이름");
-
-		//when//then
-		assertThatThrownBy(
-			() -> planetService.updatePlanet(member.getId(), memberPlanet.getMemberPlanetId(), updatePlanetNameRequest,
-				notOwner.getId()))
-			.isInstanceOf(IllegalArgumentException.class).hasMessage("본인 행성 이름만 수정 가능합니다");
-
-	}
-
 }
