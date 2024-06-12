@@ -14,6 +14,7 @@ import clofi.runningplanet.chat.dto.response.ChatListResponse;
 import clofi.runningplanet.chat.dto.response.ChatMessage;
 import clofi.runningplanet.chat.repository.ChatRepository;
 import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
@@ -27,11 +28,13 @@ public class ChatService {
 	private final ChatRepository chatRepository;
 	private final MemberRepository memberRepository;
 	private final CrewRepository crewRepository;
+	private final CrewMemberRepository crewMemberRepository;
 
 	public ChatMessage saveChatMessage(Long memberId, Long crewId, ChatMessage chatMessage) {
 
 		Member member = getMember(memberId, chatMessage);
 		Crew crew = getCrew(crewId);
+		validateMemberIsInCrew(memberId, crewId);
 
 		Chat chat = Chat.builder()
 			.member(member)
@@ -44,6 +47,8 @@ public class ChatService {
 		return new ChatMessage(chatMessage.from(), chatMessage.message(), chat.getCreatedAt());
 	}
 
+
+
 	private Member getMember(Long memberId, ChatMessage chatMessage) {
 		return memberRepository.findByIdAndNickname(memberId, chatMessage.from())
 			.orElseThrow(() -> new RuntimeException("일치하는 사용자가 없습니다."));
@@ -52,6 +57,13 @@ public class ChatService {
 	private Crew getCrew(Long crewId) {
 		return crewRepository.findById(crewId)
 			.orElseThrow(() -> new RuntimeException("일치하는 크루가 없습니다."));
+	}
+
+	private void validateMemberIsInCrew(Long memberId, Long crewId) {
+		boolean memberInCrew = crewMemberRepository.findByCrewIdAndMemberId(crewId, memberId).isPresent();
+		if(!memberInCrew) {
+			throw new RuntimeException("해당 사용자는 크루에 속해 있지 않습니다.");
+		}
 	}
 
 	public ChatListResponse getChatMessages(Long crewId, int page, int size) {
