@@ -6,6 +6,7 @@ import javax.crypto.SecretKey;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import net.minidev.json.JSONUtil;
 
@@ -42,6 +43,14 @@ public class JWTUtil {
 
 		return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
 	}
+
+	public String extractToken(String bearerToken) {
+		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
+			return bearerToken.substring(7);
+		}
+		return null;
+	}
+
 	public JwtToken createJwt(Long userId, Long expiredMs) {
 
 		String accessToken = Jwts.builder()
