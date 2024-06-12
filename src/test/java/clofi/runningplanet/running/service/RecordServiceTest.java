@@ -1,11 +1,10 @@
 package clofi.runningplanet.running.service;
 
+import static clofi.runningplanet.common.utils.TimeUtils.*;
 import static org.assertj.core.api.Assertions.*;
 
-import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +16,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.auditing.AuditingHandler;
 
+import clofi.runningplanet.crew.domain.ApprovalType;
+import clofi.runningplanet.crew.domain.Category;
+import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.domain.CrewMember;
+import clofi.runningplanet.crew.domain.Role;
+import clofi.runningplanet.crew.repository.CrewMemberRepository;
+import clofi.runningplanet.crew.repository.CrewRepository;
+import clofi.runningplanet.crew.service.CrewService;
 import clofi.runningplanet.member.domain.Gender;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
@@ -26,6 +33,7 @@ import clofi.runningplanet.running.dto.RecordFindAllResponse;
 import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
+import clofi.runningplanet.running.dto.RunningStatusResponse;
 import clofi.runningplanet.running.repository.CoordinateRepository;
 import clofi.runningplanet.running.repository.RecordRepository;
 
@@ -43,14 +51,26 @@ class RecordServiceTest {
 	@Autowired
 	MemberRepository memberRepository;
 
+	@Autowired
+	CrewService crewService;
+
 	@SpyBean
 	private AuditingHandler auditingHandler;
 
+	@Autowired
+	private CrewRepository crewRepository;
+
+	@Autowired
+	private CrewMemberRepository crewMemberRepository;
+
 	@AfterEach
 	void tearDown() {
+		crewMemberRepository.deleteAllInBatch();
+		crewRepository.deleteAllInBatch();
 		coordinateRepository.deleteAllInBatch();
 		recordRepository.deleteAllInBatch();
 		memberRepository.deleteAllInBatch();
+		auditingHandler.setDateTimeProvider(null);
 	}
 
 	@DisplayName("운동, 좌표 정보로 운동 기록을 생성할 수 있다.")
@@ -71,7 +91,7 @@ class RecordServiceTest {
 		);
 
 		// when
-		Member member = memberRepository.save(createMember());
+		Member member = memberRepository.save(createMember("감자"));
 		Record savedRecord = recordService.save(recordSaveRequest, member.getId());
 
 		// then
@@ -104,7 +124,7 @@ class RecordServiceTest {
 			false
 		);
 
-		Member member = memberRepository.save(createMember());
+		Member member = memberRepository.save(createMember("감자"));
 		recordService.save(recordSaveRequest1, member.getId());
 
 		RecordSaveRequest recordSaveRequest2 = new RecordSaveRequest(
@@ -143,31 +163,23 @@ class RecordServiceTest {
 	@Test
 	void findAllRecordsByYearAndMonth() {
 		// given
-		Member member = memberRepository.save(createMember());
+		Member member = memberRepository.save(createMember("감자"));
 
-		LocalDateTime createdDateTime1 = createLocalDateTime("2024-01-31 23:59:59");
-		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime1));
-		Record record1 = createRecord(member, 65, 1.00, 1000, 100,
-			createdDateTime1.plus(Duration.of(1000, ChronoUnit.SECONDS)));
-		recordRepository.save(record1);
+		LocalDateTime createdDateTime1 = getEndOfDay(LocalDate.of(2024, 1, 31));
+		setAuditingHandlerDateTime(createdDateTime1);
+		recordRepository.save(createRecord(member, true));
 
-		LocalDateTime createdDateTime2 = createLocalDateTime("2024-02-01 00:00:00");
-		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime2));
-		Record record2 = createRecord(member, 65, 2.00, 2000, 200,
-			createdDateTime2.plus(Duration.of(2000, ChronoUnit.SECONDS)));
-		recordRepository.save(record2);
+		LocalDateTime createdDateTime2 = getStartOfDay(LocalDate.of(2024, 2, 1));
+		setAuditingHandlerDateTime(createdDateTime2);
+		Record record2 = recordRepository.save(createRecord(member, true));
 
-		LocalDateTime createdDateTime3 = createLocalDateTime("2024-02-29 23:59:59");
-		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime3));
-		Record record3 = createRecord(member, 65, 3.00, 3000, 300,
-			createdDateTime3.plus(Duration.of(3000, ChronoUnit.SECONDS)));
-		recordRepository.save(record3);
+		LocalDateTime createdDateTime3 = getEndOfDay(LocalDate.of(2024, 2, 29));
+		setAuditingHandlerDateTime(createdDateTime3);
+		Record record3 = recordRepository.save(createRecord(member, true));
 
-		LocalDateTime createdDateTime4 = createLocalDateTime("2024-03-01 00:00:00");
-		auditingHandler.setDateTimeProvider(() -> Optional.of(createdDateTime4));
-		Record record4 = createRecord(member, 65, 4.00, 4000, 400,
-			createdDateTime4.plus(Duration.of(4000, ChronoUnit.SECONDS)));
-		recordRepository.save(record4);
+		LocalDateTime createdDateTime4 = getStartOfDay(LocalDate.of(2024, 3, 1));
+		setAuditingHandlerDateTime(createdDateTime4);
+		recordRepository.save(createRecord(member, true));
 
 		int year = 2024;
 		int month = 2;
@@ -176,10 +188,10 @@ class RecordServiceTest {
 		List<RecordFindAllResponse> response = recordService.findAll(year, month, member.getId());
 
 		assertThat(response).hasSize(2)
-			.extracting("id", "runDistance", "day")
+			.extracting("id", "day")
 			.containsExactlyInAnyOrder(
-				tuple(record2.getId(), 2.00, 1),
-				tuple(record3.getId(), 3.00, 29)
+				tuple(record2.getId(), 1),
+				tuple(record3.getId(), 29)
 			);
 	}
 
@@ -187,10 +199,9 @@ class RecordServiceTest {
 	@Test
 	void findRecord() {
 		// given
-		Member member = memberRepository.save(createMember());
+		Member member = memberRepository.save(createMember("감자"));
 
-		LocalDateTime endTime = LocalDateTime.now().withNano(0);
-		Record record = createRecord(member, 65, 1.00, 3665, 300, endTime);
+		Record record = createRecord(member, 65, 1.00, 3665, 300, true);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
 		Record savedRecord = recordRepository.save(record);
@@ -211,8 +222,9 @@ class RecordServiceTest {
 			.extracting("hour", "min", "sec")
 			.contains(1, 1, 5);
 		assertThat(response)
-			.extracting("runDistance", "calories", "endTime")
-			.contains(1.00, 300, endTime);
+			.extracting("runDistance", "calories")
+			.contains(1.00, 300);
+		assertThat(response.endTime()).isNotNull();
 		assertThat(response.coordinateResponses()).hasSize(2)
 			.extracting("latitude", "longitude")
 			.containsExactlyInAnyOrder(
@@ -225,15 +237,12 @@ class RecordServiceTest {
 	@Test
 	void findUnfinishedRecord() {
 		// given
-		Member member = memberRepository.save(createMember());
-
-		Record record = createRecord(member, 65, 1.00, 3665, 300, null);
-		Record saved = recordRepository.save(record);
-		Long recordId = saved.getId();
+		Member member = memberRepository.save(createMember("감자"));
+		Record record = recordRepository.save(createRecord(member, false));
 
 		// when & then
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> recordService.find(recordId, member.getId()))
+			.isThrownBy(() -> recordService.find(record.getId(), member.getId()))
 			.withMessage("운동 기록을 찾을 수 없습니다.");
 	}
 
@@ -241,13 +250,12 @@ class RecordServiceTest {
 	@Test
 	void findRecordByInvalidRequest() {
 		// given
-		Member member = memberRepository.save(createMember());
-		Member member2 = memberRepository.save(createMember());
+		Member member = memberRepository.save(createMember("감자"));
+		Member member2 = memberRepository.save(createMember("감자"));
 
-		LocalDateTime endTime = LocalDateTime.now().withNano(0);
-		Record record = createRecord(member, 65, 1.00, 3665, 300, endTime);
-		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
-		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
+		Record record = createRecord(member, true);
+		Coordinate coordinate1 = createCoordinate(record);
+		Coordinate coordinate2 = createCoordinate(record);
 		Record savedRecord = recordRepository.save(record);
 		coordinateRepository.save(coordinate1);
 		coordinateRepository.save(coordinate2);
@@ -267,9 +275,9 @@ class RecordServiceTest {
 	@Test
 	void findCurrentRecord() {
 		// given
-		Member member = memberRepository.save(createMember());
+		Member member = memberRepository.save(createMember("감자"));
 
-		Record record = createRecord(member, 65, 1.00, 3665, 300, null);
+		Record record = createRecord(member, 65, 1.00, 3665, 300, false);
 		Coordinate coordinate1 = createCoordinate(record, 10.00, 20.00);
 		Coordinate coordinate2 = createCoordinate(record, 20.00, 30.00);
 		recordRepository.save(record);
@@ -296,10 +304,10 @@ class RecordServiceTest {
 	@Test
 	void findCurrentWorkoutRecordWhenNoneUnfinished() {
 		// given
-		Member member = memberRepository.save(createMember());
+		Member member = memberRepository.save(createMember("감자"));
 
-		Record record = createRecord(member, 65, 1.00, 3665, 300, LocalDateTime.now());
-		Coordinate coordinate = createCoordinate(record, 10.00, 20.00);
+		Record record = createRecord(member, true);
+		Coordinate coordinate = createCoordinate(record);
 		recordRepository.save(record);
 		coordinateRepository.save(coordinate);
 
@@ -310,9 +318,53 @@ class RecordServiceTest {
 		assertThat(response).isNull();
 	}
 
-	private Member createMember() {
+	@DisplayName("회원과 크루 정보로 운동 현황 목록 조회를 할 수 있다.")
+	@Test
+	void findAllRunningStatus() {
+		Member member1 = memberRepository.save(createMember("회원1"));
+		Member member2 = memberRepository.save(createMember("회원2"));
+		Member member3 = memberRepository.save(createMember("회원3"));
+		Crew crew = crewRepository.save(createCrew(member1.getId()));
+		crewMemberRepository.save(CrewMember.builder().crew(crew).member(member1).role(Role.LEADER).build());
+		crewMemberRepository.save(CrewMember.builder().crew(crew).member(member2).role(Role.MEMBER).build());
+		crewMemberRepository.save(CrewMember.builder().crew(crew).member(member3).role(Role.MEMBER).build());
+
+		LocalDate today = LocalDate.now();
+
+		LocalDateTime endOfYesterday = getEndOfDay(today.minusDays(1));
+		setAuditingHandlerDateTime(endOfYesterday);
+		recordRepository.save(createRecord(member1, 1.0, 100, true));
+
+		LocalDateTime startOfToday = getStartOfDay(today);
+		setAuditingHandlerDateTime(startOfToday);
+		recordRepository.save(createRecord(member2, 2.0, 200, true));
+		recordRepository.save(createRecord(member1, 2.0, 200, true));
+
+		LocalDateTime endOfToday = getEndOfDay(today);
+		setAuditingHandlerDateTime(endOfToday);
+		recordRepository.save(createRecord(member1, 3.0, 300, true));
+		recordRepository.save(createRecord(member3, 3.0, 300, false));
+
+		LocalDateTime startOfTomorrow = getStartOfDay(today.plusDays(1));
+		setAuditingHandlerDateTime(startOfTomorrow);
+		recordRepository.save(createRecord(member1, 4.0, 400, true));
+
+		// when
+		List<RunningStatusResponse> response = recordService.findAllRunningStatus(member1.getId(), crew.getId());
+
+		// then
+		assertThat(response).hasSize(3)
+			.extracting("memberId", "runTime", "runDistance", "isEnd")
+			.containsExactly(
+				tuple(member3.getId(), 300, 3.00, false),
+				tuple(member1.getId(), 500, 5.00, true),
+				tuple(member2.getId(), 200, 2.00, true)
+			);
+	}
+
+	private Member createMember(String nickname) {
 		return Member.builder()
-			.nickname("감자")
+			.nickname(nickname)
 			.profileImg(
 				"https://d2u3dcdbebyaiu.cloudfront.net/uploads/atch_img/321/d4c6b40843af7f4f1d8000cafef4a2e7.jpeg")
 			.age(3)
@@ -322,16 +374,28 @@ class RecordServiceTest {
 			.build();
 	}
 
+	private Record createRecord(Member member, boolean isEnd) {
+		return this.createRecord(member, 1, 1, 1, 1, isEnd);
+	}
+
+	private Record createRecord(Member member, double runDistance, int runTime, boolean isEnd) {
+		return this.createRecord(member, 1, runDistance, runTime, 1, isEnd);
+	}
+
 	private Record createRecord(Member member, int avgPace, double runDistance, int runTime, int calories,
-		LocalDateTime endTime) {
+		boolean isEnd) {
 		return Record.builder()
 			.member(member)
 			.avgPace(avgPace)
 			.runDistance(runDistance)
 			.runTime(runTime)
 			.calories(calories)
-			.endTime(endTime)
+			.isEnd(isEnd)
 			.build();
+	}
+
+	private Coordinate createCoordinate(Record record) {
+		return this.createCoordinate(record, 1.0, 1.0);
 	}
 
 	private Coordinate createCoordinate(Record record, double latitude, double longitude) {
@@ -342,7 +406,12 @@ class RecordServiceTest {
 			.build();
 	}
 
-	private LocalDateTime createLocalDateTime(String date) {
-		return LocalDateTime.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+	private Crew createCrew(Long leaderId) {
+		return new Crew(leaderId, "crew1", 5, Category.RUNNING, ApprovalType.AUTO, "crew1", 1, 1);
 	}
+
+	private void setAuditingHandlerDateTime(LocalDateTime localDateTime) {
+		auditingHandler.setDateTimeProvider(() -> Optional.of(localDateTime));
+	}
+
 }

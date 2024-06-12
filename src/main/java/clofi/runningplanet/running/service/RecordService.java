@@ -1,9 +1,14 @@
 package clofi.runningplanet.running.service;
 
+import static clofi.runningplanet.common.utils.TimeUtils.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -46,7 +51,14 @@ public class RecordService {
 		Coordinate coordinate = request.toCoordinate(savedRecord);
 		coordinateRepository.save(coordinate);
 
-		sendRunningStatus(member, savedRecord);
+		LocalDate now = LocalDate.now();
+		LocalDateTime start = getStartOfDay(now);
+		LocalDateTime end = getEndOfDay(now);
+		List<Record> records = recordRepository.findAllByMemberIdAndCreatedAtBetween(
+			member.getId(), start, end);
+
+		RunningStatusResponse runningStatusResponse = createRunningStatusResponse(records);
+		sendRunningStatus(member, runningStatusResponse);
 
 		return savedRecord;
 	}
@@ -61,33 +73,25 @@ public class RecordService {
 			.orElse(Record.builder().member(member).build());
 	}
 
-	private void sendRunningStatus(Member member, Record savedRecord) {
+	private void sendRunningStatus(Member member, RunningStatusResponse runningStatusResponse) {
 		crewMemberRepository.findByMemberId(member.getId())
 			.ifPresent(crewMember -> messagingTemplate.convertAndSend(
 				String.format("/sub/crew/%s/running", crewMember.getCrew().getId()),
-				new RunningStatusResponse(member, savedRecord)));
+				runningStatusResponse));
 	}
 
 	public List<RecordFindAllResponse> findAll(Integer year, Integer month, Long memberId) {
 		Member member = getMember(memberId);
-		YearMonth yearMonth = YearMonth.of(year, month);
 
-		LocalDateTime startDateTime = getStartDateTime(yearMonth);
-		LocalDateTime endDateTime = getEndDateTime(yearMonth);
-		List<Record> records = recordRepository.findAllByMemberAndCreatedAtBetweenAndEndTimeIsNotNull(member,
-			startDateTime, endDateTime);
+		YearMonth yearMonth = YearMonth.of(year, month);
+		LocalDateTime start = getStartOfDay(yearMonth.atDay(1));
+		LocalDateTime end = getEndOfDay(yearMonth.atEndOfMonth());
+		List<Record> records = recordRepository.findAllByMemberAndCreatedAtBetweenAndEndTimeIsNotNull(member, start,
+			end);
 
 		return records.stream()
 			.map(RecordFindAllResponse::new)
 			.toList();
-	}
-
-	private LocalDateTime getStartDateTime(YearMonth yearMonth) {
-		return yearMonth.atDay(1).atStartOfDay();
-	}
-
-	private static LocalDateTime getEndDateTime(YearMonth yearMonth) {
-		return yearMonth.atEndOfMonth().atTime(23, 59, 59);
 	}
 
 	public RecordFindResponse find(Long recordId, Long memberId) {
@@ -120,4 +124,50 @@ public class RecordService {
 			.orElseThrow(() -> new IllegalArgumentException("좌표 정보를 찾을 수 없습니다."));
 	}
 
+	@Transactional
+	public List<RunningStatusResponse> findAllRunningStatus(Long memberId, Long crewId) {
+		if (!crewMemberRepository.existsByCrewIdAndMemberId(crewId, memberId)) {
+			throw new IllegalArgumentException("크루에 소속된 회원이 아닙니다.");
+		}
+
+		List<Member> members = crewMemberRepository.findMembersByCrewId(crewId);
+
+		LocalDate now = LocalDate.now();
+		LocalDateTime start = getStartOfDay(now);
+		LocalDateTime end = getEndOfDay(now);
+		List<Record> records = recordRepository.findAllByMemberInAndCreatedAtBetween(members, start, end);
+
+		List<RunningStatusResponse> runningStatusResponses = convertToRunningStatusResponses(records);
+		sortByIsEndAndRunTime(runningStatusResponses);
+
+		return runningStatusResponses;
+	}
+
+	private List<RunningStatusResponse> convertToRunningStatusResponses(List<Record> records) {
+		Map<Long, List<Record>> groupedByMemberId = records.stream()
+			.collect(Collectors.groupingBy(record -> record.getMember().getId()));
+
+		return groupedByMemberId.values().stream()
+			.map(RecordService::createRunningStatusResponse)
+			.collect(Collectors.toList());
+	}
+
+	private static RunningStatusResponse createRunningStatusResponse(List<Record> recordList) {
+		return new RunningStatusResponse(
+			recordList.getFirst().getMember().getId(),
+			recordList.getFirst().getMember().getNickname(),
+			recordList.stream().mapToInt(Record::getRunTime).sum(),
+			recordList.stream().mapToDouble(Record::getRunDistance).sum(),
+			recordList.stream().allMatch(r -> r.getEndTime() != null)
+		);
+	}
+
+	private void sortByIsEndAndRunTime(List<RunningStatusResponse> runningStatusResponses) {
+		runningStatusResponses.sort((r1, r2) -> {
+			if (r1.isEnd() != r2.isEnd()) {
+				return Boolean.compare(r1.isEnd(), r2.isEnd());
+			}
+			return Integer.compare(r2.runTime(), r1.runTime());
+		});
+	}
 }
