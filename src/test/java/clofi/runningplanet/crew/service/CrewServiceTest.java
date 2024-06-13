@@ -339,6 +339,35 @@ class CrewServiceTest {
 		assertThat(result).isEqualTo(applyCrewResDto);
 	}
 
+	@DisplayName("크루 가입 여부 AUTO 인 경우 자동 가입 성공")
+	@Test
+	void successApplyApprovalTypeAuto() {
+		//given
+		ApplyCrewReqDto reqDto = getApplyCrewReqDto();
+		Long crewId = 1L;
+		Long memberId = 2L;
+
+		Crew crew = createAutoCrew();
+		Member member = createMember();
+
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.of(member));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+		given(crewApplicationRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.empty());
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+
+		//when
+		ApplyCrewResDto result = crewService.applyCrew(reqDto, crewId, memberId);
+
+		//then
+		ApplyCrewResDto applyCrewResDto = new ApplyCrewResDto(crewId, memberId, true);
+
+		assertThat(result).isEqualTo(applyCrewResDto);
+	}
+
 	@DisplayName("크루 신청한 사용자가 가입된 사용자가 아닌 경우 예외 발생")
 	@Test
 	void failApplyCrewByNotFoundMember() {
