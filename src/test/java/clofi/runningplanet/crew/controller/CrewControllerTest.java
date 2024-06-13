@@ -359,7 +359,7 @@ class CrewControllerTest {
 		//given
 		Long crewId = 1L;
 
-		FindCrewWithMissionResDto expected = new FindCrewWithMissionResDto(1, "크루명", "크루 소개", 10, 10, List.of("태그"),
+		FindCrewWithMissionResDto expected = new FindCrewWithMissionResDto(1L, 1, "크루명", "크루 소개", 10, 10, List.of("태그"),
 			RUNNING, new RuleDto(5, 999), 2, List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), true, "https://test.com");
 
 		given(crewService.findCrewWithMission(anyLong(), anyLong()))
