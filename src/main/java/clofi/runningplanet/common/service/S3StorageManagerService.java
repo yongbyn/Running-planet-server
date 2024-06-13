@@ -23,6 +23,9 @@ public class S3StorageManagerService implements S3StorageManagerUseCase {
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucket;
 
+	@Value("${default.imageUrlPrefix}")
+	private static String imageUrlPrefix;
+
 	@Override
 	public List<String> uploadImages(List<MultipartFile> images) {
 		return images.stream()
@@ -59,7 +62,7 @@ public class S3StorageManagerService implements S3StorageManagerUseCase {
 		} catch (IOException e) {
 			throw new IllegalArgumentException("AWS S3");
 		}
-		return imageUrl;
+		return imageUrlPrefix + imageUrl;
 	}
 
 	private String generateUniqueFileName(String originalFilename) {

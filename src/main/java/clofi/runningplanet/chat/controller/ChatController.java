@@ -47,10 +47,9 @@ public class ChatController {
 		@PathVariable Long crewId,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "30") int size,
-		@Header("Authorization") String token
+		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
-		String jwtToken = jwtutil.extractToken(token);
-		Long memberId = jwtutil.getUserId(jwtToken);
+		Long memberId = customOAuth2User.getId();
 
 		ChatListResponse chatList = chatService.getChatMessages(memberId, crewId, page, size);
 
