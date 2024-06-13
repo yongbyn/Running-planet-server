@@ -55,3 +55,34 @@ jobs:
         run: |
           cd ${{ secrets.deploy_path }}
           ./deploy_default.sh
+
+  notify-discord:
+    runs-on: ubuntu-latest
+    needs: [ build, deploy ]
+    if: ${{ failure() }}
+    steps:
+      - name: Notify Discord on Failure
+        uses: Ilshidur/action-discord@v2
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          content: |
+            Workflow failed on branch dev!
+          embeds: |
+            [
+              {
+                "title": "Workflow Failure",
+                "description": "The workflow has failed on branch dev.",
+                "color": 16711680,
+                "fields": [
+                  { "name": "Repository", "value": "${{ github.repository }}" },
+                  { "name": "Commit", "value": "${{ github.sha }}" },
+                  { "name": "Author", "value": "${{ github.actor }}" },
+                  { "name": "Action", "value": "${{ github.action }}" },
+                  { "name": "Event Name", "value": "${{ github.event_name }}" },
+                  { "name": "Ref", "value": "${{ github.ref }}" },
+                  { "name": "Workflow", "value": "${{ github.workflow }}" },
+                  { "name": "Job", "value": "${{ github.job }}" },
+                  { "name": "Duration", "value": "${{ github.run_duration }}" }
+                ]
+              }
+            ]
