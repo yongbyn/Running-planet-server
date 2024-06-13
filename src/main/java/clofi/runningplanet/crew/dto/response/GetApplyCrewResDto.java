@@ -1,6 +1,5 @@
 package clofi.runningplanet.crew.dto.response;
 
-import clofi.runningplanet.crew.domain.Approval;
 import clofi.runningplanet.crew.domain.CrewApplication;
 import clofi.runningplanet.member.domain.Gender;
 
@@ -10,7 +9,7 @@ public record GetApplyCrewResDto(
 	String introduction,
 	Gender gender,
 	int age,
-	Approval approveStatus
+	String userImg
 ) {
 	public GetApplyCrewResDto(CrewApplication crewApplication) {
 		this(
@@ -19,7 +18,7 @@ public record GetApplyCrewResDto(
 			crewApplication.getIntroduction(),
 			crewApplication.getMember().getGender(),
 			crewApplication.getMember().getAge(),
-			crewApplication.getApproval()
+			crewApplication.getMember().getProfileImg()
 		);
 	}
 }

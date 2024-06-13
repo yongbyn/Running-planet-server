@@ -11,11 +11,15 @@ import clofi.runningplanet.mission.domain.CrewMission;
 
 public interface CrewMissionRepository extends JpaRepository<CrewMission, Long> {
 
-	List<CrewMission> findAllByCrewIdAndMemberId(Long crewId, Long memberId);
+	@Query("select cm from CrewMission cm where cm.crew.id = :crewId and cm.member.id = :memberId and cm.createdAt between :startOfDay and :endOfDay")
+	List<CrewMission> findAllByCrewIdAndMemberIdAndToday(
+		@Param("crewId") Long crewId,
+		@Param("memberId") Long memberId,
+		@Param("startOfDay") LocalDateTime startOfDay,
+		@Param("endOfDay") LocalDateTime endOfDay);
 
-	@Query("SELECT cm FROM CrewMission cm WHERE cm.crew.id = :crewId AND cm.createdAt >= :startOfWeek AND cm.createdAt <= :endOfWeek")
+	@Query("SELECT cm FROM CrewMission cm WHERE cm.crew.id = :crewId AND cm.createdAt BETWEEN :startOfWeek AND :endOfWeek")
 	List<CrewMission> findAllByCrewIdAndWeek(@Param("crewId") Long crewId,
 		@Param("startOfWeek") LocalDateTime startOfWeek,
-		@Param("endOfWeek") LocalDateTime endOfWeek
-	);
+		@Param("endOfWeek") LocalDateTime endOfWeek);
 }

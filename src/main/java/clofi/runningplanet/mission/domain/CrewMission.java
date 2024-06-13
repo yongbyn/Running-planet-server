@@ -47,6 +47,10 @@ public class CrewMission extends BaseEntity {
 		this.isCompleted = isCompleted;
 	}
 
+	public CrewMission(Member member, Crew crew, MissionType type) {
+		this(null, member, crew, type, false);
+	}
+
 	public void completeMission() {
 		this.isCompleted = true;
 	}

@@ -339,6 +339,35 @@ class CrewServiceTest {
 		assertThat(result).isEqualTo(applyCrewResDto);
 	}
 
+	@DisplayName("크루 가입 여부 AUTO 인 경우 자동 가입 성공")
+	@Test
+	void successApplyApprovalTypeAuto() {
+		//given
+		ApplyCrewReqDto reqDto = getApplyCrewReqDto();
+		Long crewId = 1L;
+		Long memberId = 2L;
+
+		Crew crew = createAutoCrew();
+		Member member = createMember();
+
+		given(memberRepository.findById(anyLong()))
+			.willReturn(Optional.of(member));
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+		given(crewApplicationRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.empty());
+		given(crewRepository.findById(anyLong()))
+			.willReturn(Optional.of(crew));
+
+		//when
+		ApplyCrewResDto result = crewService.applyCrew(reqDto, crewId, memberId);
+
+		//then
+		ApplyCrewResDto applyCrewResDto = new ApplyCrewResDto(crewId, memberId, true);
+
+		assertThat(result).isEqualTo(applyCrewResDto);
+	}
+
 	@DisplayName("크루 신청한 사용자가 가입된 사용자가 아닌 경우 예외 발생")
 	@Test
 	void failApplyCrewByNotFoundMember() {
@@ -418,7 +447,7 @@ class CrewServiceTest {
 			.nickname("닉네임1")
 			.age(30)
 			.gender(Gender.MALE)
-			.profileImg("https://image-url1.com")
+			.profileImg("https://test.com")
 			.avgDistance(50)
 			.totalDistance(2000)
 			.build();
@@ -427,7 +456,7 @@ class CrewServiceTest {
 			.nickname("닉네임2")
 			.age(15)
 			.gender(Gender.FEMALE)
-			.profileImg("https://image-url2.com")
+			.profileImg("https://test.com")
 			.avgDistance(5)
 			.totalDistance(20)
 			.build();
@@ -447,9 +476,9 @@ class CrewServiceTest {
 
 		//then
 		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글", Gender.MALE, 30,
-			Approval.PENDING);
+			"https://test.com");
 		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글", Gender.FEMALE, 15,
-			Approval.PENDING);
+			"https://test.com");
 		ApprovalMemberResDto approvalMemberResDto = new ApprovalMemberResDto(
 			List.of(getApplyCrewResDto1, getApplyCrewResDto2));
 
@@ -547,6 +576,8 @@ class CrewServiceTest {
 			.willReturn(Optional.of(member));
 		given(crewMemberRepository.save(any(CrewMember.class)))
 			.willReturn(crewMember);
+		given(crewMissionRepository.saveAll(anyList()))
+			.willReturn(null);
 
 		//when
 		//then

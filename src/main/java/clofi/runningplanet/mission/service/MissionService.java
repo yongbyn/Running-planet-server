@@ -17,6 +17,7 @@ import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.mission.domain.CrewMission;
+import clofi.runningplanet.mission.domain.MissionType;
 import clofi.runningplanet.mission.domain.vo.TodayRecords;
 import clofi.runningplanet.mission.dto.response.CrewMissionListDto;
 import clofi.runningplanet.mission.dto.response.GetCrewMissionResDto;
@@ -41,16 +42,12 @@ public class MissionService {
 		checkMemberExist(memberId);
 		validateCrewMemberShip(crewId, memberId);
 
-		List<CrewMission> crewMissionList = crewMissionRepository.findAllByCrewIdAndMemberId(crewId, memberId);
-		if (crewMissionList.size() != 2) {
-			throw new InternalServerException();
-		}
+		List<CrewMission> crewMissionList = getTodayCrewMissionList(crewId, memberId);
+		validateMissionListSize(crewMissionList);
 
 		TodayRecords todayRecords = getTodayRecords(memberId);
+		List<GetCrewMissionResDto> resDtoList = convertToResDto(crewMissionList, todayRecords);
 
-		List<GetCrewMissionResDto> resDtoList = crewMissionList.stream()
-			.map(crewMission -> convertToDto(crewMission, todayRecords))
-			.toList();
 		return new CrewMissionListDto(resDtoList);
 	}
 
@@ -66,9 +63,31 @@ public class MissionService {
 		validateRecords(findMission, todayRecords);
 
 		findMission.completeMission();
-		
+
 		Crew findCrew = getFindCrew(crewId);
 		findCrew.gainExp(10);
+	}
+
+	private List<GetCrewMissionResDto> convertToResDto(List<CrewMission> crewMissionList,
+		TodayRecords todayRecords) {
+		return crewMissionList.stream()
+			.map(crewMission -> convertToDto(crewMission, todayRecords))
+			.toList();
+	}
+
+	private void validateMissionListSize(List<CrewMission> crewMissionList) {
+		if (crewMissionList.size() != MissionType.values().length) {
+			throw new InternalServerException();
+		}
+	}
+
+	private List<CrewMission> getTodayCrewMissionList(Long crewId, Long memberId) {
+		LocalDate today = LocalDate.now();
+		LocalDateTime startOfDay = today.atStartOfDay();
+		LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+		return crewMissionRepository.findAllByCrewIdAndMemberIdAndToday(crewId, memberId,
+			startOfDay, endOfDay);
 	}
 
 	private void validateRecords(CrewMission mission, TodayRecords todayRecords) {
