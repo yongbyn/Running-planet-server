@@ -14,4 +14,8 @@ public record RunningStatusResponse(
 		this(member.getId(), member.getNickname(), savedRecord.getRunTime(),
 			savedRecord.getRunDistance(), savedRecord.isEnd());
 	}
+
+	public RunningStatusResponse(Member member) {
+		this(member.getId(), member.getNickname(), 0, 0, true);
+	}
 }
