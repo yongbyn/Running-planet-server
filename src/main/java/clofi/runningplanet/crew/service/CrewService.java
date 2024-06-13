@@ -17,6 +17,7 @@ import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.common.exception.UnauthorizedException;
 import clofi.runningplanet.common.service.S3StorageManagerUseCase;
+import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.CrewApplication;
 import clofi.runningplanet.crew.domain.CrewImage;
@@ -41,8 +42,8 @@ import clofi.runningplanet.crew.repository.TagRepository;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
 import clofi.runningplanet.mission.domain.CrewMission;
-import clofi.runningplanet.mission.repository.CrewMissionRepository;
 import clofi.runningplanet.mission.domain.MissionType;
+import clofi.runningplanet.mission.repository.CrewMissionRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -112,9 +113,35 @@ public class CrewService {
 
 		Crew findCrew = getCrewByCrewId(crewId);
 
+		if (findCrew.getApprovalType() == ApprovalType.AUTO) {
+			handleAutoApproval(findCrew, findMember);
+		} else {
+			saveCrewApplication(reqDto, findCrew, findMember);
+		}
+
+		return new ApplyCrewResDto(crewId, findMember.getId(), true);
+	}
+
+	private void saveCrewApplication(ApplyCrewReqDto reqDto, Crew findCrew, Member findMember) {
 		CrewApplication crewApplication = reqDto.toEntity(findCrew, findMember);
 		crewApplicationRepository.save(crewApplication);
-		return new ApplyCrewResDto(crewId, findMember.getId(), true);
+	}
+
+	private void handleAutoApproval(Crew findCrew, Member findMember) {
+		validateCrewMemberLimit(findCrew);
+
+		CrewMember crewMember = CrewMember.createMember(findCrew, findMember);
+		crewMemberRepository.save(crewMember);
+
+		saveInitialCrewMission(findCrew, findMember);
+	}
+
+	private void saveInitialCrewMission(Crew findCrew, Member findMember) {
+		List<CrewMission> firstCrewMissionList = Arrays.stream(MissionType.values())
+			.map(value -> new CrewMission(findMember, findCrew, value))
+			.collect(Collectors.toList());
+
+		crewMissionRepository.saveAll(firstCrewMissionList);
 	}
 
 	@Transactional(readOnly = true)
@@ -317,11 +344,7 @@ public class CrewService {
 		CrewMember crewMember = CrewMember.createMember(findCrew, applyMember);
 		crewMemberRepository.save(crewMember);
 
-		List<CrewMission> firstCrewMissionList = Arrays.stream(MissionType.values())
-			.map(value -> new CrewMission(applyMember, findCrew, value))
-			.collect(Collectors.toList());
-
-		crewMissionRepository.saveAll(firstCrewMissionList);
+		saveInitialCrewMission(findCrew, applyMember);
 	}
 
 	private void validateLeaderPrivilege(Long crewId, Long memberId) {
