@@ -17,9 +17,11 @@
 
     <springProfile name="dev">
         <include resource="file-info-appender.xml"/>
+        <include resource="async-discord-appender.xml"/>
 
         <root level="INFO">
             <appender-ref ref="FILE-INFO"/>
+            <appender-ref ref="ASYNC_DISCORD"/>
         </root>
 
         <logger level="DEBUG" name="org.hibernate.SQL">
