@@ -43,6 +43,7 @@ import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
 import clofi.runningplanet.crew.service.CrewService;
 import clofi.runningplanet.member.domain.Gender;
@@ -352,6 +353,36 @@ class CrewControllerTest {
 
 	}
 
+	@DisplayName("크루 페이지를 조회할 수 있다.")
+	@WithMockCustomMember
+	@Test
+	void successCrewPage() throws Exception {
+		//given
+		Long crewId = 1L;
+
+		FindCrewWithMissionResDto expected = new FindCrewWithMissionResDto(1, "크루명", "크루 소개", 10, 10, List.of("태그"),
+			RUNNING, new RuleDto(5, 999), 2, List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), true, "https://test.com");
+
+		given(crewService.findCrewWithMission(anyLong(), anyLong()))
+			.willReturn(expected);
+
+		//when
+		ResultActions resultActions = findCrewWithMission(crewId);
+
+		//then
+		MvcResult mvcResult = resultActions
+			.andExpect(status().isOk())
+			.andReturn();
+
+		FindCrewWithMissionResDto resDto = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<>() {
+			}
+		);
+
+		assertThat(resDto).isEqualTo(expected);
+	}
+
 	private ResultActions createCrew(CreateCrewReqDto reqDto, MockMultipartFile imgFile) throws Exception {
 		MockMultipartFile jsonFile = new MockMultipartFile("crewInfo", "", "application/json",
 			objectMapper.writeValueAsBytes(reqDto));
@@ -413,5 +444,10 @@ class CrewControllerTest {
 			.contentType(MULTIPART_FORM_DATA)
 			.header(AUTHORIZATION, "Bearer accessToken")
 			.content(objectMapper.writeValueAsString(reqDto)));
+	}
+
+	private ResultActions findCrewWithMission(Long crewId) throws Exception {
+		return mockMvc.perform(get("/api/crew/{crewId}/page", crewId)
+			.contentType(APPLICATION_JSON));
 	}
 }

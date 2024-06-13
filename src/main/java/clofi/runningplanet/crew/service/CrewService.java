@@ -1,7 +1,13 @@
 package clofi.runningplanet.crew.service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
+import clofi.runningplanet.common.exception.UnauthorizedException;
 import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.CrewApplication;
@@ -24,6 +31,7 @@ import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
 import clofi.runningplanet.crew.repository.CrewApplicationRepository;
 import clofi.runningplanet.crew.repository.CrewImageRepository;
@@ -32,6 +40,8 @@ import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.repository.TagRepository;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
+import clofi.runningplanet.mission.domain.CrewMission;
+import clofi.runningplanet.mission.repository.CrewMissionRepository;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -45,6 +55,7 @@ public class CrewService {
 	private final CrewMemberRepository crewMemberRepository;
 	private final S3StorageManagerUseCase storageManagerUseCase;
 	private final CrewImageRepository crewImageRepository;
+	private final CrewMissionRepository crewMissionRepository;
 
 	@Transactional
 	public Long createCrew(CreateCrewReqDto reqDto, MultipartFile imageFile, Long memberId) {
@@ -172,6 +183,68 @@ public class CrewService {
 		if (!imgFile.isEmpty()) {
 			updateCrewImage(imgFile, crewId);
 		}
+	}
+
+	@Transactional(readOnly = true)
+	public FindCrewWithMissionResDto findCrewWithMission(Long crewId, Long memberId) {
+		Crew findCrew = getCrewByCrewId(crewId);
+		int memberCnt = getCrewMemberCnt(crewId);
+
+		CrewMember crewMember = getCrewMember(crewId, memberId);
+		boolean isCrewLeader = isCrewLeader(memberId, crewMember, findCrew);
+
+		List<String> tags = findTagsToStrings(findCrew.getId());
+		CrewImage crewImage = findImage(crewId);
+
+		List<Double> crewMissionProgressUntilWeek = calculateCrewMissionProgressUntilWeek(crewId, memberCnt);
+
+		return new FindCrewWithMissionResDto(findCrew, tags, crewImage.getFilepath(), crewMissionProgressUntilWeek,
+			memberCnt, isCrewLeader);
+	}
+
+	private List<Double> calculateCrewMissionProgressUntilWeek(Long crewId, int memberCnt) {
+		LocalDate startOfWeek = getStartOfWeek();
+		LocalDate endOfWeek = startOfWeek.plusDays(6);
+
+		List<CrewMission> crewMissionList = crewMissionRepository.findAllByCrewIdAndWeek(crewId,
+			startOfWeek.atStartOfDay(),
+			endOfWeek.atTime(23, 59, 59));
+
+		Map<DayOfWeek, Double> result = calculateDayOfWeekSuccessRate(crewMissionList, memberCnt);
+
+		return Arrays.stream(DayOfWeek.values())
+			.map(result::get)
+			.collect(Collectors.toList());
+	}
+
+	private Map<DayOfWeek, Double> calculateDayOfWeekSuccessRate(List<CrewMission> crewMissionList, int memberCnt) {
+		return Arrays.stream(DayOfWeek.values())
+			.collect(Collectors.toMap(
+				day -> day,
+				day -> {
+					long completedCount = crewMissionList.stream()
+						.filter(mission -> mission.getCreatedAt().getDayOfWeek() == day && mission.isCompleted())
+						.count();
+					double totalPossible = memberCnt * 2;
+					return totalPossible == 0 ? 0.0 : (completedCount / totalPossible) * 100;
+				}
+			));
+	}
+
+	private LocalDate getStartOfWeek() {
+		LocalDate now = LocalDate.now();
+		DayOfWeek firstDayOfWeek = now.getDayOfWeek();
+		return now.with(TemporalAdjusters.previousOrSame(firstDayOfWeek));
+	}
+
+	private boolean isCrewLeader(Long memberId, CrewMember crewMember, Crew findCrew) {
+		return crewMember.isLeader() && findCrew.getLeaderId().equals(memberId);
+	}
+
+	private CrewMember getCrewMember(Long crewId, Long memberId) {
+		return crewMemberRepository.findByCrewIdAndMemberId(crewId, memberId).orElseThrow(
+			() -> new UnauthorizedException("크루에 소속된 크루원이 아닙니다.")
+		);
 	}
 
 	private CrewImage findImage(Long crewId) {
