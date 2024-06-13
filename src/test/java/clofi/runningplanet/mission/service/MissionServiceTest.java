@@ -70,7 +70,9 @@ class MissionServiceTest {
 			.willReturn(true);
 		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
 			.willReturn(true);
-		given(crewMissionRepository.findAllByCrewIdAndMemberId(anyLong(), anyLong()))
+		given(crewMissionRepository.findAllByCrewIdAndMemberIdAndToday(anyLong(), anyLong(), any(LocalDateTime.class),
+			any(
+				LocalDateTime.class)))
 			.willReturn(crewMissionList);
 		given(recordRepository.findAllByMemberIdAndCreatedAtBetween(anyLong(), any(LocalDateTime.class), any(
 			LocalDateTime.class)))
@@ -105,7 +107,9 @@ class MissionServiceTest {
 			.willReturn(true);
 		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
 			.willReturn(true);
-		given(crewMissionRepository.findAllByCrewIdAndMemberId(anyLong(), anyLong()))
+		given(crewMissionRepository.findAllByCrewIdAndMemberIdAndToday(anyLong(), anyLong(), any(LocalDateTime.class),
+			any(
+				LocalDateTime.class)))
 			.willReturn(crewMissionList);
 		given(recordRepository.findAllByMemberIdAndCreatedAtBetween(anyLong(), any(LocalDateTime.class), any(
 			LocalDateTime.class)))
@@ -192,7 +196,9 @@ class MissionServiceTest {
 			.willReturn(true);
 		given(crewMemberRepository.existsByCrewIdAndMemberId(anyLong(), anyLong()))
 			.willReturn(true);
-		given(crewMissionRepository.findAllByCrewIdAndMemberId(anyLong(), anyLong()))
+		given(crewMissionRepository.findAllByCrewIdAndMemberIdAndToday(anyLong(), anyLong(), any(LocalDateTime.class),
+			any(
+				LocalDateTime.class)))
 			.willReturn(Collections.emptyList());
 
 		//when
