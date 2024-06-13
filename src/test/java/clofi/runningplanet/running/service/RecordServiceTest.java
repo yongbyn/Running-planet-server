@@ -324,10 +324,12 @@ class RecordServiceTest {
 		Member member1 = memberRepository.save(createMember("회원1"));
 		Member member2 = memberRepository.save(createMember("회원2"));
 		Member member3 = memberRepository.save(createMember("회원3"));
+		Member member4 = memberRepository.save(createMember("회원4"));
 		Crew crew = crewRepository.save(createCrew(member1.getId()));
 		crewMemberRepository.save(CrewMember.builder().crew(crew).member(member1).role(Role.LEADER).build());
 		crewMemberRepository.save(CrewMember.builder().crew(crew).member(member2).role(Role.MEMBER).build());
 		crewMemberRepository.save(CrewMember.builder().crew(crew).member(member3).role(Role.MEMBER).build());
+		crewMemberRepository.save(CrewMember.builder().crew(crew).member(member4).role(Role.MEMBER).build());
 
 		LocalDate today = LocalDate.now();
 
@@ -353,20 +355,20 @@ class RecordServiceTest {
 		List<RunningStatusResponse> response = recordService.findAllRunningStatus(member1.getId(), crew.getId());
 
 		// then
-		assertThat(response).hasSize(3)
-			.extracting("memberId", "runTime", "runDistance", "isEnd")
+		assertThat(response).hasSize(4)
+			.extracting("memberId", "profileImg", "runTime", "runDistance", "isEnd")
 			.containsExactly(
-				tuple(member3.getId(), 300, 3.00, false),
-				tuple(member1.getId(), 500, 5.00, true),
-				tuple(member2.getId(), 200, 2.00, true)
+				tuple(member3.getId(), "defaultProfileImg", 300, 3.0, false),
+				tuple(member1.getId(), "defaultProfileImg", 500, 5.0, true),
+				tuple(member2.getId(), "defaultProfileImg", 200, 2.0, true),
+				tuple(member4.getId(), "defaultProfileImg", 0, 0.0, true)
 			);
 	}
 
 	private Member createMember(String nickname) {
 		return Member.builder()
 			.nickname(nickname)
-			.profileImg(
-				"https://d2u3dcdbebyaiu.cloudfront.net/uploads/atch_img/321/d4c6b40843af7f4f1d8000cafef4a2e7.jpeg")
+			.profileImg("defaultProfileImg")
 			.age(3)
 			.gender(Gender.MALE)
 			.avgPace(600)

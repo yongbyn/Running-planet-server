@@ -5,6 +5,7 @@ import static clofi.runningplanet.common.utils.TimeUtils.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -137,25 +138,34 @@ public class RecordService {
 		LocalDateTime end = getEndOfDay(now);
 		List<Record> records = recordRepository.findAllByMemberInAndCreatedAtBetween(members, start, end);
 
-		List<RunningStatusResponse> runningStatusResponses = convertToRunningStatusResponses(records);
+		List<RunningStatusResponse> runningStatusResponses = convertToRunningStatusResponses(members, records);
 		sortByIsEndAndRunTime(runningStatusResponses);
 
 		return runningStatusResponses;
 	}
 
-	private List<RunningStatusResponse> convertToRunningStatusResponses(List<Record> records) {
+	private List<RunningStatusResponse> convertToRunningStatusResponses(List<Member> members, List<Record> records) {
 		Map<Long, List<Record>> groupedByMemberId = records.stream()
 			.collect(Collectors.groupingBy(record -> record.getMember().getId()));
 
-		return groupedByMemberId.values().stream()
-			.map(RecordService::createRunningStatusResponse)
-			.collect(Collectors.toList());
+		List<RunningStatusResponse> runningStatusResponses = new ArrayList<>();
+		for (Member member : members) {
+			List<Record> memberRecords = groupedByMemberId.get(member.getId());
+			if (memberRecords == null) {
+				runningStatusResponses.add(new RunningStatusResponse(member));
+			} else {
+				runningStatusResponses.add(createRunningStatusResponse(memberRecords));
+			}
+		}
+
+		return runningStatusResponses;
 	}
 
-	private static RunningStatusResponse createRunningStatusResponse(List<Record> recordList) {
+	private RunningStatusResponse createRunningStatusResponse(List<Record> recordList) {
 		return new RunningStatusResponse(
 			recordList.getFirst().getMember().getId(),
 			recordList.getFirst().getMember().getNickname(),
+			recordList.getFirst().getMember().getProfileImg(),
 			recordList.stream().mapToInt(Record::getRunTime).sum(),
 			recordList.stream().mapToDouble(Record::getRunDistance).sum(),
 			recordList.stream().allMatch(r -> r.getEndTime() != null)
