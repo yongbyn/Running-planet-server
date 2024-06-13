@@ -356,20 +356,19 @@ class RecordServiceTest {
 
 		// then
 		assertThat(response).hasSize(4)
-			.extracting("memberId", "runTime", "runDistance", "isEnd")
+			.extracting("memberId", "profileImg", "runTime", "runDistance", "isEnd")
 			.containsExactly(
-				tuple(member3.getId(), 300, 3.0, false),
-				tuple(member1.getId(), 500, 5.0, true),
-				tuple(member2.getId(), 200, 2.0, true),
-				tuple(member4.getId(), 0, 0.0, true)
+				tuple(member3.getId(), "defaultProfileImg", 300, 3.0, false),
+				tuple(member1.getId(), "defaultProfileImg", 500, 5.0, true),
+				tuple(member2.getId(), "defaultProfileImg", 200, 2.0, true),
+				tuple(member4.getId(), "defaultProfileImg", 0, 0.0, true)
 			);
 	}
 
 	private Member createMember(String nickname) {
 		return Member.builder()
 			.nickname(nickname)
-			.profileImg(
-				"https://d2u3dcdbebyaiu.cloudfront.net/uploads/atch_img/321/d4c6b40843af7f4f1d8000cafef4a2e7.jpeg")
+			.profileImg("defaultProfileImg")
 			.age(3)
 			.gender(Gender.MALE)
 			.avgPace(600)

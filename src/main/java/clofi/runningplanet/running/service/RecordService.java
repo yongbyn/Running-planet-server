@@ -161,10 +161,11 @@ public class RecordService {
 		return runningStatusResponses;
 	}
 
-	private static RunningStatusResponse createRunningStatusResponse(List<Record> recordList) {
+	private RunningStatusResponse createRunningStatusResponse(List<Record> recordList) {
 		return new RunningStatusResponse(
 			recordList.getFirst().getMember().getId(),
 			recordList.getFirst().getMember().getNickname(),
+			recordList.getFirst().getMember().getProfileImg(),
 			recordList.stream().mapToInt(Record::getRunTime).sum(),
 			recordList.stream().mapToDouble(Record::getRunDistance).sum(),
 			recordList.stream().allMatch(r -> r.getEndTime() != null)
