@@ -7,6 +7,7 @@ import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.dto.RuleDto;
 
 public record FindCrewWithMissionResDto(
+	Long crewId,
 	int crewLevel,
 	String crewName,
 	String introduction,
@@ -22,7 +23,8 @@ public record FindCrewWithMissionResDto(
 ) {
 	public FindCrewWithMissionResDto(Crew crew, List<String> tags, String imgPath, List<Double> missionProgress,
 		int memberCnt, boolean isCrewLeader) {
-		this(crew.getCrewLevel(), crew.getCrewName(), crew.getIntroduction(), memberCnt, crew.getLimitMemberCnt(), tags,
+		this(crew.getId(), crew.getCrewLevel(), crew.getCrewName(), crew.getIntroduction(), memberCnt,
+			crew.getLimitMemberCnt(), tags,
 			crew.getCategory(), new RuleDto(crew.getRuleRunCnt(), crew.getRuleDistance()), crew.getTotalDistance(),
 			missionProgress, isCrewLeader, imgPath);
 	}
