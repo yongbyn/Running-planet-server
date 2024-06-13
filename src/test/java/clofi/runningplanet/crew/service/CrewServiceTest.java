@@ -447,7 +447,7 @@ class CrewServiceTest {
 			.nickname("닉네임1")
 			.age(30)
 			.gender(Gender.MALE)
-			.profileImg("https://image-url1.com")
+			.profileImg("https://test.com")
 			.avgDistance(50)
 			.totalDistance(2000)
 			.build();
@@ -456,7 +456,7 @@ class CrewServiceTest {
 			.nickname("닉네임2")
 			.age(15)
 			.gender(Gender.FEMALE)
-			.profileImg("https://image-url2.com")
+			.profileImg("https://test.com")
 			.avgDistance(5)
 			.totalDistance(20)
 			.build();
@@ -476,9 +476,9 @@ class CrewServiceTest {
 
 		//then
 		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글", Gender.MALE, 30,
-			Approval.PENDING);
+			"https://test.com");
 		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글", Gender.FEMALE, 15,
-			Approval.PENDING);
+			"https://test.com");
 		ApprovalMemberResDto approvalMemberResDto = new ApprovalMemberResDto(
 			List.of(getApplyCrewResDto1, getApplyCrewResDto2));
 

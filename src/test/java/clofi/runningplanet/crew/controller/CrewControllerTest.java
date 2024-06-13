@@ -32,7 +32,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import clofi.runningplanet.common.WithMockCustomMember;
-import clofi.runningplanet.crew.domain.Approval;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
@@ -211,9 +210,9 @@ class CrewControllerTest {
 		Long crewId = 1L;
 
 		GetApplyCrewResDto getApplyCrewResDto1 = new GetApplyCrewResDto(2L, "닉네임1", "크루 신청글1", Gender.MALE, 30,
-			Approval.PENDING);
+			"https://test.com");
 		GetApplyCrewResDto getApplyCrewResDto2 = new GetApplyCrewResDto(3L, "닉네임2", "크루 신청글2", Gender.FEMALE, 15,
-			Approval.PENDING);
+			"https://test.com");
 		ApprovalMemberResDto expected = new ApprovalMemberResDto(
 			List.of(getApplyCrewResDto1, getApplyCrewResDto2));
 
