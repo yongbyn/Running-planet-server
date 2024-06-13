@@ -3,7 +3,7 @@ package clofi.runningplanet.running.domain;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-import clofi.runningplanet.common.domain.BaseEntity;
+import clofi.runningplanet.common.domain.BaseSoftDeleteEntity;
 import clofi.runningplanet.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Cheer extends BaseEntity {
+public class Cheer extends BaseSoftDeleteEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

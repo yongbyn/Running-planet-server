@@ -27,6 +27,7 @@ import clofi.runningplanet.running.dto.RecordFindAllResponse;
 import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
+import clofi.runningplanet.running.dto.RunningStatusFindAllResponse;
 import clofi.runningplanet.running.dto.RunningStatusResponse;
 import clofi.runningplanet.running.repository.CheerRepository;
 import clofi.runningplanet.running.repository.CoordinateRepository;
@@ -68,7 +69,7 @@ public class RecordService {
 		List<Record> records = recordRepository.findAllByMemberIdAndCreatedAtBetween(
 			member.getId(), start, end);
 
-		RunningStatusResponse runningStatusResponse = createRunningStatusResponse(records);
+		RunningStatusResponse runningStatusResponse = new RunningStatusResponse(records);
 		sendRunningStatus(member, runningStatusResponse);
 
 		return savedRecord;
@@ -143,7 +144,7 @@ public class RecordService {
 	}
 
 	@Transactional
-	public List<RunningStatusResponse> findAllRunningStatus(Long memberId, Long crewId) {
+	public List<RunningStatusFindAllResponse> findAllRunningStatus(Long memberId, Long crewId) {
 		if (!crewMemberRepository.existsByCrewIdAndMemberId(crewId, memberId)) {
 			throw new IllegalArgumentException("크루에 소속된 회원이 아닙니다.");
 		}
@@ -155,41 +156,36 @@ public class RecordService {
 		LocalDateTime end = getEndOfDay(now);
 		List<Record> records = recordRepository.findAllByMemberInAndCreatedAtBetween(members, start, end);
 
-		List<RunningStatusResponse> runningStatusResponses = convertToRunningStatusResponses(members, records);
+		List<RunningStatusFindAllResponse> runningStatusResponses = convertToRunningStatusResponses(memberId, members, records,
+			start, end);
 		sortByIsEndAndRunTime(runningStatusResponses);
 
 		return runningStatusResponses;
 	}
 
-	private List<RunningStatusResponse> convertToRunningStatusResponses(List<Member> members, List<Record> records) {
+	private List<RunningStatusFindAllResponse> convertToRunningStatusResponses(Long fromMemberId, List<Member> members,
+		List<Record> records,
+		LocalDateTime start, LocalDateTime end) {
 		Map<Long, List<Record>> groupedByMemberId = records.stream()
 			.collect(Collectors.groupingBy(record -> record.getMember().getId()));
 
-		List<RunningStatusResponse> runningStatusResponses = new ArrayList<>();
+		List<RunningStatusFindAllResponse> runningStatusFindAllResponses = new ArrayList<>();
 		for (Member member : members) {
 			List<Record> memberRecords = groupedByMemberId.get(member.getId());
 			if (memberRecords == null) {
-				runningStatusResponses.add(new RunningStatusResponse(member));
+				runningStatusFindAllResponses.add(new RunningStatusFindAllResponse(member));
 			} else {
-				runningStatusResponses.add(createRunningStatusResponse(memberRecords));
+				boolean canCheer = cheerRepository
+					.findCheerByFromMemberIdAndToMemberIdAndCreatedAtIsBetween(fromMemberId, member.getId(), start, end)
+					.isEmpty();
+				runningStatusFindAllResponses.add(new RunningStatusFindAllResponse(memberRecords, canCheer));
 			}
 		}
 
-		return runningStatusResponses;
+		return runningStatusFindAllResponses;
 	}
 
-	private RunningStatusResponse createRunningStatusResponse(List<Record> recordList) {
-		return new RunningStatusResponse(
-			recordList.getFirst().getMember().getId(),
-			recordList.getFirst().getMember().getNickname(),
-			recordList.getFirst().getMember().getProfileImg(),
-			recordList.stream().mapToInt(Record::getRunTime).sum(),
-			recordList.stream().mapToDouble(Record::getRunDistance).sum(),
-			recordList.stream().allMatch(r -> r.getEndTime() != null)
-		);
-	}
-
-	private void sortByIsEndAndRunTime(List<RunningStatusResponse> runningStatusResponses) {
+	private void sortByIsEndAndRunTime(List<RunningStatusFindAllResponse> runningStatusResponses) {
 		runningStatusResponses.sort((r1, r2) -> {
 			if (r1.isEnd() != r2.isEnd()) {
 				return Boolean.compare(r1.isEnd(), r2.isEnd());
