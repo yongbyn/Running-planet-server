@@ -205,7 +205,7 @@ public class RecordService {
 			throw new IllegalArgumentException("크루에 소속된 회원이 아닙니다.");
 		}
 
-		List<Member> toMembers = crewMemberRepository.findMembersByMemberIds(toMemberIds);
+		List<Member> toMembers = crewMemberRepository.findMembersByCrewAndMemberIds(crewId, toMemberIds);
 		if (toMembers.isEmpty()) {
 			return;
 		}
