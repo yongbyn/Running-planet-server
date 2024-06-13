@@ -23,14 +23,17 @@ public record SelfProfileResponse(
 
 	String myCrew,
 
-	Long myCrewId
+	Long myCrewId,
+
+	Long memberId
 ) {
 	public SelfProfileResponse(Member member, CrewMember crewMember) {
 		this(member.getNickname(), member.getGender(), member.getAge(), member.getWeight(), member.getProfileImg(),
 			calculateAvgPace(member.getAvgPace())
 			, member.getAvgDistance(), member.getTotalDistance(),
 			crewMember != null ? crewMember.getCrew().getCrewName() : null,
-			(crewMember != null && crewMember.getCrew().getId() != null) ? crewMember.getCrew().getId() : null);
+			(crewMember != null && crewMember.getCrew().getId() != null) ? crewMember.getCrew().getId() : null,
+			member.getId());
 	}
 
 	public record AvgPace(
