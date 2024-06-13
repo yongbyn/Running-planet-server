@@ -8,11 +8,9 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import clofi.runningplanet.common.exception.UnauthorizedException;
-import clofi.runningplanet.member.domain.Member;
-import clofi.runningplanet.member.dto.CustomOAuth2User;
+import clofi.runningplanet.member.domain.CustomUser;
 import clofi.runningplanet.security.jwt.JWTUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +28,7 @@ public class StompHandler implements ChannelInterceptor {
 		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
 		if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-			String token = extractToken(accessor.getFirstNativeHeader(AUTHORIZATION_HEADER));
+			String token = jwtUtil.extractToken(accessor.getFirstNativeHeader(AUTHORIZATION_HEADER));
 			if (token == null || jwtUtil.isExpired(token)) {
 				throw new UnauthorizedException("Invalid token");
 			}
@@ -44,18 +42,8 @@ public class StompHandler implements ChannelInterceptor {
 		return message;
 	}
 
-	public String extractToken(String bearerToken) {
-		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
-			return bearerToken.substring(7);
-		}
-		return null;
-	}
-
 	private Authentication createAuthentication(Long userId) {
-		Member member = Member.builder()
-			.id(userId)
-			.build();
-		CustomOAuth2User customOAuth2User = new CustomOAuth2User(member);
-		return new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
+		CustomUser user = new CustomUser(userId);
+		return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 	}
 }
