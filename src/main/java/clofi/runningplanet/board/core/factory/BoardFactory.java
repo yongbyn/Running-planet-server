@@ -16,6 +16,7 @@ import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.BoardImage;
 import clofi.runningplanet.board.thumbsUp.repository.ThumbsUpRepository;
+import clofi.runningplanet.common.utils.ImageUrlFormatter;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.member.domain.Member;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,9 @@ public class BoardFactory {
 	public CreateBoardResponse insert(Crew crew, CreateBoardRequest createBoardRequest, List<String> imageUrlList,
 		Member member) {
 		Board board = boardRepository.save(createBoardRequest.toBoard(crew, member));
+
+		imageUrlList = imageUrlList.stream().map(ImageUrlFormatter::checkImageUrl).collect(Collectors.toList());
+
 		insertImage(board, imageUrlList);
 		return CreateBoardResponse.of(board);
 	}
@@ -44,6 +48,9 @@ public class BoardFactory {
 		}
 		boardImageRepository.deleteAllByBoard(board);
 		List<String> imageUrl = s3StorageManagerUseCase.uploadImages(imageFile);
+
+		imageUrl = imageUrl.stream().map(ImageUrlFormatter::checkImageUrl).collect(Collectors.toList());
+
 		insertImage(board, imageUrl);
 	}
 

@@ -1,5 +1,7 @@
 package clofi.runningplanet.member.service;
 
+import static clofi.runningplanet.common.utils.ImageUrlFormatter.*;
+
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Collections;
@@ -159,6 +161,7 @@ public class MemberService extends DefaultOAuth2UserService {
 
 		String updatedProfileImgUrl = imageFile != null ? updateProfileWithImage(member, request, imageFile)
 			: updateProfileWithoutImage(member, request);
+		updatedProfileImgUrl = checkImageUrl(updatedProfileImgUrl);
 
 		return new UpdateProfileResponse(member.getNickname(), member.getWeight(), member.getGender(), member.getAge(),
 			updatedProfileImgUrl);
