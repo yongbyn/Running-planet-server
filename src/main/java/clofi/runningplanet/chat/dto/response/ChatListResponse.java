@@ -4,6 +4,6 @@ import java.util.List;
 
 public record ChatListResponse(
 	List<ChatMessage> chatArray,
-	boolean existsNestPage
+	boolean existsNextPage
 ) {
 }

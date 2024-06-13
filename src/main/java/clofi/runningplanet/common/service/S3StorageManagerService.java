@@ -24,7 +24,7 @@ public class S3StorageManagerService implements S3StorageManagerUseCase {
 	private String bucket;
 
 	@Value("${default.imageUrlPrefix}")
-	private static String imageUrlPrefix;
+	private String imageUrlPrefix;
 
 	@Override
 	public List<String> uploadImages(List<MultipartFile> images) {

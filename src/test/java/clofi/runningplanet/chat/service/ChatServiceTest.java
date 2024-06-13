@@ -88,7 +88,7 @@ class ChatServiceTest {
 		assertThat(chatList.chatArray().get(1).from()).isEqualTo("turtle");
 		assertThat(chatList.chatArray().get(1).message()).isEqualTo("I want your liver");
 
-		assertThat(chatList.existsNestPage()).isFalse();
-		assertThat(chatList2.existsNestPage()).isTrue();
+		assertThat(chatList.existsNextPage()).isFalse();
+		assertThat(chatList2.existsNextPage()).isTrue();
 	}
 }
