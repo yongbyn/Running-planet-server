@@ -1,10 +1,10 @@
 package clofi.runningplanet.crew.service;
 
-import java.util.List;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -68,18 +68,8 @@ public class CrewService {
 		saveTags(reqDto.tags(), savedCrew);
 		saveCrewImage(imageFile, savedCrew);
 		createAndSaveCrewMember(savedCrew, findMember);
+		saveInitialCrewMission(savedCrew, findMember);
 		return savedCrew.getId();
-	}
-
-	private void saveCrewImage(MultipartFile imageFile, Crew crew) {
-		try {
-			String originalFilename = imageFile.getOriginalFilename();
-			String filepath = storageManagerUseCase.uploadImage(imageFile);
-			CrewImage crewImage = new CrewImage(originalFilename, filepath, crew);
-			crewImageRepository.save(crewImage);
-		} catch (Exception e) {
-			throw new IllegalArgumentException();
-		}
 	}
 
 	@Transactional(readOnly = true)
@@ -120,28 +110,6 @@ public class CrewService {
 		}
 
 		return new ApplyCrewResDto(crewId, findMember.getId(), true);
-	}
-
-	private void saveCrewApplication(ApplyCrewReqDto reqDto, Crew findCrew, Member findMember) {
-		CrewApplication crewApplication = reqDto.toEntity(findCrew, findMember);
-		crewApplicationRepository.save(crewApplication);
-	}
-
-	private void handleAutoApproval(Crew findCrew, Member findMember) {
-		validateCrewMemberLimit(findCrew);
-
-		CrewMember crewMember = CrewMember.createMember(findCrew, findMember);
-		crewMemberRepository.save(crewMember);
-
-		saveInitialCrewMission(findCrew, findMember);
-	}
-
-	private void saveInitialCrewMission(Crew findCrew, Member findMember) {
-		List<CrewMission> firstCrewMissionList = Arrays.stream(MissionType.values())
-			.map(value -> new CrewMission(findMember, findCrew, value))
-			.collect(Collectors.toList());
-
-		crewMissionRepository.saveAll(firstCrewMissionList);
 	}
 
 	@Transactional(readOnly = true)
@@ -228,6 +196,39 @@ public class CrewService {
 
 		return new FindCrewWithMissionResDto(findCrew, tags, crewImage.getFilepath(), crewMissionProgressUntilWeek,
 			memberCnt, isCrewLeader);
+	}
+
+	private void saveCrewImage(MultipartFile imageFile, Crew crew) {
+		try {
+			String originalFilename = imageFile.getOriginalFilename();
+			String filepath = storageManagerUseCase.uploadImage(imageFile);
+			CrewImage crewImage = new CrewImage(originalFilename, filepath, crew);
+			crewImageRepository.save(crewImage);
+		} catch (Exception e) {
+			throw new IllegalArgumentException();
+		}
+	}
+
+	private void saveCrewApplication(ApplyCrewReqDto reqDto, Crew findCrew, Member findMember) {
+		CrewApplication crewApplication = reqDto.toEntity(findCrew, findMember);
+		crewApplicationRepository.save(crewApplication);
+	}
+
+	private void handleAutoApproval(Crew findCrew, Member findMember) {
+		validateCrewMemberLimit(findCrew);
+
+		CrewMember crewMember = CrewMember.createMember(findCrew, findMember);
+		crewMemberRepository.save(crewMember);
+
+		saveInitialCrewMission(findCrew, findMember);
+	}
+
+	private void saveInitialCrewMission(Crew findCrew, Member findMember) {
+		List<CrewMission> firstCrewMissionList = Arrays.stream(MissionType.values())
+			.map(value -> new CrewMission(findMember, findCrew, value))
+			.collect(Collectors.toList());
+
+		crewMissionRepository.saveAll(firstCrewMissionList);
 	}
 
 	private List<Double> calculateCrewMissionProgressUntilWeek(Long crewId, int memberCnt) {
