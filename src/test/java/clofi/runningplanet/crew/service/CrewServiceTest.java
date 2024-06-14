@@ -1421,4 +1421,48 @@ class CrewServiceTest {
 		assertThat(result.getFirst().nickname()).isEqualTo("크루장");
 		assertThat(result.getLast().missionCnt()).isEqualTo(2);
 	}
+
+	@DisplayName("크루 미션 조회를 통해 각 크루원의 성공한 미션의 숫자를 알 수 있다.")
+	@Test
+	void successFindCrewMemberKnownMissionComplete() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		Member member = createMember();
+
+		CrewMember crewMember1 = new CrewMember(1L, crew, leader, Role.LEADER);
+		CrewMember crewMember2 = new CrewMember(2L, crew, member, Role.MEMBER);
+		List<CrewMember> crewMemberList = List.of(crewMember1, crewMember2);
+
+		CrewMission leaderMission1 = new CrewMission(1L, leader, crew, MissionType.DISTANCE, true);
+		CrewMission leaderMission2 = new CrewMission(2L, leader, crew, MissionType.DURATION, false);
+		CrewMission leaderMission3 = new CrewMission(3L, leader, crew, MissionType.DISTANCE, true);
+		CrewMission leaderMission4 = new CrewMission(4L, leader, crew, MissionType.DURATION, true);
+
+		CrewMission memberMission1 = new CrewMission(5L, member, crew, MissionType.DISTANCE, false);
+		CrewMission memberMission2 = new CrewMission(6L, member, crew, MissionType.DURATION, true);
+
+		List<CrewMission> missionList = List.of(leaderMission1, leaderMission2, leaderMission3, leaderMission4,
+			memberMission1, memberMission2);
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+		given(crewMemberRepository.findAllByCrewId(anyLong()))
+			.willReturn(crewMemberList);
+		given(crewMissionRepository.findByCrewIdAndMemberIds(anyLong(), anyList()))
+			.willReturn(missionList);
+
+		//when
+		List<FindCrewMemberResDto> result = crewService.findCrewMemberList(crewId, memberId);
+
+		//then
+		assertThat(result.size()).isEqualTo(crewMemberList.size());
+		assertThat(result.getFirst().missionCnt()).isEqualTo(3);
+		assertThat(result.getLast().missionCnt()).isEqualTo(1);
+	}
 }
