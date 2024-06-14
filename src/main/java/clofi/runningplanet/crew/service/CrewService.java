@@ -227,6 +227,7 @@ public class CrewService {
 		List<CrewMission> missionList = crewMissionRepository.findByCrewIdAndMemberIds(crewId, memberIds);
 
 		return missionList.stream()
+			.filter(CrewMission::isCompleted)
 			.collect(Collectors.groupingBy(
 				mission -> mission.getMember().getId(),
 				Collectors.counting()
