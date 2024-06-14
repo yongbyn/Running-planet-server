@@ -31,6 +31,7 @@ import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
@@ -196,6 +197,20 @@ public class CrewService {
 
 		return new FindCrewWithMissionResDto(findCrew, tags, crewImage.getFilepath(), crewMissionProgressUntilWeek,
 			memberCnt, isCrewLeader);
+	}
+
+	@Transactional(readOnly = true)
+	public List<FindCrewMemberResDto> findCrewMemberList(Long crewId, Long memberId) {
+		checkCrewExistById(crewId);
+		validateMemberNotInCrew(memberId);
+		
+		List<CrewMember> crewMemberList = crewMemberRepository.findByCrewId(crewId);
+
+		return crewMemberList.stream()
+			.map(crewMember -> new FindCrewMemberResDto(crewMember,
+				crewMissionRepository.countByCrewIdAndMemberId(crewMember.getCrew().getId(),
+					crewMember.getMember().getId())))
+			.collect(Collectors.toList());
 	}
 
 	private void saveCrewImage(MultipartFile imageFile, Crew crew) {
