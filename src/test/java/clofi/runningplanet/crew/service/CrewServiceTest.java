@@ -1465,4 +1465,44 @@ class CrewServiceTest {
 		assertThat(result.getFirst().missionCnt()).isEqualTo(3);
 		assertThat(result.getLast().missionCnt()).isEqualTo(1);
 	}
+
+	@DisplayName("미션이 없거나 완료한 미션이 없는 경우 미션 개수 0을 반환한다.")
+	@Test
+	void successFindCrewMemberNoMissionOrNotCompleteMissionReturnZero() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		Member member = createMember();
+
+		CrewMember crewMember1 = new CrewMember(1L, crew, leader, Role.LEADER);
+		CrewMember crewMember2 = new CrewMember(2L, crew, member, Role.MEMBER);
+		List<CrewMember> crewMemberList = List.of(crewMember1, crewMember2);
+
+		CrewMission leaderMission1 = new CrewMission(1L, leader, crew, MissionType.DISTANCE, false);
+		CrewMission leaderMission2 = new CrewMission(2L, leader, crew, MissionType.DURATION, false);
+		CrewMission leaderMission3 = new CrewMission(3L, leader, crew, MissionType.DISTANCE, false);
+		CrewMission leaderMission4 = new CrewMission(4L, leader, crew, MissionType.DURATION, false);
+
+		List<CrewMission> missionList = List.of(leaderMission1, leaderMission2, leaderMission3, leaderMission4);
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+		given(crewMemberRepository.findAllByCrewId(anyLong()))
+			.willReturn(crewMemberList);
+		given(crewMissionRepository.findByCrewIdAndMemberIds(anyLong(), anyList()))
+			.willReturn(missionList);
+
+		//when
+		List<FindCrewMemberResDto> result = crewService.findCrewMemberList(crewId, memberId);
+
+		//then
+		assertThat(result.size()).isEqualTo(crewMemberList.size());
+		assertThat(result.getFirst().missionCnt()).isEqualTo(0);
+		assertThat(result.getLast().missionCnt()).isEqualTo(0);
+	}
 }
