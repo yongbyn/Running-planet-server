@@ -41,6 +41,7 @@ import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
@@ -382,6 +383,36 @@ class CrewControllerTest {
 		assertThat(resDto).isEqualTo(expected);
 	}
 
+	@DisplayName("크루 명단 조회 성공")
+	@WithMockCustomMember
+	@Test
+	void successFindCrewMemberList() throws Exception {
+		//given
+		Long crewId = 1L;
+
+		FindCrewMemberResDto resDto1 = new FindCrewMemberResDto(1L, "크루장", 4, true);
+		FindCrewMemberResDto resDto2 = new FindCrewMemberResDto(2L, "크루원", 2, false);
+		List<FindCrewMemberResDto> resDtoList = List.of(resDto1, resDto2);
+
+		given(crewService.findCrewMemberList(anyLong(), anyLong()))
+			.willReturn(resDtoList);
+
+		//when
+		ResultActions resultActions = findCrewMemberList(crewId);
+
+		//then
+		MvcResult mvcResult = resultActions.andExpect(status().isOk())
+			.andReturn();
+
+		List<FindCrewMemberResDto> resDto = objectMapper.readValue(
+			mvcResult.getResponse().getContentAsString(),
+			new TypeReference<>() {
+			}
+		);
+
+		assertThat(resDto).isEqualTo(resDtoList);
+	}
+
 	private ResultActions createCrew(CreateCrewReqDto reqDto, MockMultipartFile imgFile) throws Exception {
 		MockMultipartFile jsonFile = new MockMultipartFile("crewInfo", "", "application/json",
 			objectMapper.writeValueAsBytes(reqDto));
@@ -447,6 +478,11 @@ class CrewControllerTest {
 
 	private ResultActions findCrewWithMission(Long crewId) throws Exception {
 		return mockMvc.perform(get("/api/crew/{crewId}/page", crewId)
+			.contentType(APPLICATION_JSON));
+	}
+
+	private ResultActions findCrewMemberList(Long crewId) throws Exception {
+		return mockMvc.perform(get("/api/crew/{crewId}/member", crewId)
 			.contentType(APPLICATION_JSON));
 	}
 }
