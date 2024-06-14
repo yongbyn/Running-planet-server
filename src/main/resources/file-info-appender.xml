@@ -1,6 +1,5 @@
 <included>
     <appender name="FILE-INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>.log/runple-dev-%d{yyyy-MM-dd}.%i.log</file>
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
         </encoder>

@@ -1,0 +1,11 @@
+<included>
+    <springProperty name="DISCORD_WEBHOOK_URI" source="logging.discord.webhook-uri"/>
+    <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
+        <webhookUri>${DISCORD_WEBHOOK_URI}</webhookUri>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %5level %logger - %msg%n</pattern>
+        </layout>
+        <username>runple-dev-server-log</username>
+        <tts>false</tts>
+    </appender>
+</included>
