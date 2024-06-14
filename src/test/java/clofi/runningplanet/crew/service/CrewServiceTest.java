@@ -1521,4 +1521,24 @@ class CrewServiceTest {
 		assertThatThrownBy(() -> crewService.findCrewMemberList(crewId, memberId))
 			.isInstanceOf(NotFoundException.class);
 	}
+
+	@DisplayName("다른 크루 소속 크루원이 크루 명단 조회 시 예외 발생")
+	@Test
+	void failFindCrewMemberNotInCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		CrewMember anotherCrewMember = new CrewMember(1L, null, null, Role.MEMBER);
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.of(anotherCrewMember));
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.findCrewMemberList(crewId, memberId))
+			.isInstanceOf(ConflictException.class);
+	}
 }
