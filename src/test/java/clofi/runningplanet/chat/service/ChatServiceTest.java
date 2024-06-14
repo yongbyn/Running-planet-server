@@ -2,12 +2,13 @@ package clofi.runningplanet.chat.service;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.time.LocalDateTime;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import clofi.runningplanet.chat.domain.Chat;
 import clofi.runningplanet.chat.dto.response.ChatListResponse;
@@ -71,24 +72,36 @@ class ChatServiceTest {
 
 		Chat chat1 = new Chat(null, member1, crew, "I want your liver");
 		Chat chat2 = new Chat(null, member2, crew, "I don't have it. I'll bring it");
+		Chat chat3 = new Chat(null, member1, crew, "Ok, Let's go to land");
 
 		chatRepository.save(chat1);
 		chatRepository.save(chat2);
+		chatRepository.save(chat3);
+		LocalDateTime lastChatDateTime = chat2.getCreatedAt();
+
+		System.out.println("test lastChatTime: " + lastChatDateTime);
+		System.out.println("test lastChatTime.tostring: " + lastChatDateTime.toString());
 
 		//when
-		ChatListResponse chatList = chatService.getChatMessages(member1.getId(), crew.getId(), 0, 10);
-		ChatListResponse chatList2 = chatService.getChatMessages(member2.getId(), crew.getId(), 0, 1);
+		ChatListResponse chatList = chatService.getChatMessages(member1.getId(), crew.getId(), null, 10);
+		ChatListResponse chatList2 = chatService.getChatMessages(member2.getId(), crew.getId(), null, 1);
+		ChatListResponse chatList3 = chatService.getChatMessages(member1.getId(), crew.getId(), lastChatDateTime.toString(), 10);
 
 		//then
-		assertThat(chatList.chatArray().size()).isEqualTo(2);
+		assertThat(chatList.chatArray().size()).isEqualTo(3);
 
-		assertThat(chatList.chatArray().get(0).from()).isEqualTo("rabbit");
-		assertThat(chatList.chatArray().get(0).message()).isEqualTo("I don't have it. I'll bring it");
-
-		assertThat(chatList.chatArray().get(1).from()).isEqualTo("turtle");
-		assertThat(chatList.chatArray().get(1).message()).isEqualTo("I want your liver");
+		assertThat(chatList.chatArray().get(0).from()).isEqualTo("turtle");
+		assertThat(chatList.chatArray().get(0).message()).isEqualTo("Ok, Let's go to land");
+		assertThat(chatList.chatArray().get(1).from()).isEqualTo("rabbit");
+		assertThat(chatList.chatArray().get(1).message()).isEqualTo("I don't have it. I'll bring it");
+		assertThat(chatList.chatArray().get(2).from()).isEqualTo("turtle");
+		assertThat(chatList.chatArray().get(2).message()).isEqualTo("I want your liver");
 
 		assertThat(chatList.existsNextPage()).isFalse();
 		assertThat(chatList2.existsNextPage()).isTrue();
+
+		assertThat(chatList3.chatArray().get(0).message()).isEqualTo("Ok, Let's go to land");
+		assertThat(chatList3.chatArray().size()).isEqualTo(1);
+		assertThat(chatList3.existsNextPage()).isFalse();
 	}
 }
