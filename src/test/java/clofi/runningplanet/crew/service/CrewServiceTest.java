@@ -1505,4 +1505,20 @@ class CrewServiceTest {
 		assertThat(result.getFirst().missionCnt()).isEqualTo(0);
 		assertThat(result.getLast().missionCnt()).isEqualTo(0);
 	}
+
+	@DisplayName("크루 명단 조회 시 크루가 없는 경우 예외 발생")
+	@Test
+	void failFindCrewMemberNotFoundCrew() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(false);
+
+		//when
+		//then
+		assertThatThrownBy(() -> crewService.findCrewMemberList(crewId, memberId))
+			.isInstanceOf(NotFoundException.class);
+	}
 }
