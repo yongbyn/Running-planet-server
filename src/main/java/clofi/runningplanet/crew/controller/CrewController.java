@@ -23,6 +23,7 @@ import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.service.CrewService;
@@ -106,5 +107,11 @@ public class CrewController {
 	public ResponseEntity<FindCrewWithMissionResDto> findCrewWithMission(@PathVariable("crewId") Long crewId,
 		@AuthenticationPrincipal CustomOAuth2User principal) {
 		return ResponseEntity.ok(crewService.findCrewWithMission(crewId, principal.getId()));
+	}
+
+	@GetMapping("/api/crew/{crewId}/member")
+	public ResponseEntity<List<FindCrewMemberResDto>> findCrewMemberList(@PathVariable("crewId") Long crewId,
+		@AuthenticationPrincipal CustomOAuth2User principal) {
+		return ResponseEntity.ok(crewService.findCrewMemberList(crewId, principal.getId()));
 	}
 }
