@@ -7,7 +7,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,13 +44,13 @@ public class ChatController {
 	@GetMapping("/api/crew/{crewId}/chat")
 	public ResponseEntity<ChatListResponse> getChatMessages(
 		@PathVariable Long crewId,
-		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(required = false) String lastChatTimestamp,
 		@RequestParam(defaultValue = "30") int size,
 		@AuthenticationPrincipal CustomOAuth2User customOAuth2User
 	) {
 		Long memberId = customOAuth2User.getId();
 
-		ChatListResponse chatList = chatService.getChatMessages(memberId, crewId, page, size);
+		ChatListResponse chatList = chatService.getChatMessages(memberId, crewId, lastChatTimestamp, size);
 
 		return ResponseEntity.ok(chatList);
 	}
