@@ -41,6 +41,7 @@ import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
@@ -1372,5 +1373,52 @@ class CrewServiceTest {
 		//then
 		assertThat(result.missionProgress()).containsExactly(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
+	}
+
+	@DisplayName("crewId를 통해 크루 명단을 조회할 수 있다.")
+	@Test
+	void successFindCrewMemberList() {
+		//given
+		Long crewId = 1L;
+		Long memberId = 1L;
+
+		Crew crew = createCrew();
+		Member leader = createLeader();
+		Member member = createMember();
+
+		CrewMember crewMember1 = new CrewMember(1L, crew, leader, Role.LEADER);
+		CrewMember crewMember2 = new CrewMember(2L, crew, member, Role.MEMBER);
+		List<CrewMember> crewMemberList = List.of(crewMember1, crewMember2);
+
+		CrewMission leaderMission1 = new CrewMission(1L, leader, crew, MissionType.DISTANCE, true);
+		CrewMission leaderMission2 = new CrewMission(2L, leader, crew, MissionType.DURATION, true);
+		CrewMission leaderMission3 = new CrewMission(3L, leader, crew, MissionType.DISTANCE, true);
+		CrewMission leaderMission4 = new CrewMission(4L, leader, crew, MissionType.DURATION, true);
+
+		CrewMission memberMission1 = new CrewMission(5L, member, crew, MissionType.DISTANCE, true);
+		CrewMission memberMission2 = new CrewMission(6L, member, crew, MissionType.DURATION, true);
+
+		List<CrewMission> missionList = List.of(leaderMission1, leaderMission2, leaderMission3, leaderMission4,
+			memberMission1, memberMission2);
+
+		given(crewRepository.existsById(anyLong()))
+			.willReturn(true);
+		given(crewMemberRepository.findByMemberId(anyLong()))
+			.willReturn(Optional.empty());
+		given(crewMemberRepository.findAllByCrewId(anyLong()))
+			.willReturn(crewMemberList);
+		given(crewMissionRepository.findByCrewIdAndMemberIds(anyLong(), anyList()))
+			.willReturn(missionList);
+
+		//when
+		List<FindCrewMemberResDto> result = crewService.findCrewMemberList(crewId, memberId);
+
+		//then
+		assertThat(result.size()).isEqualTo(crewMemberList.size());
+		assertThat(result.getFirst().missionCnt()).isEqualTo(4);
+		assertThat(result.getFirst().crewLeader()).isTrue();
+		assertThat(result.getFirst().memberId()).isEqualTo(1L);
+		assertThat(result.getFirst().nickname()).isEqualTo("크루장");
+		assertThat(result.getLast().missionCnt()).isEqualTo(2);
 	}
 }
