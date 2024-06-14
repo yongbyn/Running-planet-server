@@ -6,6 +6,8 @@ import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.mission.domain.vo.TodayRecords;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,6 +35,7 @@ public class CrewMission extends BaseEntity {
 	@JoinColumn(name = "crew_id")
 	private Crew crew;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "type", nullable = false)
 	private MissionType type;
 

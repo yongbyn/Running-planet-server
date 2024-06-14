@@ -7,6 +7,8 @@ import clofi.runningplanet.common.domain.BaseSoftDeleteEntity;
 import clofi.runningplanet.member.domain.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,6 +33,7 @@ public class CrewApplication extends BaseSoftDeleteEntity {
 	@Column(name = "introduction")
 	private String introduction;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "approval")
 	private Approval approval;
 
