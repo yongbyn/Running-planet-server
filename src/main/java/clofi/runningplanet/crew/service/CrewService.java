@@ -31,6 +31,7 @@ import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.dto.response.GetApplyCrewResDto;
@@ -196,6 +197,41 @@ public class CrewService {
 
 		return new FindCrewWithMissionResDto(findCrew, tags, crewImage.getFilepath(), crewMissionProgressUntilWeek,
 			memberCnt, isCrewLeader);
+	}
+
+	@Transactional(readOnly = true)
+	public List<FindCrewMemberResDto> findCrewMemberList(Long crewId, Long memberId) {
+		checkCrewExistById(crewId);
+		validateMemberNotInCrew(memberId);
+
+		List<CrewMember> crewMemberList = crewMemberRepository.findAllByCrewId(crewId);
+		Map<Long, Long> missionCounts = getMissionCounts(crewId, crewMemberList);
+		return convertToResDtos(crewMemberList, missionCounts);
+	}
+
+	private List<FindCrewMemberResDto> convertToResDtos(List<CrewMember> crewMemberList,
+		Map<Long, Long> missionCounts) {
+		return crewMemberList.stream()
+			.map(crewMember -> new FindCrewMemberResDto(
+				crewMember,
+				Math.toIntExact(missionCounts.getOrDefault(crewMember.getMember().getId(), 0L))
+			))
+			.collect(Collectors.toList());
+	}
+
+	private Map<Long, Long> getMissionCounts(Long crewId, List<CrewMember> crewMemberList) {
+		List<Long> memberIds = crewMemberList.stream()
+			.map(crewMember -> crewMember.getMember().getId())
+			.collect(Collectors.toList());
+
+		List<CrewMission> missionList = crewMissionRepository.findByCrewIdAndMemberIds(crewId, memberIds);
+
+		return missionList.stream()
+			.filter(CrewMission::isCompleted)
+			.collect(Collectors.groupingBy(
+				mission -> mission.getMember().getId(),
+				Collectors.counting()
+			));
 	}
 
 	private void saveCrewImage(MultipartFile imageFile, Crew crew) {

@@ -17,8 +17,6 @@ public interface CrewMemberRepository extends JpaRepository<CrewMember, Long> {
 
 	boolean existsByMemberId(Long memberId);
 
-	List<CrewMember> findByCrewId(Long crewId);
-
 	int countByCrewId(Long id);
 
 	Optional<CrewMember> findByCrewIdAndMemberId(Long crewId, Long memberId);
@@ -27,4 +25,6 @@ public interface CrewMemberRepository extends JpaRepository<CrewMember, Long> {
 
 	@Query("SELECT cm.member FROM CrewMember cm WHERE cm.crew.id = :crewId")
 	List<Member> findMembersByCrewId(@Param("crewId") Long crewId);
+
+	List<CrewMember> findAllByCrewId(Long crewId);
 }

@@ -22,4 +22,7 @@ public interface CrewMissionRepository extends JpaRepository<CrewMission, Long> 
 	List<CrewMission> findAllByCrewIdAndWeek(@Param("crewId") Long crewId,
 		@Param("startOfWeek") LocalDateTime startOfWeek,
 		@Param("endOfWeek") LocalDateTime endOfWeek);
+
+	@Query("select cm from CrewMission cm where cm.crew.id = :crewId and cm.member.id in :memberIds")
+	List<CrewMission> findByCrewIdAndMemberIds(@Param("crewId") Long crewId, @Param("memberIds") List<Long> memberIds);
 }
