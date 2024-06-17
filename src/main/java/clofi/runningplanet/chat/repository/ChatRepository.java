@@ -13,5 +13,5 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
 
 	Page<Chat> findByCrewId(Long crewId, Pageable pageable);
 
-	Page<Chat> findByCrewIdAndCreatedAtGreaterThanEqual(Long crewId, LocalDateTime createdAt, Pageable pageable);
+	Page<Chat> findByCrewIdAndCreatedAtLessThan(Long crewId, LocalDateTime createdAt, Pageable pageable);
 }

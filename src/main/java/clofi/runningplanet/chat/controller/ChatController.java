@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import clofi.runningplanet.chat.dto.request.ChatMessageRequest;
 import clofi.runningplanet.chat.dto.response.ChatListResponse;
-import clofi.runningplanet.chat.dto.response.ChatMessage;
+import clofi.runningplanet.chat.dto.response.ChatMessageResponse;
 import clofi.runningplanet.chat.dto.response.DataResponse;
 import clofi.runningplanet.chat.service.ChatService;
 import clofi.runningplanet.member.dto.CustomOAuth2User;
@@ -29,15 +30,15 @@ public class ChatController {
 
 	@MessageMapping("/crew/{crewId}/chat")
 	@SendTo("/sub/crew/{crewId}/chat")
-	public DataResponse<ChatMessage> sendChatMessage(
+	public DataResponse<ChatMessageResponse> sendChatMessage(
 		@DestinationVariable Long crewId,
-		@Payload ChatMessage chatMessage,
+		@Payload ChatMessageRequest chatMessageRequest,
 		@Header("Authorization") String token
 	) {
 		String jwtToken = jwtutil.extractToken(token);
 		Long memberId = jwtutil.getUserId(jwtToken);
 
-		ChatMessage savedChat = chatService.saveChatMessage(memberId, crewId, chatMessage);
+		ChatMessageResponse savedChat = chatService.saveChatMessage(memberId, crewId, chatMessageRequest);
 		return new DataResponse<>(savedChat);
 	}
 
