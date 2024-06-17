@@ -34,6 +34,7 @@ import clofi.runningplanet.crew.domain.Role;
 import clofi.runningplanet.crew.domain.Tag;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.SearchParamDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
@@ -165,7 +166,7 @@ class CrewServiceTest {
 		Member leader = createLeader();
 		Member leader2 = createMember();
 
-		given(crewRepository.findAll())
+		given(crewRepository.search(any(SearchParamDto.class)))
 			.willReturn(List.of(crew1, crew2));
 		given(crewMemberRepository.countByCrewId(anyLong()))
 			.willReturn(1)
@@ -185,7 +186,7 @@ class CrewServiceTest {
 			.willReturn(Optional.of(createCrewImage()));
 
 		//when
-		List<FindAllCrewResDto> result = crewService.findAllCrew();
+		List<FindAllCrewResDto> result = crewService.findAllCrew(new SearchParamDto("", null));
 
 		//then
 		final FindAllCrewResDto firstFindAllCrewResDto = FindAllCrewResDto.of(crew1, 1, List.of("성실"),
@@ -203,11 +204,11 @@ class CrewServiceTest {
 	@Test
 	void successEmptyCrew() {
 		//given
-		given(crewRepository.findAll())
-			.willReturn(List.of());
+		given(crewRepository.search(any(SearchParamDto.class)))
+			.willReturn(Collections.emptyList());
 
 		//when
-		List<FindAllCrewResDto> result = crewService.findAllCrew();
+		List<FindAllCrewResDto> result = crewService.findAllCrew(new SearchParamDto("", null));
 
 		//then
 		assertThat(result).isEmpty();
@@ -219,7 +220,7 @@ class CrewServiceTest {
 		//given
 		Crew crew = createCrew();
 
-		given(crewRepository.findAll())
+		given(crewRepository.search(any(SearchParamDto.class)))
 			.willReturn(List.of(crew));
 
 		given(tagRepository.findAllByCrewId(anyLong()))
@@ -231,7 +232,7 @@ class CrewServiceTest {
 
 		//when
 		//then
-		assertThatThrownBy(() -> crewService.findAllCrew())
+		assertThatThrownBy(() -> crewService.findAllCrew(new SearchParamDto("", null)))
 			.isInstanceOf(NotFoundException.class);
 	}
 
