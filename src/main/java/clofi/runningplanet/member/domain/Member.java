@@ -43,21 +43,21 @@ public class Member extends BaseSoftDeleteEntity {
 	@Column(name = "profile_img", nullable = false)
 	private String profileImg;
 
-	@Column(name = "exp", columnDefinition = "int default 0")
-	private int exp;
+	@Column(name = "exp", columnDefinition = "double default 0.0")
+	private double exp;
 
 	@Column(name = "avg_pace")
 	private int avgPace;
 
 	@Column(name = "avg_distance")
-	private int avgDistance;
+	private double avgDistance;
 
 	@Column(name = "total_distance", nullable = false)
-	private int totalDistance;
+	private double totalDistance;
 
 	@Builder
 	public Member(Long id, String nickname, Gender gender, Integer age, Integer weight, String profileImg,
-		int exp,
+		double exp,
 		int avgPace,
 		int avgDistance, int totalDistance) {
 		this.id = id;
@@ -84,5 +84,18 @@ public class Member extends BaseSoftDeleteEntity {
 		this.gender = gender;
 		this.age = age;
 		this.weight = weight;
+	}
+
+	public void updateRunningStatistics(int totalRunTime, double totalRunDistance, int recordCount) {
+		if (totalRunTime == 0 || recordCount == 0 || totalRunDistance == 0) {
+			return;
+		}
+		this.avgDistance = totalRunDistance / recordCount;
+		this.totalDistance = totalRunDistance;
+		this.avgPace = (int)(totalRunTime / totalRunDistance);
+	}
+
+	public void increaseExp(double runDistance) {
+		this.exp += runDistance;
 	}
 }

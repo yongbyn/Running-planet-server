@@ -50,7 +50,7 @@ public class PlanetService {
 				planetStage = memberPlanetList.get(0).getPlanetId().getFifthPlanet();
 			}
 			planetResponseList.add(new PlanetResponse(memberPlanetList.getFirst().getMemberPlanetId(),
-				memberPlanetList.getFirst().getMemberPlanetName(), planetStage, 10, member.getExp()));
+				memberPlanetList.getFirst().getMemberPlanetName(), planetStage, 10.0, member.getExp()));
 
 		} else {
 			for (int i = 0; i < memberPlanetList.size(); i++) {
@@ -58,7 +58,7 @@ public class PlanetService {
 					planetResponseList.add(
 						createPlanetResponse(memberPlanetList.get(i), planetStage, 10, 10));
 				} else {
-					int distance = (i == memberPlanetList.size() - 1)
+					double distance = (i == memberPlanetList.size() - 1)
 						? member.getExp() - 10 - (50 * (memberPlanetList.size() - 2))
 						: 50;
 					planetStage = getPlanetStage(distance, planetStage, memberPlanetList);
@@ -107,23 +107,23 @@ public class PlanetService {
 		));
 	}
 
-	private static String getPlanetStage(int distance, String planetStage, List<MemberPlanet> memberPlanetList) {
+	private static String getPlanetStage(double distance, String planetStage, List<MemberPlanet> memberPlanetList) {
 		if (distance >= 0 && distance < 10) {
-			planetStage = memberPlanetList.get(0).getPlanetId().getFirstPlanet();
+			planetStage = memberPlanetList.getFirst().getPlanetId().getFirstPlanet();
 		} else if (distance >= 10 && distance < 20) {
-			planetStage = memberPlanetList.get(0).getPlanetId().getSecondPlanet();
+			planetStage = memberPlanetList.getFirst().getPlanetId().getSecondPlanet();
 		} else if (distance >= 20 && distance < 30) {
-			planetStage = memberPlanetList.get(0).getPlanetId().getThirdPlanet();
+			planetStage = memberPlanetList.getFirst().getPlanetId().getThirdPlanet();
 		} else if (distance >= 30 && distance < 40) {
-			planetStage = memberPlanetList.get(0).getPlanetId().getFourthPlanet();
+			planetStage = memberPlanetList.getFirst().getPlanetId().getFourthPlanet();
 		} else if (distance >= 40 && distance < 50) {
-			planetStage = memberPlanetList.get(0).getPlanetId().getFifthPlanet();
+			planetStage = memberPlanetList.getFirst().getPlanetId().getFifthPlanet();
 		}
 		return planetStage;
 	}
 
-	private PlanetResponse createPlanetResponse(MemberPlanet memberPlanet, String planetStage, int distance,
-		int score) {
+	private PlanetResponse createPlanetResponse(MemberPlanet memberPlanet, String planetStage, double distance,
+		double score) {
 		return new PlanetResponse(
 			memberPlanet.getMemberPlanetId(),
 			memberPlanet.getMemberPlanetName(),
