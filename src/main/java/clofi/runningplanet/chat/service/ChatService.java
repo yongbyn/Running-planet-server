@@ -12,8 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import clofi.runningplanet.chat.domain.Chat;
+import clofi.runningplanet.chat.dto.request.ChatMessageRequest;
 import clofi.runningplanet.chat.dto.response.ChatListResponse;
-import clofi.runningplanet.chat.dto.response.ChatMessage;
+import clofi.runningplanet.chat.dto.response.ChatMessageResponse;
 import clofi.runningplanet.chat.repository.ChatRepository;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
@@ -34,21 +35,21 @@ public class ChatService {
 	private final CrewRepository crewRepository;
 	private final CrewMemberRepository crewMemberRepository;
 
-	public ChatMessage saveChatMessage(Long memberId, Long crewId, ChatMessage chatMessage) {
+	public ChatMessageResponse saveChatMessage(Long memberId, Long crewId, ChatMessageRequest chatMessageRequest) {
 
-		Member member = getMember(memberId, chatMessage);
+		Member member = getMember(memberId, chatMessageRequest);
 		Crew crew = getCrew(crewId);
 		validateMemberIsInCrew(memberId, crewId);
 
 		Chat chat = Chat.builder()
 			.member(member)
 			.crew(crew)
-			.content(chatMessage.message())
+			.content(chatMessageRequest.message())
 			.build();
 
-		chatRepository.save(chat);
+		Chat saveChat = chatRepository.save(chat);
 
-		return new ChatMessage(chatMessage.from(), chatMessage.message(), chat.getCreatedAt());
+		return new ChatMessageResponse(chatMessageRequest.from(), chatMessageRequest.message(), saveChat.getCreatedAt());
 	}
 
 	public ChatListResponse getChatMessages(Long memberId, Long crewId, String lastChatTimestamp, int size) {
@@ -59,11 +60,9 @@ public class ChatService {
 		Pageable pageable = PageRequest.of(0, size, Sort.by("createdAt").descending());
 		Page<Chat> chatPage;
 
-		log.info("service timestamp={}",lastChatTimestamp);
+		chatPage = getChatPageByCrewIdAndLastChatTimestamp(crewId, lastChatTimestamp, pageable);
 
-		chatPage = getChatPageByCrewIdAndLastChatTimeStamp(crewId, lastChatTimestamp, pageable);
-
-		List<ChatMessage> chatList = getChatList(chatPage);
+		List<ChatMessageResponse> chatList = getChatList(chatPage);
 
 		boolean existsNextPage = chatPage.hasNext();
 
@@ -71,8 +70,8 @@ public class ChatService {
 	}
 
 
-	private Member getMember(Long memberId, ChatMessage chatMessage) {
-		return memberRepository.findByIdAndNickname(memberId, chatMessage.from())
+	private Member getMember(Long memberId, ChatMessageRequest chatMessageRequest) {
+		return memberRepository.findByIdAndNickname(memberId, chatMessageRequest.from())
 			.orElseThrow(() -> new RuntimeException("일치하는 사용자가 없습니다."));
 	}
 
@@ -94,22 +93,22 @@ public class ChatService {
 		}
 	}
 
-	private Page<Chat> getChatPageByCrewIdAndLastChatTimeStamp(Long crewId, String lastChatTimestamp, Pageable pageable) {
+	private Page<Chat> getChatPageByCrewIdAndLastChatTimestamp(Long crewId, String lastChatTimestamp, Pageable pageable) {
 		Page<Chat> chatPage;
 		if (lastChatTimestamp == null) {
 			chatPage = chatRepository.findByCrewId(crewId, pageable);
 		} else {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
 			LocalDateTime lastChatDateTime = LocalDateTime.parse(lastChatTimestamp, formatter);
 
-			chatPage = chatRepository.findByCrewIdAndCreatedAtGreaterThanEqual(crewId, lastChatDateTime, pageable);
+			chatPage = chatRepository.findByCrewIdAndCreatedAtLessThan(crewId, lastChatDateTime, pageable);
 		}
 		return chatPage;
 	}
 
-	private static List<ChatMessage> getChatList(Page<Chat> chatPage) {
+	private static List<ChatMessageResponse> getChatList(Page<Chat> chatPage) {
 		return chatPage.stream()
-			.map(chat -> new ChatMessage(chat.getMember().getNickname(), chat.getContent(), chat.getCreatedAt()))
+			.map(chat -> new ChatMessageResponse(chat.getMember().getNickname(), chat.getContent(), chat.getCreatedAt()))
 			.toList();
 	}
 }
