@@ -6,11 +6,11 @@ public record PlanetResponse(
 	Long planetId,
 	String planetName,
 	String planetImage,
-	Integer demandDistance,
-	Integer distance
+	Double demandDistance,
+	Double distance
 ) {
-	public PlanetResponse(Planet planet, String planetName, String planetImage, Integer demandDistance,
-		Integer distance) {
+	public PlanetResponse(Planet planet, String planetName, String planetImage, Double demandDistance,
+		Double distance) {
 		this(planet.getPlanetImageId(),
 			planetName, planetImage, demandDistance, distance);
 	}

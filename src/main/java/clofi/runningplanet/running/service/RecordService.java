@@ -54,6 +54,7 @@ public class RecordService {
 
 		if (savedRecord.isEnd()) {
 			updateRunningStatistics(member);
+			member.increaseExp(savedRecord.getRunDistance());
 		}
 
 		LocalDate now = LocalDate.now();
