@@ -20,6 +20,7 @@ import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.service.CrewService;
 import clofi.runningplanet.member.domain.Gender;
 import clofi.runningplanet.member.domain.Member;
@@ -114,5 +115,33 @@ public class CrewServiceIntegrationTest {
 			}
 		);
 
+	}
+
+	@DisplayName("crewId를 통해 크루 정보를 조회할 수 있다.")
+	@Test
+	void findCrew() {
+		//given
+		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.AUTO,
+			"크루 소개", new RuleDto(3, 10));
+		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+
+		Long crewId = crewService.createCrew(reqDto, image, 1L);
+
+		//when
+		FindCrewResDto result = crewService.findCrew(crewId);
+
+		//then
+		assertSoftly(
+			softly -> {
+				softly.assertThat(result.crewId()).isEqualTo(crewId);
+				softly.assertThat(result)
+					.extracting("crewLevel", "memberCnt", "limitMemberCnt", "crewTotalDistance")
+					.containsExactly(1, 1, 10, 0);
+				softly.assertThat(result)
+					.extracting("crewName", "approvalType", "introduction", "category")
+					.containsExactly("크루명", ApprovalType.AUTO, "크루 소개", Category.RUNNING);
+			}
+		);
 	}
 }
