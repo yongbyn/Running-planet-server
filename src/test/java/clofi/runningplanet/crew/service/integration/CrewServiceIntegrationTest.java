@@ -201,4 +201,22 @@ public class CrewServiceIntegrationTest {
 		});
 
 	}
+
+	@DisplayName("크루에 신청한 인원이 없는 경우 빈 리스트를 반환한다.")
+	@Test
+	void getCrewApplicationEmptyList() {
+		//given
+		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
+			"크루 소개", new RuleDto(3, 10));
+		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+		Long crewId = crewService.createCrew(reqDto, image, 1L);
+
+		//when
+		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, 1L);
+
+		//then
+		assertThat(result.approvalMember()).isEmpty();
+
+	}
 }
