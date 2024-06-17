@@ -23,6 +23,7 @@ import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
+import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
@@ -360,5 +361,36 @@ public class CrewServiceIntegrationTest {
 
 		//then
 		assertThat(result.isRequest()).isFalse();
+	}
+
+	@DisplayName("크루장은 크루 정보를 수정할 수 있다.")
+	@Test
+	void updateCrewInfo() {
+		//given
+		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
+			"크루 소개", new RuleDto(3, 10));
+		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+		Long crewId = crewService.createCrew(reqDto, image, 1L);
+
+		UpdateCrewReqDto updateCrewReqDto = new UpdateCrewReqDto(List.of("새로운 태그"), ApprovalType.AUTO, "새로운 크루 소개",
+			new RuleDto(1, 2));
+		MockMultipartFile updateImage = new MockMultipartFile("imgFile", "크루로고수정.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고수정.png".getBytes());
+
+		//when
+		crewService.updateCrew(updateCrewReqDto, updateImage, crewId, 1L);
+
+		//then
+		FindCrewResDto resDto = crewService.findCrew(crewId);
+		assertSoftly(softAssertions -> {
+			softAssertions.assertThat(resDto)
+				.extracting("approvalType", "introduction")
+				.containsExactly(ApprovalType.AUTO, "새로운 크루 소개");
+			softAssertions.assertThat(resDto.tags())
+				.contains("새로운 태그");
+			softAssertions.assertThat(resDto.rule())
+				.isEqualTo(new RuleDto(1, 2));
+		});
 	}
 }
