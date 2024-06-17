@@ -18,8 +18,8 @@ public class RankController {
 
 	@GetMapping("/api/ranking/crew")
 	public ResponseEntity<List<CrewRankResponse>> crew(
-		@RequestParam String condition,
-		@RequestParam String period
+		@RequestParam("condition") String condition,
+		@RequestParam("period") String period
 	) {
 		return ResponseEntity.ok(rankService.getCrewRankList(condition, period));
 	}
