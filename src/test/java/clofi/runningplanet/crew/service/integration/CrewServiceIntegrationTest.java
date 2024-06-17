@@ -241,4 +241,24 @@ public class CrewServiceIntegrationTest {
 		//then
 		assertDoesNotThrow(() -> crewService.proceedApplyCrew(proceedApplyReqDto, crewId, 1L));
 	}
+
+	@DisplayName("크루장은 크루 신청인원을 거절할 수 있다.")
+	@Test
+	void rejectApplicationCrew() {
+		//given
+		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
+			"크루 소개", new RuleDto(3, 10));
+		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+		Long crewId = crewService.createCrew(reqDto, image, 1L);
+
+		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
+		crewService.applyCrew(applyReqDto, crewId, 2L);
+
+		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(2L, false);
+
+		//when
+		//then
+		assertDoesNotThrow(() -> crewService.proceedApplyCrew(proceedApplyReqDto, crewId, 1L));
+	}
 }
