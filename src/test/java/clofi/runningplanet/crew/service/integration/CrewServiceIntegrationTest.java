@@ -18,7 +18,9 @@ import clofi.runningplanet.common.DatabaseCleaner;
 import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
+import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.service.CrewService;
@@ -143,5 +145,33 @@ public class CrewServiceIntegrationTest {
 					.containsExactly("크루명", ApprovalType.AUTO, "크루 소개", Category.RUNNING);
 			}
 		);
+	}
+
+	@DisplayName("crewId를 통해 원하는 크루에 신청할 수 있다.")
+	@Test
+	void applyCrew() {
+		//given
+		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
+			"크루 소개", new RuleDto(3, 10));
+		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+
+		Long crewId = crewService.createCrew(reqDto, image, 1L);
+
+		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
+
+		//when
+		ApplyCrewResDto result = crewService.applyCrew(applyReqDto, crewId, 2L);
+
+		//then
+		assertSoftly(
+			softAssertions -> {
+				softAssertions.assertThat(result)
+					.extracting("crewId", "memberId")
+					.containsExactly(crewId, 2L);
+				softAssertions.assertThat(result.isRequest()).isTrue();
+			}
+		);
+
 	}
 }
