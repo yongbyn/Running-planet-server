@@ -33,14 +33,14 @@ class RankServiceTest {
 	@Test
 	void getCrewRankByDistance() {
 		//given
-		Crew firstCrew = new Crew(1L, 1L, "1등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "1등 크루", 10, 10, 100, 100,
+		Crew firstCrew = new Crew(null, 1L, "1등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "1등 크루", 10, 10, 100, 100,
 			100,
 			10);
 		crewRepository.save(firstCrew);
-		Crew secondCrew = new Crew(2L, 2L, "2등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "2등 크루", 10, 10, 100, 90,
+		Crew secondCrew = new Crew(null, 2L, "2등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "2등 크루", 10, 10, 100, 90,
 			100, 10);
 		crewRepository.save(secondCrew);
-		Crew thirdCrew = new Crew(3L, 3L, "3등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "3등 크루", 10, 10, 100, 80,
+		Crew thirdCrew = new Crew(null, 3L, "3등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "3등 크루", 10, 10, 100, 80,
 			100,
 			10);
 		crewRepository.save(thirdCrew);
@@ -56,17 +56,18 @@ class RankServiceTest {
 	@Test
 	void getCrewRankByLevel() {
 		//given
-		Crew firstCrew = new Crew(1L, 1L, "1등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "1등 크루", 10, 10, 100, 100,
+		Crew firstCrew = new Crew(null, 1L, "1등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "1등 크루", 10, 10, 100, 100,
 			100, 10);
 		crewRepository.save(firstCrew);
-		Crew secondCrew = new Crew(2L, 2L, "2등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "2등 크루", 10, 10, 100, 90,
+		Crew secondCrew = new Crew(null, 2L, "2등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "2등 크루", 10, 10, 100, 90,
 			100, 9);
 		crewRepository.save(secondCrew);
-		Crew thirdCrew = new Crew(3L, 3L, "3등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "3등 크루", 10, 10, 100, 80,
+		Crew thirdCrew = new Crew(null, 3L, "3등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "3등 크루", 10, 10, 100, 80,
 			100, 8);
 		crewRepository.save(thirdCrew);
 		//when
 		List<CrewRankResponse> crewRankList = rankService.getCrewRankList("LEVEL", "TOTAL");
+
 		//then
 		assertThat(crewRankList.get(0).getCrewName()).isEqualTo("1등 크루");
 		assertThat(crewRankList.get(1).getCrewName()).isEqualTo("2등 크루");
@@ -77,13 +78,13 @@ class RankServiceTest {
 	@Test
 	void getCrewRankByWeeklyDistance() {
 		//given
-		Crew firstCrew = new Crew(1L, 1L, "1등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "1등 크루", 10, 10, 100, 100,
+		Crew firstCrew = new Crew(null, 1L, "1등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "1등 크루", 10, 10, 100, 100,
 			100, 10);
 		crewRepository.save(firstCrew);
-		Crew secondCrew = new Crew(2L, 2L, "2등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "2등 크루", 10, 10, 90, 90,
+		Crew secondCrew = new Crew(null, 2L, "2등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "2등 크루", 10, 10, 90, 90,
 			100, 9);
 		crewRepository.save(secondCrew);
-		Crew thirdCrew = new Crew(3L, 3L, "3등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "3등 크루", 10, 10, 80, 80,
+		Crew thirdCrew = new Crew(null, 3L, "3등 크루", 10, Category.RUNNING, ApprovalType.AUTO, "3등 크루", 10, 10, 80, 80,
 			100, 8);
 		crewRepository.save(thirdCrew);
 		//when
