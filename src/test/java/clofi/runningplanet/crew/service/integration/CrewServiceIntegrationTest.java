@@ -341,4 +341,24 @@ public class CrewServiceIntegrationTest {
 		//then
 		assertDoesNotThrow(() -> crewService.leaveCrew(crewId, 1L));
 	}
+
+	@DisplayName("크루 신청자는 크루 신청 취소가 가능")
+	@Test
+	void cancelApplication() {
+		//given
+		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
+			"크루 소개", new RuleDto(3, 10));
+		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+		Long crewId = crewService.createCrew(reqDto, image, 1L);
+
+		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
+		crewService.applyCrew(applyReqDto, crewId, 2L);
+
+		//when
+		ApplyCrewResDto result = crewService.cancelCrewApplication(crewId, 2L);
+
+		//then
+		assertThat(result.isRequest()).isFalse();
+	}
 }
