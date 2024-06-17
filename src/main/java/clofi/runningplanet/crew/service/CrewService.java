@@ -24,6 +24,7 @@ import clofi.runningplanet.crew.domain.CrewImage;
 import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.crew.domain.Tag;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
+import clofi.runningplanet.crew.dto.SearchParamDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
@@ -74,10 +75,10 @@ public class CrewService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<FindAllCrewResDto> findAllCrew() {
-		List<Crew> crewList = crewRepository.findAll();
+	public List<FindAllCrewResDto> findAllCrew(SearchParamDto searchParamDto) {
+		List<Crew> crewSearchList = crewRepository.search(searchParamDto);
 
-		return crewList.stream()
+		return crewSearchList.stream()
 			.map(this::convertToFindAllCrewResDto)
 			.toList();
 	}
