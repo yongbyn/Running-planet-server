@@ -2,6 +2,7 @@ package clofi.runningplanet.crew.service.integration;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
+import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
@@ -218,5 +220,25 @@ public class CrewServiceIntegrationTest {
 		//then
 		assertThat(result.approvalMember()).isEmpty();
 
+	}
+
+	@DisplayName("크루장은 크루 신청인원을 수락할 수 있다.")
+	@Test
+	void proceedApplicationCrew() {
+		//given
+		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
+			"크루 소개", new RuleDto(3, 10));
+		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+		Long crewId = crewService.createCrew(reqDto, image, 1L);
+
+		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
+		crewService.applyCrew(applyReqDto, crewId, 2L);
+
+		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(2L, true);
+
+		//when
+		//then
+		assertDoesNotThrow(() -> crewService.proceedApplyCrew(proceedApplyReqDto, crewId, 1L));
 	}
 }
