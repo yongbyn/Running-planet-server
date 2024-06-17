@@ -1,13 +1,15 @@
 package clofi.runningplanet.common;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
+@Profile("mysql")
 @Component
-public class DatabaseCleaner {
+public class MysqlDataCleaner implements DataCleaner {
 
 	@PersistenceContext
 	private EntityManager entityManager;
