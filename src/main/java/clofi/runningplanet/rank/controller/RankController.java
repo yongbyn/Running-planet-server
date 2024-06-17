@@ -21,5 +21,6 @@ public class RankController {
 		@RequestParam String condition,
 		@RequestParam String period
 	) {
+		return ResponseEntity.ok(rankService.getCrewRankList(condition, period));
 	}
 }
