@@ -159,6 +159,28 @@ class RecordServiceTest {
 			);
 	}
 
+	@DisplayName("운동 종료 시 회원의 운동 정보가 업데이트된다.")
+	@Test
+	void updateMemberStatistics() {
+		Member member = memberRepository.save(createMember("회원1"));
+		RecordSaveRequest recordSaveRequest1 = new RecordSaveRequest(1, 1, 600, 1, 1,
+			new RecordSaveRequest.AvgPace(10, 0), true
+		);
+		RecordSaveRequest recordSaveRequest2 = new RecordSaveRequest(2, 2, 1200, 2, 2,
+			new RecordSaveRequest.AvgPace(10, 0), true
+		);
+		recordService.save(recordSaveRequest1, member.getId());
+		recordService.save(recordSaveRequest2, member.getId());
+
+		// when
+		Member savedMember = memberRepository.findById(member.getId()).get();
+
+		// then
+		assertThat(savedMember)
+			.extracting("avgPace", "avgDistance", "totalDistance")
+			.contains(600, 1.5, 3.0);
+	}
+
 	@DisplayName("year, month 로 운동 기록을 조회할 수 있다.")
 	@Test
 	void findAllRecordsByYearAndMonth() {

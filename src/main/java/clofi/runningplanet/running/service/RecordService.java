@@ -52,6 +52,10 @@ public class RecordService {
 		Coordinate coordinate = request.toCoordinate(savedRecord);
 		coordinateRepository.save(coordinate);
 
+		if (savedRecord.isEnd()) {
+			updateRunningStatistics(member);
+		}
+
 		LocalDate now = LocalDate.now();
 		LocalDateTime start = getStartOfDay(now);
 		LocalDateTime end = getEndOfDay(now);
@@ -72,6 +76,13 @@ public class RecordService {
 	private Record getCurrentRecordOrElseNew(Member member) {
 		return recordRepository.findOneByMemberAndEndTimeIsNull(member)
 			.orElse(Record.builder().member(member).build());
+	}
+
+	private void updateRunningStatistics(Member member) {
+		List<Record> records = recordRepository.findAllByMember(member);
+		int totalRunTime = records.stream().mapToInt(Record::getRunTime).sum();
+		double totalRunDistance = records.stream().mapToDouble(Record::getRunDistance).sum();
+		member.updateRunningStatistics(totalRunTime, totalRunDistance, records.size());
 	}
 
 	private void sendRunningStatus(Member member, RunningStatusResponse runningStatusResponse) {

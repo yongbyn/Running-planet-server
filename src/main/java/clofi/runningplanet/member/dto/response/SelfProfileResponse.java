@@ -17,9 +17,9 @@ public record SelfProfileResponse(
 
 	AvgPace avgPace,
 
-	int avgDistance,
+	double avgDistance,
 
-	int totalDistance,
+	double totalDistance,
 
 	String myCrew,
 

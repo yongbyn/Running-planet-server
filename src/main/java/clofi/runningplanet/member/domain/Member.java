@@ -50,10 +50,10 @@ public class Member extends BaseSoftDeleteEntity {
 	private int avgPace;
 
 	@Column(name = "avg_distance")
-	private int avgDistance;
+	private double avgDistance;
 
 	@Column(name = "total_distance", nullable = false)
-	private int totalDistance;
+	private double totalDistance;
 
 	@Builder
 	public Member(Long id, String nickname, Gender gender, Integer age, Integer weight, String profileImg,
@@ -85,4 +85,17 @@ public class Member extends BaseSoftDeleteEntity {
 		this.age = age;
 		this.weight = weight;
 	}
+
+	public void updateRunningStatistics(int totalRunTime, double totalRunDistance, int recordCount) {
+		if (totalRunTime == 0 || recordCount == 0 || totalRunDistance == 0) {
+			return;
+		}
+		System.out.println(totalRunTime);
+		System.out.println(totalRunDistance);
+		System.out.println(recordCount);
+		this.avgDistance = totalRunDistance / recordCount;
+		this.totalDistance = totalRunDistance;
+		this.avgPace = (int)(totalRunTime / totalRunDistance);
+	}
+
 }

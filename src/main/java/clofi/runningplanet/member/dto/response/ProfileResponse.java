@@ -15,9 +15,9 @@ public record ProfileResponse(
 
 	AvgPace avgPace,
 
-	int avgDistance,
+	double avgDistance,
 
-	int totalDistance,
+	double totalDistance,
 
 	String myCrew
 ) {
