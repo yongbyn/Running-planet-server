@@ -1,5 +1,7 @@
 package clofi.runningplanet.chat.service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -19,10 +21,12 @@ import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ChatService {
 
 	private final ChatRepository chatRepository;
@@ -47,13 +51,17 @@ public class ChatService {
 		return new ChatMessage(chatMessage.from(), chatMessage.message(), chat.getCreatedAt());
 	}
 
-	public ChatListResponse getChatMessages(Long memberId, Long crewId, int page, int size) {
+	public ChatListResponse getChatMessages(Long memberId, Long crewId, String lastChatTimestamp, int size) {
 
 		validateMemberIsInCrew(memberId, crewId);
 		validateSizeIsPositive(size);
 
-		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-		Page<Chat> chatPage = chatRepository.findByCrewId(crewId, pageable);
+		Pageable pageable = PageRequest.of(0, size, Sort.by("createdAt").descending());
+		Page<Chat> chatPage;
+
+		log.info("service timestamp={}",lastChatTimestamp);
+
+		chatPage = getChatPageByCrewIdAndLastChatTimeStamp(crewId, lastChatTimestamp, pageable);
 
 		List<ChatMessage> chatList = getChatList(chatPage);
 
@@ -84,6 +92,19 @@ public class ChatService {
 		if (size <= 0) {
 			throw new IllegalArgumentException("설정할 채팅의 개수는 양수이어야 합니다.");
 		}
+	}
+
+	private Page<Chat> getChatPageByCrewIdAndLastChatTimeStamp(Long crewId, String lastChatTimestamp, Pageable pageable) {
+		Page<Chat> chatPage;
+		if (lastChatTimestamp == null) {
+			chatPage = chatRepository.findByCrewId(crewId, pageable);
+		} else {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS");
+			LocalDateTime lastChatDateTime = LocalDateTime.parse(lastChatTimestamp, formatter);
+
+			chatPage = chatRepository.findByCrewIdAndCreatedAtGreaterThanEqual(crewId, lastChatDateTime, pageable);
+		}
+		return chatPage;
 	}
 
 	private static List<ChatMessage> getChatList(Page<Chat> chatPage) {
