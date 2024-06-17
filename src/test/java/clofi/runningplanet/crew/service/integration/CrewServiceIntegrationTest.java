@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
-import clofi.runningplanet.common.DatabaseCleaner;
+import clofi.runningplanet.common.DataCleaner;
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Category;
@@ -43,30 +42,7 @@ public class CrewServiceIntegrationTest {
 	MemberRepository memberRepository;
 
 	@Autowired
-	DatabaseCleaner cleaner;
-
-	@BeforeEach
-	void init() {
-		Member member1 = Member.builder()
-			.nickname("크루장")
-			.id(1L)
-			.profileImg("https://test.com")
-			.gender(Gender.MALE)
-			.age(30)
-			.weight(70)
-			.build();
-		memberRepository.save(member1);
-
-		Member member2 = Member.builder()
-			.nickname("크루")
-			.id(2L)
-			.profileImg("https://test.com")
-			.gender(Gender.FEMALE)
-			.age(20)
-			.weight(60)
-			.build();
-		memberRepository.save(member2);
-	}
+	DataCleaner cleaner;
 
 	@AfterEach
 	void setUp() {
@@ -77,7 +53,7 @@ public class CrewServiceIntegrationTest {
 	@Test
 	void createCrew() {
 		//given
-		Long memberId = 1L;
+		Long memberId = saveMember1();
 
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.AUTO,
 			"크루 소개", new RuleDto(3, 10));
@@ -95,20 +71,22 @@ public class CrewServiceIntegrationTest {
 	@Test
 	void findAllCrews() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
 
 		CreateCrewReqDto reqDto1 = new CreateCrewReqDto("크루명1", Category.RUNNING, List.of("태그1"), ApprovalType.AUTO,
 			"크루 소개2", new RuleDto(3, 10));
 		MockMultipartFile image1 = new MockMultipartFile("imgFile", "크루로고1.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고1.png".getBytes());
 
-		Long crewId1 = crewService.createCrew(reqDto1, image1, 1L);
+		Long crewId1 = crewService.createCrew(reqDto1, image1, memberId1);
 
 		CreateCrewReqDto reqDto2 = new CreateCrewReqDto("크루명2", Category.RUNNING, List.of("태그2"), ApprovalType.AUTO,
 			"크루 소개2", new RuleDto(3, 10));
 		MockMultipartFile image2 = new MockMultipartFile("imgFile", "크루로고2.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고2.png".getBytes());
 
-		Long crewId2 = crewService.createCrew(reqDto2, image2, 2L);
+		Long crewId2 = crewService.createCrew(reqDto2, image2, memberId2);
 
 		//when
 		List<FindAllCrewResDto> result = crewService.findAllCrew();
@@ -128,12 +106,14 @@ public class CrewServiceIntegrationTest {
 	@Test
 	void findCrew() {
 		//given
+		Long memberId1 = saveMember1();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.AUTO,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
 
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		//when
 		FindCrewResDto result = crewService.findCrew(crewId);
@@ -156,24 +136,27 @@ public class CrewServiceIntegrationTest {
 	@Test
 	void applyCrew() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
 
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
 
 		//when
-		ApplyCrewResDto result = crewService.applyCrew(applyReqDto, crewId, 2L);
+		ApplyCrewResDto result = crewService.applyCrew(applyReqDto, crewId, memberId2);
 
 		//then
 		assertSoftly(
 			softAssertions -> {
 				softAssertions.assertThat(result)
 					.extracting("crewId", "memberId")
-					.containsExactly(crewId, 2L);
+					.containsExactly(crewId, memberId2);
 				softAssertions.assertThat(result.isRequest()).isTrue();
 			}
 		);
@@ -184,24 +167,27 @@ public class CrewServiceIntegrationTest {
 	@Test
 	void getCrewApplicationList() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
-		crewService.applyCrew(applyReqDto, crewId, 2L);
+		crewService.applyCrew(applyReqDto, crewId, memberId2);
 
 		//when
-		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, 1L);
+		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, memberId1);
 
 		//then
 		assertSoftly(softAssertions -> {
 			softAssertions.assertThat(result.approvalMember().size()).isEqualTo(1);
 			softAssertions.assertThat(result.approvalMember().getFirst())
 				.extracting("memberId", "nickname", "introduction", "gender", "age")
-				.containsExactly(2L, "크루", "크루 가입 신청서", Gender.FEMALE, 20);
+				.containsExactly(memberId2, "크루", "크루 가입 신청서", Gender.FEMALE, 20);
 		});
 
 	}
@@ -210,14 +196,16 @@ public class CrewServiceIntegrationTest {
 	@Test
 	void getCrewApplicationEmptyList() {
 		//given
+		Long memberId1 = saveMember1();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		//when
-		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, 1L);
+		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, memberId1);
 
 		//then
 		assertThat(result.approvalMember()).isEmpty();
@@ -228,103 +216,118 @@ public class CrewServiceIntegrationTest {
 	@Test
 	void proceedApplicationCrew() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
-		crewService.applyCrew(applyReqDto, crewId, 2L);
+		crewService.applyCrew(applyReqDto, crewId, memberId2);
 
-		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(2L, true);
+		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(memberId2, true);
 
 		//when
 		//then
-		assertDoesNotThrow(() -> crewService.proceedApplyCrew(proceedApplyReqDto, crewId, 1L));
+		assertDoesNotThrow(() -> crewService.proceedApplyCrew(proceedApplyReqDto, crewId, memberId1));
 	}
 
 	@DisplayName("크루장은 크루 신청인원을 거절할 수 있다.")
 	@Test
 	void rejectApplicationCrew() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
-		crewService.applyCrew(applyReqDto, crewId, 2L);
+		crewService.applyCrew(applyReqDto, crewId, memberId2);
 
-		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(2L, false);
+		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(memberId2, false);
 
 		//when
 		//then
-		assertDoesNotThrow(() -> crewService.proceedApplyCrew(proceedApplyReqDto, crewId, 1L));
+		assertDoesNotThrow(() -> crewService.proceedApplyCrew(proceedApplyReqDto, crewId, memberId1));
 	}
 
 	@DisplayName("크루장은 크루원을 강퇴할 수 있다.")
 	@Test
 	void removeCrew() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
-		crewService.applyCrew(applyReqDto, crewId, 2L);
+		crewService.applyCrew(applyReqDto, crewId, memberId2);
 
-		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(2L, true);
-		crewService.proceedApplyCrew(proceedApplyReqDto, crewId, 1L);
+		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(memberId2, true);
+		crewService.proceedApplyCrew(proceedApplyReqDto, crewId, memberId1);
 
 		//when
 		//then
-		assertDoesNotThrow(() -> crewService.removeCrewMember(crewId, 2L, 1L));
+		assertDoesNotThrow(() -> crewService.removeCrewMember(crewId, memberId2, memberId1));
 	}
 
 	@DisplayName("크루원은 크루를 탈퇴할 수 있다.")
 	@Test
 	void leaveCrew() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
-		crewService.applyCrew(applyReqDto, crewId, 2L);
+		crewService.applyCrew(applyReqDto, crewId, memberId2);
 
-		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(2L, true);
-		crewService.proceedApplyCrew(proceedApplyReqDto, crewId, 1L);
+		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(memberId2, true);
+		crewService.proceedApplyCrew(proceedApplyReqDto, crewId, memberId1);
 
 		//when
 		//then
-		assertDoesNotThrow(() -> crewService.leaveCrew(crewId, 2L));
+		assertDoesNotThrow(() -> crewService.leaveCrew(crewId, memberId2));
 	}
 
 	@DisplayName("크루장은 크루원이 있는 경우 탈퇴할 수 없다.")
 	@Test
 	void couldNotLeaveCrewLeader() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
-		crewService.applyCrew(applyReqDto, crewId, 2L);
+		crewService.applyCrew(applyReqDto, crewId, memberId2);
 
-		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(2L, true);
-		crewService.proceedApplyCrew(proceedApplyReqDto, crewId, 1L);
+		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(memberId2, true);
+		crewService.proceedApplyCrew(proceedApplyReqDto, crewId, memberId1);
 
 		//when
 		//then
-		assertThatThrownBy(() -> crewService.leaveCrew(crewId, 1L))
+		assertThatThrownBy(() -> crewService.leaveCrew(crewId, memberId1))
 			.isInstanceOf(ConflictException.class);
 	}
 
@@ -332,32 +335,37 @@ public class CrewServiceIntegrationTest {
 	@Test
 	void leaveCrewLeader() {
 		//given
+		Long memberId1 = saveMember1();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		//when
 		//then
-		assertDoesNotThrow(() -> crewService.leaveCrew(crewId, 1L));
+		assertDoesNotThrow(() -> crewService.leaveCrew(crewId, memberId1));
 	}
 
 	@DisplayName("크루 신청자는 크루 신청 취소가 가능")
 	@Test
 	void cancelApplication() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
-		crewService.applyCrew(applyReqDto, crewId, 2L);
+		crewService.applyCrew(applyReqDto, crewId, memberId2);
 
 		//when
-		ApplyCrewResDto result = crewService.cancelCrewApplication(crewId, 2L);
+		ApplyCrewResDto result = crewService.cancelCrewApplication(crewId, memberId2);
 
 		//then
 		assertThat(result.isRequest()).isFalse();
@@ -367,11 +375,14 @@ public class CrewServiceIntegrationTest {
 	@Test
 	void updateCrewInfo() {
 		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, 1L);
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
 
 		UpdateCrewReqDto updateCrewReqDto = new UpdateCrewReqDto(List.of("새로운 태그"), ApprovalType.AUTO, "새로운 크루 소개",
 			new RuleDto(1, 2));
@@ -379,7 +390,7 @@ public class CrewServiceIntegrationTest {
 			"크루로고수정.png".getBytes());
 
 		//when
-		crewService.updateCrew(updateCrewReqDto, updateImage, crewId, 1L);
+		crewService.updateCrew(updateCrewReqDto, updateImage, crewId, memberId1);
 
 		//then
 		FindCrewResDto resDto = crewService.findCrew(crewId);
@@ -392,5 +403,27 @@ public class CrewServiceIntegrationTest {
 			softAssertions.assertThat(resDto.rule())
 				.isEqualTo(new RuleDto(1, 2));
 		});
+	}
+
+	private Long saveMember1() {
+		Member member1 = Member.builder()
+			.nickname("크루장")
+			.profileImg("https://test.com")
+			.gender(Gender.MALE)
+			.age(30)
+			.weight(70)
+			.build();
+		return memberRepository.save(member1).getId();
+	}
+
+	private Long saveMember2() {
+		Member member2 = Member.builder()
+			.nickname("크루")
+			.profileImg("https://test.com")
+			.gender(Gender.FEMALE)
+			.age(20)
+			.weight(60)
+			.build();
+		return memberRepository.save(member2).getId();
 	}
 }
