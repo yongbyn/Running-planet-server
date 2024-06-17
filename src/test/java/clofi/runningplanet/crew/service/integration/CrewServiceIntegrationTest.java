@@ -326,4 +326,19 @@ public class CrewServiceIntegrationTest {
 		assertThatThrownBy(() -> crewService.leaveCrew(crewId, 1L))
 			.isInstanceOf(ConflictException.class);
 	}
+
+	@DisplayName("크루장은 크루에 혼자 남은 경우 탈퇴할 수 있다.")
+	@Test
+	void leaveCrewLeader() {
+		//given
+		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
+			"크루 소개", new RuleDto(3, 10));
+		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+		Long crewId = crewService.createCrew(reqDto, image, 1L);
+
+		//when
+		//then
+		assertDoesNotThrow(() -> crewService.leaveCrew(crewId, 1L));
+	}
 }
