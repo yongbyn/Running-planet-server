@@ -46,6 +46,10 @@ class RankServiceTest {
 	@AfterEach
 	void tearDown() {
 		crewRepository.deleteAllInBatch();
+		memberPlanetRepository.deleteAllInBatch();
+		recordRepository.deleteAllInBatch();
+		planetRepository.deleteAllInBatch();
+		memberRepository.deleteAllInBatch();
 	}
 
 	@DisplayName("크루 랭킹을 거리로 조회할 수 있다")

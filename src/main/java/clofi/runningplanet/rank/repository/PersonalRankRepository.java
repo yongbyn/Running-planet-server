@@ -68,7 +68,7 @@ public class PersonalRankRepository {
 						member.id,
 						member.nickname,
 						memberPlanet.countDistinct().intValue(),
-						member.totalDistance
+						member.totalDistance.intValue()
 					))
 				.from(member)
 				.leftJoin(memberPlanet).on(memberPlanet.memberId.id.eq(member.id))
@@ -85,7 +85,7 @@ public class PersonalRankRepository {
 		} else if ("WEEK".equals(period) && "DISTANCE".equals(condition)) {
 			return record.runDistance.sum().intValue().desc();
 		} else {
-			return member.totalDistance.desc();
+			return member.totalDistance.intValue().desc();
 		}
 	}
 }
