@@ -43,7 +43,6 @@ public class MissionService {
 		validateCrewMemberShip(crewId, memberId);
 
 		List<CrewMission> crewMissionList = getTodayCrewMissionList(crewId, memberId);
-		validateMissionListSize(crewMissionList);
 
 		TodayRecords todayRecords = getTodayRecords(memberId);
 		List<GetCrewMissionResDto> resDtoList = convertToResDto(crewMissionList, todayRecords);

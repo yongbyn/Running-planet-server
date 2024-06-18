@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import clofi.runningplanet.crew.dto.SearchParamDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
@@ -46,8 +48,11 @@ public class CrewController {
 	}
 
 	@GetMapping("/api/crew")
-	public ResponseEntity<List<FindAllCrewResDto>> findAllCrews() {
-		return ResponseEntity.ok(crewService.findAllCrew());
+	public ResponseEntity<List<FindAllCrewResDto>> findAllCrews(
+		@RequestParam(name = "crewName", required = false) String crewName,
+		@RequestParam(name = "category", required = false) String category) {
+		SearchParamDto searchParamDto = new SearchParamDto(crewName, category);
+		return ResponseEntity.ok(crewService.findAllCrew(searchParamDto));
 	}
 
 	@GetMapping("/api/crew/{crewId}")

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 import clofi.runningplanet.crew.domain.Crew;
 
 @Repository
-public interface CrewRepository extends JpaRepository<Crew, Long> {
+public interface CrewRepository extends JpaRepository<Crew, Long>, CrewRepositoryCustom {
 }

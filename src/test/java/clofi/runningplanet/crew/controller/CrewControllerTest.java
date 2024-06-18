@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import clofi.runningplanet.common.WithMockCustomMember;
 import clofi.runningplanet.crew.dto.CrewLeaderDto;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.SearchParamDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
@@ -123,7 +124,7 @@ class CrewControllerTest {
 				"클로피 크루는 최고의 크루",
 				new CrewLeaderDto(2L, "임시 닉네임"))
 		);
-		given(crewService.findAllCrew())
+		given(crewService.findAllCrew(any(SearchParamDto.class)))
 			.willReturn(expected);
 
 		//when
