@@ -62,7 +62,7 @@ jobs:
     if: ${{ failure() }}
     steps:
       - name: Notify Discord on Failure
-        uses: Ilshidur/action-discord@v2
+        uses: Ilshidur/action-discord@master
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
           content: |

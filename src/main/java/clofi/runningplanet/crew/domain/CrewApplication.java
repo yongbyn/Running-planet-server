@@ -20,14 +20,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@SQLDelete(sql = "update crew set deleted_at = now() where crew_application_id = ?")
+@SQLDelete(sql = "update crew_application set deleted_at = now() where crew_application_id = ?")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class CrewApplication extends BaseSoftDeleteEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", nullable = false)
+	@Column(name = "crew_application_id", nullable = false)
 	private Long id;
 
 	@Column(name = "introduction")
