@@ -27,7 +27,7 @@ public class CrewRepositoryImpl implements CrewRepositoryCustom {
 		return queryFactory
 			.select(crew)
 			.from(crew)
-			.where(crewNameEq(searchParamDto.getCrewName())
+			.where(crewNameContains(searchParamDto.getCrewName())
 				, categoryEq(searchParamDto.getCategory()))
 			.fetch();
 	}
@@ -36,7 +36,7 @@ public class CrewRepositoryImpl implements CrewRepositoryCustom {
 		return isNull(category) ? null : crew.category.eq(category);
 	}
 
-	private BooleanExpression crewNameEq(String crewName) {
-		return isEmpty(crewName) ? null : crew.crewName.eq(crewName);
+	private BooleanExpression crewNameContains(String crewName) {
+		return isEmpty(crewName) ? null : crew.crewName.containsIgnoreCase(crewName);
 	}
 }
