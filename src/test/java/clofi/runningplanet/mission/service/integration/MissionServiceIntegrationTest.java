@@ -1,6 +1,7 @@
 package clofi.runningplanet.mission.service.integration;
 
 import static org.assertj.core.api.SoftAssertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
@@ -25,9 +26,13 @@ import clofi.runningplanet.crew.service.CrewService;
 import clofi.runningplanet.member.domain.Gender;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
+import clofi.runningplanet.mission.domain.CrewMission;
 import clofi.runningplanet.mission.domain.MissionType;
 import clofi.runningplanet.mission.dto.response.CrewMissionListDto;
+import clofi.runningplanet.mission.repository.CrewMissionRepository;
 import clofi.runningplanet.mission.service.MissionService;
+import clofi.runningplanet.running.domain.Record;
+import clofi.runningplanet.running.repository.RecordRepository;
 
 @SpringBootTest
 public class MissionServiceIntegrationTest {
@@ -45,6 +50,12 @@ public class MissionServiceIntegrationTest {
 	CrewMemberRepository crewMemberRepository;
 
 	@Autowired
+	CrewMissionRepository crewMissionRepository;
+
+	@Autowired
+	RecordRepository recordRepository;
+
+	@Autowired
 	CrewService crewService;
 
 	@Autowired
@@ -59,17 +70,16 @@ public class MissionServiceIntegrationTest {
 	@Test
 	void createCrewCreate2CrewMission() {
 		//given
-		Long memberId = saveMember1();
-		// Long crewId = createCrew(memberId);
+		Member member = saveMember1();
 
 		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.AUTO,
 			"크루 소개", new RuleDto(3, 10));
 		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
 			"크루로고.png".getBytes());
-		Long crewId = crewService.createCrew(reqDto, image, memberId);
+		Long crewId = crewService.createCrew(reqDto, image, member.getId());
 
 		//when
-		CrewMissionListDto result = missionService.getCrewMission(crewId, memberId);
+		CrewMissionListDto result = missionService.getCrewMission(crewId, member.getId());
 
 		//then
 		assertSoftly(softly -> {
@@ -88,7 +98,26 @@ public class MissionServiceIntegrationTest {
 
 	}
 
-	private Long saveMember1() {
+	@DisplayName("조건을 만족한 경우 미션을 완료처리 할 수 있다.")
+	@Test
+	void successDistanceMission() {
+		//given
+		Member member = saveMember1();
+		Crew crew = createCrew(member);
+		createRecord(member, 3600, 1000);
+
+		CrewMission mission1 = new CrewMission(member, crew, MissionType.DISTANCE);
+		Long missionId1 = crewMissionRepository.save(mission1).getId();
+		CrewMission mission2 = new CrewMission(member, crew, MissionType.DURATION);
+		Long missionId2 = crewMissionRepository.save(mission2).getId();
+
+		//when
+		//then
+		assertDoesNotThrow(() -> missionService.successMission(crew.getId(), missionId1, member.getId()));
+		assertDoesNotThrow(() -> missionService.successMission(crew.getId(), missionId2, member.getId()));
+	}
+
+	private Member saveMember1() {
 		Member member1 = Member.builder()
 			.nickname("크루장")
 			.profileImg("https://test.com")
@@ -96,18 +125,28 @@ public class MissionServiceIntegrationTest {
 			.age(30)
 			.weight(70)
 			.build();
-		return memberRepository.save(member1).getId();
+		return memberRepository.save(member1);
 	}
 
-	private Long createCrew(Long memberId) {
-		Crew crew = new Crew(null, saveMember1(), "구름", 10, Category.RUNNING, ApprovalType.AUTO, "크루 소개", 3, 1, 0, 0, 0,
+	private Crew createCrew(Member member) {
+		Crew crew = new Crew(null, member.getId(), "구름", 10, Category.RUNNING, ApprovalType.AUTO, "크루 소개", 3, 1, 0, 0,
+			0,
 			1);
 		Crew savedCrew = crewRepository.save(crew);
 
-		Member leader = memberRepository.findById(memberId).get();
-		CrewMember crewMember = CrewMember.createLeader(savedCrew, leader);
+		CrewMember crewMember = CrewMember.createLeader(savedCrew, member);
 		crewMemberRepository.save(crewMember);
 
-		return savedCrew.getId();
+		return savedCrew;
+	}
+
+	private void createRecord(Member member, int duration, double distance) {
+		Record record = Record.builder()
+			.member(member)
+			.runTime(duration)
+			.runDistance(distance)
+			.isEnd(true)
+			.build();
+		recordRepository.save(record);
 	}
 }
