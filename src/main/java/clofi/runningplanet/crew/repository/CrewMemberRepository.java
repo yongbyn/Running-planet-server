@@ -2,6 +2,7 @@ package clofi.runningplanet.crew.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,10 @@ public interface CrewMemberRepository extends JpaRepository<CrewMember, Long> {
 	List<Member> findMembersByCrewId(@Param("crewId") Long crewId);
 
 	List<CrewMember> findAllByCrewId(Long crewId);
+
+	@Query("SELECT cm.member FROM CrewMember cm WHERE cm.member.id IN :memberIds")
+	List<Member> findMembersByMemberIds(@Param("memberIds") Set<Long> memberIds);
+
+	@Query("SELECT cm.member FROM CrewMember cm WHERE cm.crew.id = :crewId AND cm.member.id IN :memberIds")
+	List<Member> findMembersByCrewAndMemberIds(@Param("crewId") Long crewId, @Param("memberIds") Set<Long> memberIds);
 }

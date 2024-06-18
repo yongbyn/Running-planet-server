@@ -33,7 +33,7 @@ import clofi.runningplanet.running.dto.RecordFindAllResponse;
 import clofi.runningplanet.running.dto.RecordFindCurrentResponse;
 import clofi.runningplanet.running.dto.RecordFindResponse;
 import clofi.runningplanet.running.dto.RecordSaveRequest;
-import clofi.runningplanet.running.dto.RunningStatusResponse;
+import clofi.runningplanet.running.dto.RunningStatusFindAllResponse;
 import clofi.runningplanet.running.repository.CoordinateRepository;
 import clofi.runningplanet.running.repository.RecordRepository;
 
@@ -374,16 +374,16 @@ class RecordServiceTest {
 		recordRepository.save(createRecord(member1, 4.0, 400, true));
 
 		// when
-		List<RunningStatusResponse> response = recordService.findAllRunningStatus(member1.getId(), crew.getId());
+		List<RunningStatusFindAllResponse> response = recordService.findAllRunningStatus(member1.getId(), crew.getId());
 
 		// then
 		assertThat(response).hasSize(4)
-			.extracting("memberId", "profileImg", "runTime", "runDistance", "isEnd")
+			.extracting("memberId", "profileImg", "runTime", "runDistance", "isEnd", "canCheer")
 			.containsExactly(
-				tuple(member3.getId(), "defaultProfileImg", 300, 3.0, false),
-				tuple(member1.getId(), "defaultProfileImg", 500, 5.0, true),
-				tuple(member2.getId(), "defaultProfileImg", 200, 2.0, true),
-				tuple(member4.getId(), "defaultProfileImg", 0, 0.0, true)
+				tuple(member3.getId(), "defaultProfileImg", 300, 3.0, false, true),
+				tuple(member1.getId(), "defaultProfileImg", 500, 5.0, true, true),
+				tuple(member2.getId(), "defaultProfileImg", 200, 2.0, true, true),
+				tuple(member4.getId(), "defaultProfileImg", 0, 0.0, true, false)
 			);
 	}
 
