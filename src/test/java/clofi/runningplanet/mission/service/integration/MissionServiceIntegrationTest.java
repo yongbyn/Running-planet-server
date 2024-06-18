@@ -1,5 +1,6 @@
 package clofi.runningplanet.mission.service.integration;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
 import clofi.runningplanet.common.DataCleaner;
+import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.domain.Crew;
@@ -115,6 +117,23 @@ public class MissionServiceIntegrationTest {
 		//then
 		assertDoesNotThrow(() -> missionService.successMission(crew.getId(), missionId1, member.getId()));
 		assertDoesNotThrow(() -> missionService.successMission(crew.getId(), missionId2, member.getId()));
+	}
+
+	@DisplayName("조건 만족하지 못한 경우 예외 처리")
+	@Test
+	void failDurationMissions() {
+		//given
+		Member member = saveMember1();
+		Crew crew = createCrew(member);
+		createRecord(member, 1000, 1000);
+
+		CrewMission mission = new CrewMission(member, crew, MissionType.DURATION);
+		Long missionId = crewMissionRepository.save(mission).getId();
+
+		//when
+		//then
+		assertThatThrownBy(() -> missionService.successMission(crew.getId(), missionId, member.getId()))
+			.isInstanceOf(ConflictException.class);
 	}
 
 	private Member saveMember1() {
