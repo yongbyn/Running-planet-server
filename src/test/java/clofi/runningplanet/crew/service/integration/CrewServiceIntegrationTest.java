@@ -19,6 +19,7 @@ import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Category;
 import clofi.runningplanet.crew.dto.RuleDto;
+import clofi.runningplanet.crew.dto.SearchParamDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
 import clofi.runningplanet.crew.dto.request.CreateCrewReqDto;
 import clofi.runningplanet.crew.dto.request.ProceedApplyReqDto;
@@ -89,7 +90,7 @@ public class CrewServiceIntegrationTest {
 		Long crewId2 = crewService.createCrew(reqDto2, image2, memberId2);
 
 		//when
-		List<FindAllCrewResDto> result = crewService.findAllCrew();
+		List<FindAllCrewResDto> result = crewService.findAllCrew(new SearchParamDto("", null));
 
 		//then
 		assertSoftly(
@@ -97,6 +98,52 @@ public class CrewServiceIntegrationTest {
 				softAssertions.assertThat(result.size()).isEqualTo(2);
 				softAssertions.assertThat(result).extracting("crewId")
 					.contains(crewId1, crewId2);
+			}
+		);
+
+	}
+
+	@DisplayName("카테고리를 통해 크루 목록을 필터링 할 수 있다.")
+	@Test
+	void filterCrewByCategory() {
+		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+		Long memberId3 = saveMember1();
+
+		CreateCrewReqDto reqDto1 = new CreateCrewReqDto("구름", Category.RUNNING, List.of("태그1"), ApprovalType.AUTO,
+			"크루 소개2", new RuleDto(3, 10));
+		MockMultipartFile image1 = new MockMultipartFile("imgFile", "크루로고1.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고1.png".getBytes());
+
+		Long crewId1 = crewService.createCrew(reqDto1, image1, memberId1);
+
+		CreateCrewReqDto reqDto2 = new CreateCrewReqDto("클로피", Category.DIET, List.of("태그2"), ApprovalType.AUTO,
+			"크루 소개2", new RuleDto(3, 10));
+		MockMultipartFile image2 = new MockMultipartFile("imgFile", "크루로고2.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고2.png".getBytes());
+
+		Long crewId2 = crewService.createCrew(reqDto2, image2, memberId2);
+
+		CreateCrewReqDto reqDto3 = new CreateCrewReqDto("구름 클로피", Category.RUNNING, List.of("태그3"), ApprovalType.MANUAL,
+			"크루 소개3", new RuleDto(3, 10));
+		MockMultipartFile image3 = new MockMultipartFile("imgFile", "크루로고3.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고3.png".getBytes());
+
+		Long crewId3 = crewService.createCrew(reqDto3, image3, memberId3);
+
+		//when
+		List<FindAllCrewResDto> result = crewService.findAllCrew(new SearchParamDto("", "Running"));
+
+		//then
+		assertSoftly(
+			softAssertions -> {
+				softAssertions.assertThat(result.size()).isEqualTo(2);
+				softAssertions.assertThat(result).extracting("crewId")
+					.contains(crewId1, crewId3)
+					.doesNotContain(crewId2);
+				softAssertions.assertThat(result).extracting("category")
+					.allMatch(category -> category.equals(Category.RUNNING));
 			}
 		);
 
