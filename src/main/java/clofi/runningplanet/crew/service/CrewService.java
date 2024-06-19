@@ -299,8 +299,7 @@ public class CrewService {
 
 	private LocalDate getStartOfWeek() {
 		LocalDate now = LocalDate.now();
-		DayOfWeek firstDayOfWeek = now.getDayOfWeek();
-		return now.with(TemporalAdjusters.previousOrSame(firstDayOfWeek));
+		return now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 	}
 
 	private boolean isCrewLeader(Long memberId, CrewMember crewMember, Crew findCrew) {
