@@ -13,6 +13,7 @@ import clofi.runningplanet.common.exception.ForbiddenException;
 import clofi.runningplanet.common.exception.InternalServerException;
 import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.crew.repository.CrewMemberRepository;
 import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.member.repository.MemberRepository;
@@ -65,6 +66,26 @@ public class MissionService {
 
 		Crew findCrew = getFindCrew(crewId);
 		findCrew.gainExp(10);
+	}
+
+	@Transactional
+	public void createDailyMission() {
+		List<CrewMember> crewMemberList = crewMemberRepository.findAll();
+
+		LocalDate now = LocalDate.now();
+		LocalDateTime startOfDay = now.atStartOfDay();
+		LocalDateTime endOfDay = now.atTime(LocalTime.MAX);
+
+		for (CrewMember crewMember : crewMemberList) {
+			if (crewMissionRepository.findAllByCrewIdAndMemberIdAndToday(crewMember.getCrew().getId(),
+				crewMember.getMember().getId(), startOfDay, endOfDay).isEmpty()) {
+				List<CrewMission> dailyMissionList = List.of(
+					new CrewMission(crewMember.getMember(), crewMember.getCrew(), MissionType.DISTANCE),
+					new CrewMission(crewMember.getMember(), crewMember.getCrew(),
+						MissionType.DURATION));
+				crewMissionRepository.saveAll(dailyMissionList);
+			}
+		}
 	}
 
 	private List<GetCrewMissionResDto> convertToResDto(List<CrewMission> crewMissionList,
