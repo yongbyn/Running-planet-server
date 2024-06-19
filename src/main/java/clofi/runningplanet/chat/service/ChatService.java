@@ -98,8 +98,7 @@ public class ChatService {
 		if (lastChatTimestamp == null) {
 			chatPage = chatRepository.findByCrewId(crewId, pageable);
 		} else {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-			LocalDateTime lastChatDateTime = LocalDateTime.parse(lastChatTimestamp, formatter);
+			LocalDateTime lastChatDateTime = LocalDateTime.parse(lastChatTimestamp);
 
 			chatPage = chatRepository.findByCrewIdAndCreatedAtLessThan(crewId, lastChatDateTime, pageable);
 		}
