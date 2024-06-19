@@ -36,6 +36,7 @@ import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
 import clofi.runningplanet.crew.repository.CrewImageRepository;
@@ -620,6 +621,60 @@ public class CrewServiceIntegrationTest {
 
 		//then
 		assertThat(result.missionProgress()).isEqualTo(List.of(50.0, 0.0, 0.0, 25.0, 0.0, 0.0, 25.0));
+	}
+
+	@DisplayName("소속 크루원 명단 및 정보를 조회할 수 있다.")
+	@Test
+	void getCrewMemberInfoList() {
+		//given
+		Long memberId1 = saveMember1();
+		Member member1 = memberRepository.findById(memberId1).get();
+		Long memberId2 = saveMember2();
+		Member member2 = memberRepository.findById(memberId2).get();
+		Crew crew = createCrew(member1);
+
+		CrewMember crewMember = CrewMember.createMember(crew, member2);
+		crewMemberRepository.save(crewMember);
+
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime mon = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		LocalDateTime thu = mon.plusDays(3);
+
+		CrewMission mission1 = new CrewMission(null, member1, crew, MissionType.DISTANCE, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission1);
+
+		CrewMission mission2 = new CrewMission(null, member1, crew, MissionType.DURATION, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission2);
+
+		CrewMission mission3 = new CrewMission(null, member1, crew, MissionType.DISTANCE, true);
+		setAuditingHandlerDateTime(thu);
+		crewMissionRepository.save(mission3);
+
+		CrewMission mission4 = new CrewMission(null, member2, crew, MissionType.DISTANCE, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission4);
+
+		CrewMission mission5 = new CrewMission(null, member2, crew, MissionType.DURATION, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission5);
+
+		//when
+		List<FindCrewMemberResDto> result = crewService.findCrewMemberList(crew.getId(), memberId1);
+
+		//then
+		assertSoftly(
+			softAssertions -> {
+				softAssertions.assertThat(result).extracting("nickname")
+					.containsExactly(member1.getNickname(), member2.getNickname());
+				softAssertions.assertThat(result).extracting("missionCnt")
+					.containsExactly(3, 2);
+				softAssertions.assertThat(result).extracting("crewLeader")
+					.containsExactly(true, false);
+			}
+		);
+
 	}
 
 	private Long saveMember1() {

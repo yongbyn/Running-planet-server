@@ -203,7 +203,7 @@ public class CrewService {
 	@Transactional(readOnly = true)
 	public List<FindCrewMemberResDto> findCrewMemberList(Long crewId, Long memberId) {
 		checkCrewExistById(crewId);
-		validateMemberNotInCrew(memberId);
+		getCrewMember(crewId, memberId);
 
 		List<CrewMember> crewMemberList = crewMemberRepository.findAllByCrewId(crewId);
 		Map<Long, Long> missionCounts = getMissionCounts(crewId, crewMemberList);
