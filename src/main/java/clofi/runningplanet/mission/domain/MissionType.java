@@ -27,7 +27,7 @@ public enum MissionType {
 	public double calculateProgress(TodayRecords todayRecords) {
 		return switch (this) {
 			case DISTANCE -> (todayRecords.getTotalDistance() / requiredScore);
-			case DURATION -> ((double)(todayRecords.getTotalDuration() / requiredScore));
+			case DURATION -> ((double)todayRecords.getTotalDuration() / requiredScore);
 			default -> 0;
 		};
 	}
