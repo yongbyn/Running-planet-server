@@ -100,6 +100,28 @@ public class MissionServiceIntegrationTest {
 
 	}
 
+	@DisplayName("본인의 크루 미션 진행도를 알 수 있다.")
+	@Test
+	void successDistanceMissions() {
+		//given
+		Member member = saveMember1();
+		Crew crew = createCrew(member);
+		createRecord(member, 1800, 750.0);
+
+		CrewMission mission1 = new CrewMission(member, crew, MissionType.DISTANCE);
+		crewMissionRepository.save(mission1);
+		CrewMission mission2 = new CrewMission(member, crew, MissionType.DURATION);
+		crewMissionRepository.save(mission2);
+
+		//when
+		CrewMissionListDto result = missionService.getCrewMission(crew.getId(), member.getId());
+
+		//then
+		assertThat(result.missions())
+			.extracting("missionProgress")
+			.contains((double)750 / 1000 * 100, (double)1800 / 3600 * 100);
+	}
+
 	@DisplayName("조건을 만족한 경우 미션을 완료처리 할 수 있다.")
 	@Test
 	void successDistanceMission() {
