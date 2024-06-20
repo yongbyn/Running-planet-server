@@ -204,6 +204,29 @@ public class MissionServiceIntegrationTest {
 		});
 	}
 
+	@DisplayName("미션 생성 로직")
+	@Test
+	void createAllCrewMissions() {
+		//given
+		Member member1 = saveMember1();
+		Member member2 = saveMember1();
+
+		Crew crew1 = createCrew(member1);
+		Crew crew2 = createCrew(member2);
+
+		//when
+		//then
+		assertDoesNotThrow(() -> missionService.createDailyMission());
+		List<CrewMission> missionList = crewMissionRepository.findAll();
+		assertSoftly(softAssertions -> {
+			softAssertions.assertThat(missionList.size()).isEqualTo(4);
+			softAssertions.assertThat(missionList).extracting("crew.id")
+				.contains(crew1.getId(), crew2.getId());
+			softAssertions.assertThat(missionList).extracting("member.id")
+				.contains(member1.getId(), member2.getId());
+		});
+	}
+
 	private Member saveMember1() {
 		Member member1 = Member.builder()
 			.nickname("크루장")
