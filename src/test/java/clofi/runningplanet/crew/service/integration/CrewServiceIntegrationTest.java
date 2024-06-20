@@ -4,13 +4,19 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.SoftAssertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
@@ -18,6 +24,9 @@ import clofi.runningplanet.common.DataCleaner;
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Category;
+import clofi.runningplanet.crew.domain.Crew;
+import clofi.runningplanet.crew.domain.CrewImage;
+import clofi.runningplanet.crew.domain.CrewMember;
 import clofi.runningplanet.crew.dto.RuleDto;
 import clofi.runningplanet.crew.dto.SearchParamDto;
 import clofi.runningplanet.crew.dto.request.ApplyCrewReqDto;
@@ -27,14 +36,26 @@ import clofi.runningplanet.crew.dto.request.UpdateCrewReqDto;
 import clofi.runningplanet.crew.dto.response.ApplyCrewResDto;
 import clofi.runningplanet.crew.dto.response.ApprovalMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindAllCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewMemberResDto;
 import clofi.runningplanet.crew.dto.response.FindCrewResDto;
+import clofi.runningplanet.crew.dto.response.FindCrewWithMissionResDto;
+import clofi.runningplanet.crew.repository.CrewImageRepository;
+import clofi.runningplanet.crew.repository.CrewMemberRepository;
+import clofi.runningplanet.crew.repository.CrewRepository;
 import clofi.runningplanet.crew.service.CrewService;
 import clofi.runningplanet.member.domain.Gender;
 import clofi.runningplanet.member.domain.Member;
 import clofi.runningplanet.member.repository.MemberRepository;
+import clofi.runningplanet.mission.domain.CrewMission;
+import clofi.runningplanet.mission.domain.MissionType;
+import clofi.runningplanet.mission.repository.CrewMissionRepository;
+import clofi.runningplanet.running.repository.RecordRepository;
 
 @SpringBootTest
 public class CrewServiceIntegrationTest {
+
+	@SpyBean
+	private AuditingHandler auditingHandler;
 
 	@Autowired
 	CrewService crewService;
@@ -43,11 +64,26 @@ public class CrewServiceIntegrationTest {
 	MemberRepository memberRepository;
 
 	@Autowired
+	CrewRepository crewRepository;
+
+	@Autowired
+	CrewMemberRepository crewMemberRepository;
+
+	@Autowired
+	CrewMissionRepository crewMissionRepository;
+
+	@Autowired
+	RecordRepository recordRepository;
+
+	@Autowired
 	DataCleaner cleaner;
+	@Autowired
+	private CrewImageRepository crewImageRepository;
 
 	@AfterEach
 	void setUp() {
 		cleaner.truncateAllTables();
+		auditingHandler.setDateTimeProvider(null);
 	}
 
 	@DisplayName("크루를 생성 테스트 코드")
@@ -546,6 +582,101 @@ public class CrewServiceIntegrationTest {
 		});
 	}
 
+	@DisplayName("크루의 미션 수행률을 알 수 있다.")
+	@Test
+	void crewMissionInfo() {
+		//given
+		Long memberId1 = saveMember1();
+		Member member1 = memberRepository.findById(memberId1).get();
+		Long memberId2 = saveMember2();
+		Member member2 = memberRepository.findById(memberId2).get();
+		Crew crew = createCrew(member1);
+
+		CrewMember crewMember = CrewMember.createMember(crew, member2);
+		crewMemberRepository.save(crewMember);
+
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime mon = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		LocalDateTime thu = mon.plusDays(3);
+		LocalDateTime sun = mon.plusDays(6);
+
+		CrewMission mission1 = new CrewMission(null, member1, crew, MissionType.DISTANCE, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission1);
+
+		CrewMission mission2 = new CrewMission(null, member1, crew, MissionType.DURATION, true);
+		setAuditingHandlerDateTime(thu);
+		crewMissionRepository.save(mission2);
+
+		CrewMission mission3 = new CrewMission(null, member2, crew, MissionType.DISTANCE, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission3);
+
+		CrewMission mission4 = new CrewMission(null, member2, crew, MissionType.DURATION, true);
+		setAuditingHandlerDateTime(sun);
+		crewMissionRepository.save(mission4);
+
+		//when
+		FindCrewWithMissionResDto result = crewService.findCrewWithMission(crew.getId(), memberId1);
+
+		//then
+		assertThat(result.missionProgress()).isEqualTo(List.of(50.0, 0.0, 0.0, 25.0, 0.0, 0.0, 25.0));
+	}
+
+	@DisplayName("소속 크루원 명단 및 정보를 조회할 수 있다.")
+	@Test
+	void getCrewMemberInfoList() {
+		//given
+		Long memberId1 = saveMember1();
+		Member member1 = memberRepository.findById(memberId1).get();
+		Long memberId2 = saveMember2();
+		Member member2 = memberRepository.findById(memberId2).get();
+		Crew crew = createCrew(member1);
+
+		CrewMember crewMember = CrewMember.createMember(crew, member2);
+		crewMemberRepository.save(crewMember);
+
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime mon = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+		LocalDateTime thu = mon.plusDays(3);
+
+		CrewMission mission1 = new CrewMission(null, member1, crew, MissionType.DISTANCE, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission1);
+
+		CrewMission mission2 = new CrewMission(null, member1, crew, MissionType.DURATION, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission2);
+
+		CrewMission mission3 = new CrewMission(null, member1, crew, MissionType.DISTANCE, true);
+		setAuditingHandlerDateTime(thu);
+		crewMissionRepository.save(mission3);
+
+		CrewMission mission4 = new CrewMission(null, member2, crew, MissionType.DISTANCE, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission4);
+
+		CrewMission mission5 = new CrewMission(null, member2, crew, MissionType.DURATION, true);
+		setAuditingHandlerDateTime(mon);
+		crewMissionRepository.save(mission5);
+
+		//when
+		List<FindCrewMemberResDto> result = crewService.findCrewMemberList(crew.getId(), memberId1);
+
+		//then
+		assertSoftly(
+			softAssertions -> {
+				softAssertions.assertThat(result).extracting("nickname")
+					.containsExactly(member1.getNickname(), member2.getNickname());
+				softAssertions.assertThat(result).extracting("missionCnt")
+					.containsExactly(3, 2);
+				softAssertions.assertThat(result).extracting("crewLeader")
+					.containsExactly(true, false);
+			}
+		);
+
+	}
+
 	private Long saveMember1() {
 		Member member1 = Member.builder()
 			.nickname("크루장")
@@ -566,5 +697,24 @@ public class CrewServiceIntegrationTest {
 			.weight(60)
 			.build();
 		return memberRepository.save(member2).getId();
+	}
+
+	private Crew createCrew(Member member) {
+		Crew crew = new Crew(null, member.getId(), "구름", 10, Category.RUNNING, ApprovalType.AUTO, "크루 소개", 3, 1, 0, 0,
+			0,
+			1);
+		Crew savedCrew = crewRepository.save(crew);
+
+		CrewMember crewMember = CrewMember.createLeader(savedCrew, member);
+		crewMemberRepository.save(crewMember);
+
+		CrewImage crewImage = new CrewImage("파일명", "파일경로", savedCrew);
+		crewImageRepository.save(crewImage);
+
+		return savedCrew;
+	}
+
+	private void setAuditingHandlerDateTime(LocalDateTime localDateTime) {
+		auditingHandler.setDateTimeProvider(() -> Optional.of(localDateTime));
 	}
 }

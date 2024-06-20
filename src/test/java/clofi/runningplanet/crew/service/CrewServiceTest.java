@@ -24,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
+import clofi.runningplanet.common.exception.UnauthorizedException;
 import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.crew.domain.Approval;
 import clofi.runningplanet.crew.domain.Crew;
@@ -1404,8 +1405,8 @@ class CrewServiceTest {
 
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
-		given(crewMemberRepository.findByMemberId(anyLong()))
-			.willReturn(Optional.empty());
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewMember2));
 		given(crewMemberRepository.findAllByCrewId(anyLong()))
 			.willReturn(crewMemberList);
 		given(crewMissionRepository.findByCrewIdAndMemberIds(anyLong(), anyList()))
@@ -1451,8 +1452,8 @@ class CrewServiceTest {
 
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
-		given(crewMemberRepository.findByMemberId(anyLong()))
-			.willReturn(Optional.empty());
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewMember2));
 		given(crewMemberRepository.findAllByCrewId(anyLong()))
 			.willReturn(crewMemberList);
 		given(crewMissionRepository.findByCrewIdAndMemberIds(anyLong(), anyList()))
@@ -1491,8 +1492,8 @@ class CrewServiceTest {
 
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
-		given(crewMemberRepository.findByMemberId(anyLong()))
-			.willReturn(Optional.empty());
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.of(crewMember2));
 		given(crewMemberRepository.findAllByCrewId(anyLong()))
 			.willReturn(crewMemberList);
 		given(crewMissionRepository.findByCrewIdAndMemberIds(anyLong(), anyList()))
@@ -1530,16 +1531,14 @@ class CrewServiceTest {
 		Long crewId = 1L;
 		Long memberId = 1L;
 
-		CrewMember anotherCrewMember = new CrewMember(1L, null, null, Role.MEMBER);
-
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
-		given(crewMemberRepository.findByMemberId(anyLong()))
-			.willReturn(Optional.of(anotherCrewMember));
+		given(crewMemberRepository.findByCrewIdAndMemberId(anyLong(), anyLong()))
+			.willReturn(Optional.empty());
 
 		//when
 		//then
 		assertThatThrownBy(() -> crewService.findCrewMemberList(crewId, memberId))
-			.isInstanceOf(ConflictException.class);
+			.isInstanceOf(UnauthorizedException.class);
 	}
 }

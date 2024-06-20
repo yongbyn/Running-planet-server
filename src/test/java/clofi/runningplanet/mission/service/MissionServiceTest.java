@@ -83,7 +83,7 @@ class MissionServiceTest {
 		//then
 		List<GetCrewMissionResDto> getCrewMissionResDtos = List.of(
 			new GetCrewMissionResDto(1L, MissionType.DISTANCE, 100, true),
-			new GetCrewMissionResDto(2L, MissionType.DURATION, (double)(1800 / 3600) * 100, false)
+			new GetCrewMissionResDto(2L, MissionType.DURATION, (double)1800 / 3600 * 100, false)
 		);
 
 		CrewMissionListDto expected = new CrewMissionListDto(getCrewMissionResDtos);
