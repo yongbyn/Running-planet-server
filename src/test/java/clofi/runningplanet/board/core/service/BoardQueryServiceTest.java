@@ -22,6 +22,7 @@ import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
 import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
 import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
 import clofi.runningplanet.board.core.factory.BoardFactory;
+import clofi.runningplanet.board.core.repository.BoardImageJdbcRepository;
 import clofi.runningplanet.board.core.repository.BoardImageRepository;
 import clofi.runningplanet.board.core.repository.BoardRepository;
 import clofi.runningplanet.board.domain.Board;
@@ -55,6 +56,8 @@ class BoardQueryServiceTest {
 	private ThumbsUpRepository thumbsUpRepository;
 	@Autowired
 	private BoardQueryService boardQueryService;
+	@Autowired
+	private BoardImageJdbcRepository boardImageJdbcRepository;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
@@ -172,6 +175,7 @@ class BoardQueryServiceTest {
 			new BoardFactory(
 				boardRepository,
 				boardImageRepository,
+				boardImageJdbcRepository,
 				commentRepository,
 				thumbsUpRepository,
 				fakeS3StorageManager
