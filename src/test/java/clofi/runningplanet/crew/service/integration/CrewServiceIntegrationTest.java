@@ -369,6 +369,40 @@ public class CrewServiceIntegrationTest {
 
 	}
 
+	@DisplayName("크루 신청 목록은 Pending 상태인 인원만 조회한다.")
+	@Test
+	void getCrewApplicationListPending() {
+		//given
+		Long memberId1 = saveMember1();
+		Long memberId2 = saveMember2();
+		Long memberId3 = saveMember2();
+
+		CreateCrewReqDto reqDto = new CreateCrewReqDto("크루명", Category.RUNNING, List.of("태그"), ApprovalType.MANUAL,
+			"크루 소개", new RuleDto(3, 10));
+		MockMultipartFile image = new MockMultipartFile("imgFile", "크루로고.png", MediaType.IMAGE_PNG_VALUE,
+			"크루로고.png".getBytes());
+		Long crewId = crewService.createCrew(reqDto, image, memberId1);
+
+		ApplyCrewReqDto applyReqDto = new ApplyCrewReqDto("크루 가입 신청서");
+		crewService.applyCrew(applyReqDto, crewId, memberId2);
+		crewService.applyCrew(applyReqDto, crewId, memberId3);
+
+		ProceedApplyReqDto proceedApplyReqDto = new ProceedApplyReqDto(memberId3, true);
+		crewService.proceedApplyCrew(proceedApplyReqDto, crewId, memberId1);
+
+		//when
+		ApprovalMemberResDto result = crewService.getApplyCrewList(crewId, memberId1);
+
+		//then
+		assertSoftly(softAssertions -> {
+			softAssertions.assertThat(result.approvalMember().size()).isEqualTo(1);
+			softAssertions.assertThat(result.approvalMember().getFirst())
+				.extracting("memberId", "nickname", "introduction", "gender", "age")
+				.containsExactly(memberId2, "크루", "크루 가입 신청서", Gender.FEMALE, 20);
+		});
+
+	}
+
 	@DisplayName("크루에 신청한 인원이 없는 경우 빈 리스트를 반환한다.")
 	@Test
 	void getCrewApplicationEmptyList() {
