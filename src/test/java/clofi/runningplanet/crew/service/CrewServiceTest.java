@@ -471,7 +471,7 @@ class CrewServiceTest {
 			.willReturn(Optional.of(crewMember));
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
-		given(crewApplicationRepository.findAllByCrewId(anyLong()))
+		given(crewApplicationRepository.findAllByCrewIdAndApproval(anyLong(), any()))
 			.willReturn(List.of(crewApplication1, crewApplication2));
 
 		//when
@@ -503,7 +503,7 @@ class CrewServiceTest {
 			.willReturn(Optional.of(crewMember));
 		given(crewRepository.existsById(anyLong()))
 			.willReturn(true);
-		given(crewApplicationRepository.findAllByCrewId(anyLong()))
+		given(crewApplicationRepository.findAllByCrewIdAndApproval(anyLong(), any()))
 			.willReturn(Collections.emptyList());
 
 		//when
