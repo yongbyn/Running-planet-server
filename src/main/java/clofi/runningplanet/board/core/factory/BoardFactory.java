@@ -10,12 +10,13 @@ import clofi.runningplanet.board.comment.repository.CommentRepository;
 import clofi.runningplanet.board.core.dto.request.CreateBoardRequest;
 import clofi.runningplanet.board.core.dto.request.UpdateBoardRequest;
 import clofi.runningplanet.board.core.dto.response.CreateBoardResponse;
+import clofi.runningplanet.board.core.repository.BoardImageJdbcRepository;
 import clofi.runningplanet.board.core.repository.BoardImageRepository;
 import clofi.runningplanet.board.core.repository.BoardRepository;
-import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.board.domain.Board;
 import clofi.runningplanet.board.domain.BoardImage;
 import clofi.runningplanet.board.thumbsUp.repository.ThumbsUpRepository;
+import clofi.runningplanet.common.service.S3StorageManagerUseCase;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.member.domain.Member;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class BoardFactory {
 	private final BoardRepository boardRepository;
 	private final BoardImageRepository boardImageRepository;
+	private final BoardImageJdbcRepository boardImageJdbcRepository;
 	private final CommentRepository commentRepository;
 	private final ThumbsUpRepository thumbsUpRepository;
 	private final S3StorageManagerUseCase s3StorageManagerUseCase;
@@ -52,7 +54,7 @@ public class BoardFactory {
 			List<BoardImage> images = imageUrlList.stream()
 				.map(imageUrl -> new BoardImage(board, imageUrl))
 				.collect(Collectors.toList());
-			boardImageRepository.saveAll(images);
+			boardImageJdbcRepository.saveAll(images);
 		}
 	}
 
