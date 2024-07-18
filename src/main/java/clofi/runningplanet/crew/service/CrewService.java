@@ -17,6 +17,7 @@ import clofi.runningplanet.common.exception.ConflictException;
 import clofi.runningplanet.common.exception.NotFoundException;
 import clofi.runningplanet.common.exception.UnauthorizedException;
 import clofi.runningplanet.common.service.S3StorageManagerUseCase;
+import clofi.runningplanet.crew.domain.Approval;
 import clofi.runningplanet.crew.domain.ApprovalType;
 import clofi.runningplanet.crew.domain.Crew;
 import clofi.runningplanet.crew.domain.CrewApplication;
@@ -119,7 +120,8 @@ public class CrewService {
 		validateLeaderPrivilege(crewId, memberId);
 		checkCrewExistById(crewId);
 
-		List<CrewApplication> crewApplicationList = crewApplicationRepository.findAllByCrewId(crewId);
+		List<CrewApplication> crewApplicationList = crewApplicationRepository.findAllByCrewIdAndApproval(crewId,
+			Approval.PENDING);
 		List<GetApplyCrewResDto> getApplyCrewResDtos = makeGetApplyDtoList(crewApplicationList);
 		return new ApprovalMemberResDto(getApplyCrewResDtos);
 	}
