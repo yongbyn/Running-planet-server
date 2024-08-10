@@ -2,6 +2,7 @@ package clofi.runningplanet.board.core.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,13 +43,13 @@ public class BoardReadService {
 			.orElseThrow(() -> new IllegalArgumentException("크루가 존재하지 않습니다"));
 
 		List<Board> boardList = boardRepository.findAllByCrew(crew);
-		for (Board board : boardList) {
+		boardList.forEach(board -> {
 			List<ImageList> boardImageList = boardImageRepository.findAllByBoard(board)
-				.stream().map(ImageList::of).toList();
+				.stream().map(ImageList::of).collect(Collectors.toList());
 			List<Comment> commentList = commentRepository.findAllByBoard(board);
 			List<ThumbsUp> thumbsUpList = thumbsUpRepository.findAllByBoard(board);
 			boardResponses.add(new BoardResponse(board, boardImageList, commentList.size(), thumbsUpList.size()));
-		}
+		});
 		return boardResponses;
 	}
 
@@ -65,10 +66,10 @@ public class BoardReadService {
 		List<CommentResponse> commentResponseList = new ArrayList<>();
 
 		List<Comment> commentList = commentRepository.findAllByBoard(board);
-		for (Comment comment : commentList) {
+		commentList.forEach(comment -> {
 			boolean isModified = !comment.getCreatedAt().equals(comment.getUpdatedAt());
 			commentResponseList.add(new CommentResponse(comment, isModified));
-		}
+		});
 		List<ThumbsUp> thumbsUpList = thumbsUpRepository.findAllByBoard(board);
 		Boolean isThumbsUp = thumbsUpRepository.existsByMemberAndBoard(member, board);
 		BoardResponse boardResponse = new BoardResponse(board, boardImageList, commentList.size(), thumbsUpList.size());

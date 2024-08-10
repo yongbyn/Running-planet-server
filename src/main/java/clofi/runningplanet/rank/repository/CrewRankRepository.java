@@ -22,7 +22,7 @@ public class CrewRankRepository {
 	}
 
 	public List<CrewRankResponse> getCrewRank(String condition, String period) {
-		if (period == "WEEK") {
+		if (period.equals("WEEK")) {
 			return jpaQueryFactory.select(
 					new QCrewRankResponse(
 						crew.id,
@@ -48,7 +48,7 @@ public class CrewRankRepository {
 	}
 
 	private OrderSpecifier<Integer> sortByCondition(String condition) {
-		if (condition == "LEVEL") {
+		if (condition.equals("LEVEL")) {
 			return crew.crewLevel.desc();
 		} else {
 			return crew.totalDistance.desc();

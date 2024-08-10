@@ -3,6 +3,7 @@ package clofi.runningplanet.rank.repository;
 import static clofi.runningplanet.member.domain.QMember.*;
 import static clofi.runningplanet.planet.domain.QMemberPlanet.*;
 import static clofi.runningplanet.running.domain.QRecord.*;
+import static com.querydsl.jpa.JPAExpressions.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -13,7 +14,6 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import clofi.runningplanet.rank.dto.PersonalRankResponse;
@@ -44,7 +44,7 @@ public class PersonalRankRepository {
 						member.id,
 						member.nickname,
 						memberPlanet.countDistinct().intValue(),
-						JPAExpressions.select(recordSub.runDistance.sum().coalesce(0.0).intValue())
+						select(recordSub.runDistance.sum().coalesce(0.0).intValue())
 							.from(recordSub)
 							.where(
 								recordSub.member.id.eq(member.id)
@@ -79,7 +79,6 @@ public class PersonalRankRepository {
 	}
 
 	private OrderSpecifier<Integer> sortByCondition(String condition, String period) {
-		QRecord recordSub = new QRecord("recordSub");
 		if ("PLANET".equals(condition)) {
 			return memberPlanet.countDistinct().intValue().desc();
 		} else if ("WEEK".equals(period) && "DISTANCE".equals(condition)) {

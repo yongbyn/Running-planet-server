@@ -39,15 +39,15 @@ public class PlanetService {
 
 		if (memberPlanetList.size() == 1) {
 			if (member.getExp() >= 0 && member.getExp() < 2) {
-				planetStage = memberPlanetList.get(0).getPlanetId().getFirstPlanet();
+				planetStage = memberPlanetList.getFirst().getPlanetId().getFirstPlanet();
 			} else if (member.getExp() >= 2 && member.getExp() < 4) {
-				planetStage = memberPlanetList.get(0).getPlanetId().getSecondPlanet();
+				planetStage = memberPlanetList.getFirst().getPlanetId().getSecondPlanet();
 			} else if (member.getExp() >= 4 && member.getExp() < 6) {
-				planetStage = memberPlanetList.get(0).getPlanetId().getThirdPlanet();
+				planetStage = memberPlanetList.getFirst().getPlanetId().getThirdPlanet();
 			} else if (member.getExp() >= 6 && member.getExp() < 8) {
-				planetStage = memberPlanetList.get(0).getPlanetId().getFourthPlanet();
+				planetStage = memberPlanetList.getFirst().getPlanetId().getFourthPlanet();
 			} else {
-				planetStage = memberPlanetList.get(0).getPlanetId().getFifthPlanet();
+				planetStage = memberPlanetList.getFirst().getPlanetId().getFifthPlanet();
 			}
 			planetResponseList.add(new PlanetResponse(memberPlanetList.getFirst().getMemberPlanetId(),
 				memberPlanetList.getFirst().getMemberPlanetName(), planetStage, 10.0, member.getExp()));
